@@ -19,11 +19,6 @@ from global_methods import *
 from datetime import datetime
 from django.contrib.postgres.fields import ArrayField
 
-from interviewer_agent.interviewer_utils.settings import *
-from interviewer_agent.agent_modules.vocalize import *
-from interviewer_agent.agent_modules.transcribe import *
-from interviewer_agent.prompt_template.run_gpt_prompt import *
-
 from pages.models import *
 from .interview_settings import *
 

@@ -1,3 +1,4 @@
+*.pyc
 agora.pem
 data/
 *__pycache__*
