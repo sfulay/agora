@@ -1,0 +1,16 @@
+{
+  "q1": {
+    "content": "What\u2019s the highest degree or grade your dad completed?",
+    "type": "factual",
+    "requirement": "Ascertain the highest level of education completed by the interviewee's father or the adult male they lived with at age 16.",
+    "condition": "",
+    "max_sec": 5
+  },
+  "q2": {
+    "content": "What\u2019s the highest degree or grade your mom completed?",
+    "type": "factual",
+    "requirement": "Ascertain the highest level of education completed by the interviewee's mother or female guardian at age 16.",
+    "condition": "",
+    "max_sec": 5
+  }
+}

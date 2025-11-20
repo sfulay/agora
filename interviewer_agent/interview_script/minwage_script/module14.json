@@ -1,0 +1,9 @@
+{
+  "q1": {
+    "content": "I'd now like to ask you about discrimination in the workplace. Have you ever experienced discrimination in the workplace or during the hiring process? If so, can you tell me about it?",
+    "type": "factual",
+    "requirement": "Learn about the interviewee's experiences with discrimination in the workplace. Be curious and try to get some specific and detailed experiences or memories about the interviewee's experience with discrimination in the workplace. If they say they have never experienced discrimination, ask them if anyone they know has experienced discrimination in the workplace. If they say they have not experienced discrimination nor have anyone they know has experienced discrimination, then the objective has been met.",
+    "condition": "",
+    "max_sec": 60
+  }
+} 

@@ -1,0 +1,16 @@
+{
+  "q1": {
+    "content": "Now we\u2019d like to learn more about your health. First, tell me all about your health.",
+    "type": "qualitative",
+    "requirement": "Gain an overview of the interviewee's current health status.",
+    "condition": "",
+    "max_sec": 30
+  },
+  "q2": {
+    "content": "For you, what makes it easy or hard to stay healthy?",
+    "type": "qualitative",
+    "requirement": "Understand the factors that affect the interviewee's ability to maintain good health.",
+    "condition": "",
+    "max_sec": 25
+  }
+}

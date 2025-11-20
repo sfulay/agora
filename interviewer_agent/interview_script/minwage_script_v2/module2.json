@@ -1,0 +1,38 @@
+{
+  "q1": {
+    "content": "[pause]",
+    "type": "non-question",
+    "requirement": "",
+    "condition": "",
+    "max_sec": 0
+  }, 
+  "q2": {
+    "content": "In the United States, there is a lot of debate about how workers could be better supported and how we should set policy around work. Through this interview, I would like to understand your own experiences with work. These experiences will then be used to inform a set of policies that you will vote on in a weeks time.",
+    "type": "non-question",
+    "requirement": "",
+    "condition": "",
+    "max_sec": 0
+  },
+  "q5": {
+    "content": "As a reminder, please do not include any personally identifiable information, such as your name or specific addresses, in your answer.",
+    "type": "non-question",
+    "requirement": "",
+    "condition": "",
+    "max_sec": 0
+  },
+  "q6": {
+    "content": "Finally, feel free to take a moment to think and reflect before answering any questions. For example, we know that thinking of specific memories or experiences can take some time, so there is no need to rush. Even if you need a minute or two to gather your thoughts before answering any question, that's fine.",
+    "type": "non-question",
+    "requirement": "",
+    "condition": "",
+    "max_sec": 0
+  },
+  "q7": {
+    "content": "Thank you for your time and input!",
+    "type": "non-question",
+    "requirement": "",
+    "condition": "",
+    "max_sec": 0
+  }
+}
+

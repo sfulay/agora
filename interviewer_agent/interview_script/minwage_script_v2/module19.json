@@ -1,0 +1,9 @@
+{
+  "q1": {
+    "content": "How do you feel about the idea that companies should prioritize hiring local applicants over foreign applicants?",
+    "type": "qualitative",
+    "requirement": "Understand the interviewee's thoughts on the idea that companies should prioritize hiring local applicants over foreign applicants. Follow up by asking them the benefits and drawbacks of this idea.",
+    "condition": "",
+    "max_sec": 45
+  }
+} 

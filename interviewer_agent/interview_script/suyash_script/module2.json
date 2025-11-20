@@ -1,0 +1,9 @@
+{
+  "q1": {
+    "content": "To start, I would like to begin with a big question: tell me the story of your life. Start from the beginning -- from your childhood, to education, to family and relationships, and to any major life events you may have had.",
+    "type": "qualitative",
+    "requirement": "Learn as much as you can about the interviewee's life experience, and their personal background. Be respectful but curious as you hear about their story.",
+    "condition": "",
+    "max_sec": 120
+  }
+}

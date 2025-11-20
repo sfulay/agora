@@ -1,0 +1,23 @@
+{
+  "q1": {
+    "content": "How have you been thinking about race in the U.S. recently?",
+    "type": "qualitative",
+    "requirement": "Learn about the interviewee's recent thoughts on race in the U.S.",
+    "condition": "",
+    "max_sec": 40
+  },
+  "q2": {
+    "content": "How have you responded to the increased focus on race and/or racism and policing? Some people tell us they\u2019re aware of the issue but keep their thoughts to themselves, others say they\u2019ve talked to family and friends, others have joined protests. What about you?",
+    "type": "qualitative",
+    "requirement": "Inquire about the interviewee's response to the heightened focus on race, racism, and policing.",
+    "condition": "",
+    "max_sec": 20
+  },
+  "q3": {
+    "content": "What about people you\u2019re close to? How have they responded to the increased focus on race and/or racism and policing?",
+    "type": "qualitative",
+    "requirement": "Find out about the reactions of people close to the interviewee regarding race and policing issues.",
+    "condition": "",
+    "max_sec": 30
+  }
+}

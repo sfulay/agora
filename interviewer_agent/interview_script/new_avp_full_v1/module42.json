@@ -1,0 +1,9 @@
+{
+  "q1": {
+    "content": "Some people say it\u2019s hard to take or keep a job because of child care. How about for you?",
+    "type": "qualitative",
+    "requirement": "Find out if child care responsibilities have affected the interviewee's ability to work.",
+    "condition": "The interviewee is currently employed and is a caregiver for a child.",
+    "max_sec": 5
+  }
+}

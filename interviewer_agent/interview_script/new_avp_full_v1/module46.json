@@ -1,0 +1,9 @@
+{
+  "q1": {
+    "content": "For our records, we also need your date of birth. Could you please provide that?",
+    "type": "factual",
+    "requirement": "Obtain the interviewee's date of birth for record purposes.",
+    "condition": "",
+    "max_sec": 10
+  }
+}

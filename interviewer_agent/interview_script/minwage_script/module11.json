@@ -1,0 +1,9 @@
+{
+  "q1": {
+    "content": "We're now going to turn to the topic of the minimum wage. How would changes in the minimum wage (either raising or lowering it) affect you, your family, or anyone else you know personally?",
+    "type": "qualitative",
+    "requirement": "Learn about how the interviewee thinks changes in the minimum wage would affect them, their family, or anyone else they know personally. Be curious about their thoughts. Make sure you ask follow up questions to get more specific on how they would be impacted. For example, if they say they would be affected by a raise in the minimum wage, ask them what they would do with the extra money. If they say they would be negatively impacted, ask why they think that. If they do not think they would be impacted, prompt them to think about different people they interact with that may be impacted.",
+    "condition": "",
+    "max_sec": 60
+  }
+} 

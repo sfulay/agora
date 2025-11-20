@@ -1,0 +1,9 @@
+{
+  "q1": {
+    "content": "What are your trusted sources of information about the vaccine?",
+    "type": "qualitative",
+    "requirement": "Discover which sources the interviewee trusts for information regarding the Covid-19 vaccine.",
+    "condition": "",
+    "max_sec": 30
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "q1": {
+    "content": "This might be repetitive, but before we go on to the next section, I want to quickly make sure I have this right: who are you living with right now?",
+    "type": "factual",
+    "requirement": "Confirm the relationships of all individuals living with the interviewee.",
+    "condition": "",
+    "max_sec": 10
+  },
+  "q2": {
+    "content": "Any babies or small children?",
+    "type": "factual",
+    "requirement": "Determine whether there are any babies or small children in the household.",
+    "condition": "The interviewee has not indicated that they live alone.",
+    "max_sec": 0.5
+  },
+  "q3": {
+    "content": "Anyone who usually lives here but is away \u2013 traveling, at school, or in a hospital?",
+    "type": "factual",
+    "requirement": "Ask about household members who are temporarily absent.",
+    "condition": "",
+    "max_sec": 0.5
+  },
+  "q4": {
+    "content": "Any lodgers, boarders, or employees who live here?",
+    "type": "factual",
+    "requirement": "Find out if there are any lodgers, boarders, or employees residing in the household.",
+    "condition": "The interviewee has not indicated that they live alone.",
+    "max_sec": 0.5
+  },
+  "q5": {
+    "content": "Who shares the responsibility for the rent, mortgage, or other household expenses?",
+    "type": "factual",
+    "requirement": "Identify other individuals in the household who contribute to rent, mortgage, or other expenses.",
+    "condition": "",
+    "max_sec": 1
+  }
+}

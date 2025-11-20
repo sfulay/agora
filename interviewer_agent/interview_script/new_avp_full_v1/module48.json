@@ -1,0 +1,16 @@
+{
+  "q1": {
+    "content": "Are you of Hispanic, Latinx, or Spanish origin?",
+    "type": "factual",
+    "requirement": "Determine if the interviewee identifies as Hispanic, Latinx, or of Spanish origin.",
+    "condition": "",
+    "max_sec": 5
+  },
+  "q2": {
+    "content": "What race or races do you identify with?",
+    "type": "factual",
+    "requirement": "Identify the race or races the interviewee identifies with.",
+    "condition": "",
+    "max_sec": 5
+  }
+}

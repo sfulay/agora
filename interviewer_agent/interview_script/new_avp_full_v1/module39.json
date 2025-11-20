@@ -1,0 +1,9 @@
+{
+  "q1": {
+    "content": "Switching gears a bit, let\u2019s talk a little about tax time. Did you file taxes last year (the most recent year)?",
+    "type": "qualitative",
+    "requirement": "Determine if the interviewee filed taxes in the most recent tax year.",
+    "condition": "",
+    "max_sec": 15
+  }
+}

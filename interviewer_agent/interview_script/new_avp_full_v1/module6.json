@@ -1,0 +1,30 @@
+{
+  "q1": {
+    "content": "Tell me about the people who live with you right now, even people who are staying here temporarily.",
+    "type": "factual",
+    "requirement": "If the participant lives alone, your objective is accomplished. If not, proceed to understand the current living arrangement of the interviewee, including temporary residents. Follow up by how each person have come to live with the interviewee.",
+    "condition": "",
+    "max_sec": 30
+  },
+  "q2": {
+    "content": "Is anyone in your household a temporary member, or is everyone a permanent member of the household?",
+    "type": "factual",
+    "requirement": "If the participant does not have any family member, your objective is accomplished. If not, determine whether anyone in the family is a temporary member.",
+    "condition": "",
+    "max_sec": 0.5
+  },
+  "q3": {
+    "content": "Tell me about anyone else who stays here from time to time, if there is anyone like that",
+    "type": "factual",
+    "requirement": "Determine whether anyone else stays at the household from time to time.",
+    "condition": "",
+    "max_sec": 0.5
+  },
+  "q4": {
+    "content": "Is there anyone who usually lives here but is away \u2013 traveling, at school, or in a hospital?",
+    "type": "factual",
+    "requirement": "Determine whether there are usual members of the household who are currently absent.",
+    "condition": "",
+    "max_sec": 0.5
+  }
+}

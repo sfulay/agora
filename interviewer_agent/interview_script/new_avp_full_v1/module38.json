@@ -1,0 +1,23 @@
+{
+  "q1": {
+    "content": "For your job or occupations, how much money did you receive in the past month?",
+    "type": "factual",
+    "requirement": "If the participant says they do not work, your objective is accomplished. If not, determine the monthly income from the interviewee's current job.",
+    "condition": "The interviewee indicated that they are currently employed.",
+    "max_sec": 20
+  },
+  "q2": {
+    "content": "How often do you get paid?",
+    "type": "factual",
+    "requirement": "Establish the frequency of the interviewee's paychecks and the amount received, including tax considerations.",
+    "condition": "The interviewee indicated that they are currently employed.",
+    "max_sec": 10
+  },
+  "q3": {
+    "content": "In total, how much did your household make in the past month?",
+    "type": "factual",
+    "requirement": "Confirm the total combined income for all working members of the household in the past month.",
+    "condition": "",
+    "max_sec": 20
+  }
+}

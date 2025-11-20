@@ -1,0 +1,23 @@
+{
+  "q1": {
+    "content": "What is the highest degree or grade you\u2019ve completed?",
+    "type": "factual",
+    "requirement": "Identify the highest level of education completed by the interviewee.",
+    "condition": "",
+    "max_sec": 5
+  },
+  "q2": {
+    "content": "Are you enrolled in school?",
+    "type": "factual",
+    "requirement": "Determine the current enrollment status of the interviewee in an educational institution.",
+    "condition": "",
+    "max_sec": 5
+  },
+  "q3": {
+    "content": "Have you been enrolled in school during the past 3 months?",
+    "type": "factual",
+    "requirement": "Ascertain if the interviewee was enrolled in school at any point in the last 3 months.",
+    "condition": "",
+    "max_sec": 5
+  }
+}

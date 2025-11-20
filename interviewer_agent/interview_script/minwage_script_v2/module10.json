@@ -1,0 +1,9 @@
+{
+  "q1": {
+    "content": "What do you think is a fair minimum wage in your area? Why?",
+    "type": "qualitative",
+    "requirement": "Understand the interviewee's thoughts on what a fair minimum wage is. Be curious and try to get some specific and detailed thoughts about the interviewee's thoughts on what a fair minimum wage is. For example, you can ask them to think about rent, food, and other basic necessities in their area.",
+    "condition": "",
+    "max_sec": 45
+  }
+} 

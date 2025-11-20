@@ -1,0 +1,23 @@
+{
+  "q1": {
+    "content": "Now we\u2019d like to talk about how you make ends meet and what the monthly budget looks like for you and your family. What were your biggest expenses last month?",
+    "type": "qualitative",
+    "requirement": "",
+    "condition": "",
+    "max_sec": 20
+  },
+  "q2": {
+    "content": "How much did your household spend in the past month? Is that the usual amount? And if not, how much do you usually spend and on what?",
+    "type": "qualitative",
+    "requirement": "Ascertain if the mentioned housing costs are typical and what the usual costs are.",
+    "condition": "",
+    "max_sec": 20
+  },
+  "q3": {
+    "content": "Does your household own or rent your home?",
+    "type": "qualitative",
+    "requirement": "Find out if the household owns or rents their home.",
+    "condition": "",
+    "max_sec": 20
+  }
+}

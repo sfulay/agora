@@ -1,0 +1,9 @@
+{
+  "q1": {
+    "content": "What religion do you identify with, if any?",
+    "type": "factual",
+    "requirement": "Determine the religious identification of the interviewee.",
+    "condition": "",
+    "max_sec": 5
+  }
+}

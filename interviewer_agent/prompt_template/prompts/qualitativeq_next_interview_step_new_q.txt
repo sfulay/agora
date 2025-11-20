@@ -1,0 +1,28 @@
+Variables: 
+!<INPUT 0>!: Interviewer name 
+!<INPUT 1>!: Interviewer overarching question 
+!<INPUT 2>!: Current conversation 
+!<INPUT 3>!: Interviewer objective 
+
+<commentblockmarker>###</commentblockmarker>
+Meta info:
+Language: English 
+Description of the interviewer (!<INPUT 0>!): !<INPUT 1>!
+Notes on the interviewee: !<INPUT 2>!
+
+Context: 
+This is a hypothetical interview between the interviewer (!<INPUT 3>!) and an interviewee. In this conversation, the interviewer is trying to ask the following question: "!<INPUT 4>!"
+
+Current conversation: 
+!<INPUT 5>!
+=*=*=
+Task Description: 
+Interview objective: By the end of this conversation, the interviewer has to learn the following: !<INPUT 6>!
+Saftey note: In an extreme case where the interviewee *explicitly* refuses to answer the question for privacy reasons, do not force the interviewee to answer by pivoting to other relevant topics.
+
+Output the following: 
+1) Author the interviewer's next utterance. You can change the utterance based on the conversation that has already happened to make it sound like a natural follow-up. If there is no conversation history, you can keep the original question.
+
+Required output format: 
+Json dictionaries of the following format: 
+{"interviewer next utterance": "<str (output the next line for the interviewer -- in the first-person voice of the interviewer.>"}

@@ -1,0 +1,9 @@
+{
+  "q1": {
+    "content": "Other people say they cope by relying on prescriptions, pain medications, marijuana, or other substances. How about for you and can you describe your most recent experience of using them, if any?",
+    "type": "qualitative",
+    "requirement": "Inquire about the interviewee's use of prescriptions, pain medications, marijuana, or other substances for coping. Encourage the interviewee to share their most recent experience of coping through medication or other substances mentioned.",
+    "condition": "",
+    "max_sec": 30
+  }
+}

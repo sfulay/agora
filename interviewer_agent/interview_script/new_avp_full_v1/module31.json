@@ -1,0 +1,16 @@
+{
+  "q1": {
+    "content": "Bills can fluctuate over the course of a year. Seasons change, there are holidays and special events, school starts and ends, and so on. Tell me all about how your bills have fluctuated over the past year.",
+    "type": "qualitative",
+    "requirement": "Explore how the interviewee's bills have varied throughout the year due to different factors.",
+    "condition": "",
+    "max_sec": 20
+  },
+  "q2": {
+    "content": "Tell me all about how you coped with any extra expenses in the past months.",
+    "type": "qualitative",
+    "requirement": "Learn about the strategies the interviewee used to manage additional expenses.",
+    "condition": "",
+    "max_sec": 15
+  }
+}

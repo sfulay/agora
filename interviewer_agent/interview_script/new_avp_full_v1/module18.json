@@ -1,0 +1,9 @@
+{
+  "q1": {
+    "content": "During tough times, some people tell us they cope by smoking or drinking. How about for you?",
+    "type": "factual",
+    "requirement": "Understand if the interviewee uses smoking or drinking as coping mechanisms during difficult periods. Learn about the interviewee's most recent experience using smoking or drinking as a coping strategy. Your objective is accomplished if the interviewee does not smoke or drink.",
+    "condition": "",
+    "max_sec": 30
+  }
+}

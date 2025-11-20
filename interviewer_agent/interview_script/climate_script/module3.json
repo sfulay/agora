@@ -1,0 +1,23 @@
+{
+  "q1": {
+    "content": "To start, I would like to begin with a big question: tell me the story of your life. Start from the beginning -- from your childhood, to education, to family and relationships, and to any major life events you may have had.",
+    "type": "qualitative",
+    "requirement": "Learn as much as you can about the interviewee's life experience, and their personal background. Be respectful but curious as you hear about their story.",
+    "condition": "",
+    "max_sec": 60
+  },
+  "q2": {
+    "content": "What hobbies or interests did you have growing up, and what do you enjoy doing now?",
+    "type": "qualitative",
+    "requirement": "Learn in detail what hobbies and interests the person has. Be respectful but curious as you hear about their story.",
+    "condition": "",
+    "max_sec": 45
+  },
+  "q3": {
+    "content": "What brought you to MIT and what do you hope to get out of your time here?",
+    "type": "qualitative",
+    "requirement": "Learn why the interviewee chose MIT, and what they hope to get out of their time here. Be respectful but curious as you hear about their story.",
+    "condition": "",
+    "max_sec": 45
+  }
+}

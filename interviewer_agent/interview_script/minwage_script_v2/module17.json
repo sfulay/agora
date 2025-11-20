@@ -1,0 +1,9 @@
+{
+  "q1": {
+    "content": "Have you or someone close to you ever been impacted by immigration policy, especially around work or hiring?",
+    "type": "factual",
+    "requirement": "Understand whether the interviewee has been impacted by immigration policy. If they have, ask them specifics questions about their experience and what it was like. If they have not, ask them if they have friends or family who have been impacted by immigration policy. Try to get specific experiences or memories about the interviewee's experience with immigration policy if they have been impacted. If they have not been impacted at all nor have anyone they know has been impacted, then the objective has been met.",
+    "condition": "",
+    "max_sec": 45
+  }
+} 

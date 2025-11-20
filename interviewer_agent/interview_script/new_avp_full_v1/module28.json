@@ -1,0 +1,9 @@
+{
+  "q1": {
+    "content": "Tell me about any recent changes in your level of stress, worry, and your emotional coping strategies.",
+    "type": "qualitative",
+    "requirement": "Inquire about any recent shifts in the interviewee's stress levels, worries, and how they cope emotionally.",
+    "condition": "",
+    "max_sec": 20
+  }
+}

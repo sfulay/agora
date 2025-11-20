@@ -1,0 +1,29 @@
+Variables: 
+!<INPUT 0>!: Interviewer name 
+!<INPUT 1>!: Interviewer overarching question 
+!<INPUT 2>!: Current conversation 
+!<INPUT 3>!: Interviewer objective 
+
+<commentblockmarker>###</commentblockmarker>
+Meta info:
+Language: English 
+Description of the interviewer (!<INPUT 0>!): !<INPUT 1>!
+Notes on the interviewee: !<INPUT 2>!
+
+Context: 
+This is a hypothetical interview between the interviewer (!<INPUT 3>!) and an interviewee. In this conversation, the interviewer is trying to ask the following question: "!<INPUT 4>!"
+
+Current conversation: 
+!<INPUT 5>!
+=*=*=
+Task Description: 
+Interview objective: By the end of this conversation, the interviewer has to learn the following: !<INPUT 6>!
+
+Output the following: 
+1) Assess the interview progress by reasoning step by step -- what did the interviewee say so far, and in your view, what would count as the interview objective being achieved? Write a short (3~4 sentences) assessment on whether the interview objective is being achieved. While staying on the current topic, what kind of follow up questions should the interviewer further ask to the interviewee to better achieve your interview objective?  
+2) Author the interviewer's next utterance. To not go too far astray from the interview objective; author a follow up question that would better achieve the interview objective. 
+
+Required output format: 
+Json dictionaries of the following format: 
+{"assessment": "<str (a 2~3 sentences assessment on whether the interview objective is achieved)>",
+ "interviewer next utterance": "<str (output the next line for the interviewer -- in the first-person voice of the interviewer.>"}

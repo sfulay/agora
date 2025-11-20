@@ -1,0 +1,9 @@
+{
+    "q1": { 
+    "content": "Now I'd like to ask you about an important relationship in your life. Who is someone who has had a big impact on you? Can you tell me about your relationship with them—how you met, what they mean to you, and any important memories you've shared?",
+    "type": "qualitative",
+    "requirement": "Learn about a personally meaningful relationship. Encourage storytelling and emotional depth. Ask follow-ups to explore how this relationship shaped the interviewee's identity, values, or perspective.",
+    "condition": "",
+    "max_sec": 30
+  } 
+  }

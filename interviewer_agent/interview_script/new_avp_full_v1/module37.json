@@ -1,0 +1,37 @@
+{
+  "q1": {
+    "content": "In the past year, how many weeks did you work (for a few hours, including paid vacation, paid sick leave, and military service)?",
+    "type": "factual",
+    "requirement": "If the participant says they do not work, your objective is accomplished. If not, determine the number of weeks the interviewee worked in the past year, including any paid time off.",
+    "condition": "",
+    "max_sec": 15
+  },
+  "q2": {
+    "content": "How many hours each week did you usually work?",
+    "type": "factual",
+    "requirement": "If the participant says they do not work, your objective is accomplished. If not, determine the average number of hours the interviewee worked each week.",
+    "condition": "The interviewee indicated that they currently or previously worked.",
+    "max_sec": 5
+  },
+  "q3": {
+    "content": "In the past week, did you work for pay (even for 1 hour) at a job or business?",
+    "type": "factual",
+    "requirement": "If the participant says they do not work, your objective is accomplished. If not, establish if the interviewee worked for pay in the past week.",
+    "condition": "The interviewee indicated that they currently or previously worked.",
+    "max_sec": 5
+  },
+  "q4": {
+    "content": "Did you have more than one job or business, including part time, evening, or weekend work?",
+    "type": "factual",
+    "requirement": "If the participant says they do not work, your objective is accomplished. If not, find out if the interviewee had multiple jobs or business engagements, including part-time work.",
+    "condition": "The interviewee indicated that they currently or previously worked.",
+    "max_sec": 10
+  },
+  "q5": {
+    "content": "Now, in the past month, how many jobs did you work, including part time, evening, or weekend work?",
+    "type": "factual",
+    "requirement": "If the participant says they do not work, your objective is accomplished. If not, assess the total number of jobs the interviewee held in the past month, considering all types of employment.",
+    "condition": "The interviewee indicated that they currently or previously worked.",
+    "max_sec": 10
+  }
+}

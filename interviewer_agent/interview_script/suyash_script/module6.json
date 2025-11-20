@@ -1,0 +1,9 @@
+{
+  "q1": {
+    "content": "What types of food would you like to see in the CCC lab?",
+    "type": "qualitative",
+    "requirement": "Learn about the interviewee's preferences for food at the CCC lab. Try to understand what is important to them in terms of food. Be respectful but curious as you hear about their story.",
+    "condition": "",
+    "max_sec": 90
+  }
+}

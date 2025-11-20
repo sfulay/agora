@@ -1,0 +1,30 @@
+{
+  "q1": {
+    "content": "Now we're going to move on to topics specific to environmental sustainability at MIT.",
+    "type": "non-question",
+    "requirement": "",
+    "condition": "",
+    "max_sec": 0
+  },
+  "q2": {
+    "content": "What are you currently doing now to be sustainable at MIT, if anything? You could discuss your experiences with waste and recycling, energy conservation, how you travel around campus, the food you eat, any clubs or classes you're involved in, or other choices you've made that relate to sustainability.",
+    "type": "qualitative",
+    "requirement": "Learn in detail about what the interviewee does to be sustainable at MIT. Understand whether they are doing anything to be sustainable or not. If at first they don't share anything, try to give more examples of what counts as sustainable practices. However, if they repeatedly say they don't do anything, your objective is accomplished. Once they have shared an experience with some detail, your objective is accomplished.",
+    "condition": "",
+    "max_sec": 45
+  },
+  "q3": {
+    "content": "What challenges or barriers—if any—do you face when trying to be sustainable at MIT? These could be things like not knowing what’s recyclable, not having time, limited access to resources, or anything else that makes it harder for you.",
+    "type": "qualitative",
+    "requirement": "Learn about what the interviewee thinks are the biggest barriers to them being sustainable at MIT. Be curious about their thoughts. Once they have shared a challenge or barrier and you have some detail about it, your objective is accomplished. However, if they repeatedly say they don't face any barriers, your objective is also accomplished.",
+    "condition": "",
+    "max_sec": 45
+  },
+  "q4": {
+    "content": "What changes do you think MIT could make that would help you—or others—live more sustainably on campus?",
+    "type": "factual",
+    "requirement": "Learn about what the interviewee thinks MIT could change to be sustainable. Get specific ideas from the interviewee. Be curious about their thoughts. Once they have shared an idea and you have some detail about it, your objective is accomplished. However, if they repeatedly say they don't think MIT could change anything or don't have any ideas, your objective is also accomplished.",
+    "condition": "The interviewer has not given concrete suggestions in how MIT could make it easier to be sustainable.",
+    "max_sec": 45
+  }
+}

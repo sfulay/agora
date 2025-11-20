@@ -1,0 +1,9 @@
+{
+  "q1": {
+    "content": "Some people are excited about medical vaccination, and others, not so much. How about you?",
+    "type": "qualitative",
+    "requirement": "Gauge the interviewee's attitude towards medical vaccination.",
+    "condition": "",
+    "max_sec": 20
+  }
+}

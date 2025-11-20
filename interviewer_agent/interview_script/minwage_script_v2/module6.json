@@ -1,0 +1,9 @@
+{
+  "q1": {
+    "content": "Can you tell me about the work you do now? What's your job like, and how do you feel about it day to day?",
+    "type": "qualitative",
+    "requirement": "Learn about what the interviewee does for a living. Be curious but respectful as you hear about their story. Follow up and ask what they like and dislike about their job.",
+    "condition": "",
+    "max_sec": 45
+  }
+} 

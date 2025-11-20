@@ -1,0 +1,44 @@
+{
+  "q1": {
+    "content": "Did your mom work for pay for at least a year while you were growing up?",
+    "type": "factual",
+    "requirement": "Inquire about the work status of the interviewee's mother during their upbringing.",
+    "condition": "",
+    "max_sec": 5
+  },
+  "q2": {
+    "content": "What was her job? What kind of work did she do? What were her most important activities or duties?",
+    "type": "qualitative",
+    "requirement": "Explore the job, duties, and activities of the interviewee's mother.",
+    "condition": "The interviewee's mother worked for pay for at least a year while the interviewee was growing up.",
+    "max_sec": 20
+  },
+  "q3": {
+    "content": "What kind of place did she work for? What kind of business was it? What did they make or do where she worked?",
+    "type": "qualitative",
+    "requirement": "Learn about the type of business or place where the interviewee's mother worked.",
+    "condition": "The interviewee's mother worked for pay for at least a year while the interviewee was growing up.",
+    "max_sec": 20
+  },
+  "q4": {
+    "content": "Did your dad work for pay for at least a year while you were growing up?",
+    "type": "factual",
+    "requirement": "Inquire about the work status of the interviewee's father during their upbringing.",
+    "condition": "",
+    "max_sec": 5
+  },
+  "q5": {
+    "content": "What was his job? What kind of work did he do? What were his most important activities or duties?",
+    "type": "qualitative",
+    "requirement": "Explore the job, duties, and activities of the interviewee's father.",
+    "condition": "The interviewee's father worked for pay for at least a year while the interviewee was growing up.",
+    "max_sec": 20
+  },
+  "q6": {
+    "content": "What kind of place did he work for? What kind of business was it? What did they make or do where he worked?",
+    "type": "qualitative",
+    "requirement": "Learn about the type of business or place where the interviewee's father worked.",
+    "condition": "The interviewee's father worked for pay for at least a year while the interviewee was growing up.",
+    "max_sec": 20
+  }
+}

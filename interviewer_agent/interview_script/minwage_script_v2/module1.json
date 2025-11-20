@@ -1,0 +1,37 @@
+{
+  "q1": {
+    "content": "Hi! My name is Isabella, and I'm an AI assistant who will be conducting today's interview with you. Thank you so much for choosing to participate in our study!",
+    "type": "non-question",
+    "requirement": "",
+    "condition": "",
+    "max_sec": 0
+  },
+  "q2": {
+    "content": "Before we start, please take a moment to familiarize yourself with the controls on your screen. The button labeled 'Hide Isabella's Subtitles' will hide the subtitles for my dialogue, while the pause button will take you back to the homepage that led you to this interview screen. ",
+    "type": "non-question",
+    "requirement": "",
+    "condition": "",
+    "max_sec": 0
+  },
+  "q4": {
+    "content": "If we lose connection for more than two minutes during the interview, you can refresh the page and resume from the last saved checkpoint. ",
+    "type": "non-question",
+    "requirement": "",
+    "condition": "",
+    "max_sec": 0
+  },
+  "q6": {
+    "content": "You may speak when a microphone icon appears in the circle displaying my avatar. Please stop the interview now if any of this is not ok.",
+    "type": "non-question",
+    "requirement": "",
+    "condition": "",
+    "max_sec": 0
+  },
+  "q7": {
+    "content": "If all this sounds good, let’s get started!",
+    "type": "non-question",
+    "requirement": "",
+    "condition": "",
+    "max_sec": 0
+  }
+}

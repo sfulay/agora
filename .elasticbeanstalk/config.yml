@@ -1,0 +1,3 @@
+branch-defaults:
+  main:
+    environment: agora-prolific

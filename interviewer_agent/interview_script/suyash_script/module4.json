@@ -1,0 +1,9 @@
+{
+  "q1": {
+    "content": "Thanks for sharing that. As you grew up, how did what you eat change?",
+    "type": "qualitative",
+    "requirement": "Learn about the interviewee's relationship with food over time. Be respectful but curious as you hear about their story.",
+    "condition": "",
+    "max_sec": 90
+  }
+}

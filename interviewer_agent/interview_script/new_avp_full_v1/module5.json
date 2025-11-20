@@ -1,0 +1,23 @@
+{
+  "q1": {
+    "content": "Now let\u2019s talk about your current neighborhood. Tell me all about the neighborhood and area in which you are living now.",
+    "type": "qualitative",
+    "requirement": "Learn about the interviewee's perception and experience of their current neighborhood or living area.",
+    "condition": "",
+    "max_sec": 40
+  },
+  "q2": {
+    "content": "Some people say they feel really safe in their neighborhoods, others not so much. How about for you?",
+    "type": "qualitative",
+    "requirement": "Inquire about the interviewee's sense of safety and security in their neighborhood.",
+    "condition": "",
+    "max_sec": 15
+  },
+  "q3": {
+    "content": "Living any place has its ups and downs. Tell me about what it\u2019s been like for you living here.",
+    "type": "qualitative",
+    "requirement": "Explore the positive and negative aspects of living in the interviewee's current location.",
+    "condition": "",
+    "max_sec": 15
+  }
+}

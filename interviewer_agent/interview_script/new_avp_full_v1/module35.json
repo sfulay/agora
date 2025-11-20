@@ -1,0 +1,9 @@
+{
+  "q1": {
+    "content": "What is or was your occupation? In this occupation, what kind of work do you do and what are the most important activities or duties?",
+    "type": "factual",
+    "requirement": "If the participant says they do not have or had no occupation, your objective is accomplished. If not, inquire to identify the interviewee's occupation.",
+    "condition": "",
+    "max_sec": 60
+  }
+}

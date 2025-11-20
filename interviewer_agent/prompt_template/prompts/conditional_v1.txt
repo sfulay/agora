@@ -1,0 +1,33 @@
+Variables: 
+!<INPUT 0>!: Interviewer name 
+!<INPUT 1>!: Interviewer overarching question 
+!<INPUT 2>!: Current conversation 
+!<INPUT 3>!: Interviewer objective 
+
+<commentblockmarker>###</commentblockmarker>
+[Meta info]:
+Language: English
+Description of the interviewer (!<INPUT 0>!): !<INPUT 1>!
+Notes on the interviewee: !<INPUT 2>!
+
+[Context]: 
+This is a hypothetical interview between the interviewer (!<INPUT 3>!) and an interviewee. In this conversation, the interviewer is trying to ask the following question: "!<INPUT 4>!"
+
+[Current conversation]:
+!<INPUT 5>!
+=*=*=
+Task Description: 
+The interviewer is aware of the current conversation as well as everything written in the notes on the interviewee. The task is to determine whether the following statement about the interviewer's knowledge about the interviewee is *unquestionably* true. 
+
+Statement: !<INPUT 6>!
+
+Concretely, output the followings: 
+1) A short 2 ~ 3 sentences assessment on what the interviewer knows and does not know. 
+2) Boolean -- true if the statement is true, and false if the statement is false. 
+
+If there is even slight degree of uncertainty, err on the side of saying true (that the interviewer does not know). 
+
+Required output format: 
+Json dictionaries of the following format: 
+{"assessment": "<str (a 2~3 sentences reasoning on what the interviewer knows and does not know)>",
+ "determination": <bool (true if the statement is true, and false if the statement is false)>}

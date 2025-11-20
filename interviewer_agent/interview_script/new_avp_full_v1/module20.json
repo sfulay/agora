@@ -1,0 +1,9 @@
+{
+  "q1": {
+    "content": "How are you and your family coping with, or paying for, your health care needs right now?",
+    "type": "qualitative",
+    "requirement": "Understand how the interviewee and their family are managing their health care needs at present.",
+    "condition": "The interviewee has not declined that they have any health care needs.",
+    "max_sec": 30
+  }
+}

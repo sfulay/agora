@@ -1,0 +1,30 @@
+{
+  "q1": {
+    "content": "Right now, across a typical week, how do your days vary?",
+    "type": "qualitative",
+    "requirement": "Understand the variation in the interviewee's daily activities throughout a typical week.",
+    "condition": "",
+    "max_sec": 40
+  },
+  "q2": {
+    "content": "At what kind of job or jobs do you work, and when do you work?",
+    "type": "factual",
+    "requirement": "If the participant says they do not work, your objective is accomplished. If not, learn about the nature of the interviewee's employment.",
+    "condition": "The interviewer does not know what kind of job or jobs the interviewee works, and when the interviewee works",
+    "max_sec": 40
+  },
+  "q3": {
+    "content": "Do you have other routines or responsibilities that you did not already share?",
+    "type": "qualitative",
+    "requirement": "Explore other regular activities or responsibilities the interviewee has.",
+    "condition": "",
+    "max_sec": 30
+  },
+  "q4": {
+    "content": "Tell me about any recent changes to your daily routine.",
+    "type": "qualitative",
+    "requirement": "Discover any recent adjustments in the interviewee's daily life. Encourage the interviewee to elaborate on changes mentioned in their daily routine.",
+    "condition": "",
+    "max_sec": 30
+  }
+}

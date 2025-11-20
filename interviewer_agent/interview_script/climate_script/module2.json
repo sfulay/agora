@@ -1,0 +1,24 @@
+{
+  "q1": {
+    "content": "I know that many MIT students care about climate issues, but don’t often know how to do their part or get involved. Specifically, students have been asking for more clarity around waste and recycling practices, but I don’t know what’s common knowledge, what isn’t, and how to share that new information.",
+    "type": "non-question",
+    "requirement": "",
+    "condition": "",
+    "max_sec": 0
+  }, 
+  "q2": {
+    "content": "I hope through this interview, I can understand your own experiences with sustainability generally and also at MIT specifically. I'll start with some general questions about you and your background. Then, we'll discuss your experiences with sustainability generally, and finally I'll ask you about your experiences with sustainability at MIT.",
+    "type": "non-question",
+    "requirement": "",
+    "condition": "",
+    "max_sec": 0
+  },
+  "q3": {
+    "content": "The results from this interview will be used to create recommendations for the MIT climate office to better communicate with students, and you will also be able to explore what other students said and hear their experiences as they relate to these recommendations.",
+    "type": "non-question",
+    "requirement": "",
+    "condition": "",
+    "max_sec": 0
+  }
+}
+

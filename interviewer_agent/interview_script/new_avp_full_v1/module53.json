@@ -1,0 +1,23 @@
+{
+  "q1": {
+    "content": "What was the city and state that you lived in when you were 16 years old?",
+    "type": "factual",
+    "requirement": "Identify the residence of the interviewee at age 16.",
+    "condition": "",
+    "max_sec": 10
+  },
+  "q2": {
+    "content": "Did you live with both your own mother and father when you were 16?",
+    "type": "factual",
+    "requirement": "Inquire about the interviewee's living situation at age 16.",
+    "condition": "",
+    "max_sec": 10
+  },
+  "q3": {
+    "content": "Who else did you live with?",
+    "type": "factual",
+    "requirement": "Determine with whom the interviewee lived at age 16 if not with both parents.",
+    "condition": "",
+    "max_sec": 10
+  }
+}

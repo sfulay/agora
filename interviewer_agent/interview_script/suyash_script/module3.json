@@ -1,0 +1,9 @@
+{
+  "q1": {
+    "content": "Thanks for sharing your story! I'm curious, growing up, what were dinners like in your house and what did you typically eat?",
+    "type": "qualitative",
+    "requirement": "Learn about the interviewee's family background and their relationship with food. Be respectful but curious as you hear about their story.",
+    "condition": "",
+    "max_sec": 90
+  }
+}

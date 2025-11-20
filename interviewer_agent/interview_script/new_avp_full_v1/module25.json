@@ -1,0 +1,16 @@
+{
+  "q1": {
+    "content": "Some people say they struggle with depression, anxiety, or something else like that. How about for you?",
+    "type": "qualitative",
+    "requirement": "Inquire about the interviewee's experiences with depression, anxiety, or similar mental health issues.",
+    "condition": "",
+    "max_sec": 30
+  },
+  "q2": {
+    "content": "How has it been for your family?",
+    "type": "qualitative",
+    "requirement": "Explore the impact of the interviewee's emotional or mental health on their family.",
+    "condition": "The interviewee has indicated that they have experienced depression, anxiety, or similar mental health issues.",
+    "max_sec": 20
+  }
+}

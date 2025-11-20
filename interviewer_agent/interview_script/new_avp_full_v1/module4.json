@@ -1,0 +1,23 @@
+{
+  "q1": {
+    "content": "Moving to present time, tell me more about family who are important to you. Do you have a partner, or children?",
+    "type": "qualitative",
+    "requirement": "Understand the interviewee's current relationships with family and friends. IMPORTANT: 1) If the interviewee has a partner, follow up by asking them to describe their relationship with their partner (e.g., how they met, what their relationship is like, if they are divorced/separated, why they got divorced/separated). 2) Also, of the interviewee has children, follow up by asking more about their children and where they are staying.",
+    "condition": "",
+    "max_sec": 120
+  },
+  "q2": {
+    "content": "Are there anyone else in your immediate family whom you have not mentioned? Who are they, and what is your relationship with them like?",
+    "type": "factual",
+    "requirement": "If they do not have any more immediate family members beyond those already mention, move on. If they do, ask follow up questions.",
+    "condition": "",
+    "max_sec": 10
+  },
+  "q3": {
+    "content": "Tell me about anyone else in your life we haven\u2019t discussed (like friends or romantic partners). Are there people outside of your family who are important to you?",
+    "type": "qualitative",
+    "requirement": "Encourage the interviewee to share information about significant others not previously mentioned. If they share a romantic partner, ask the partner's living situation, whether the interviewee and the partner shares children, and whether the partner has any other children.",
+    "condition": "",
+    "max_sec": 30
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "q1": {
+    "content": "Tell me about anything big that has happened in the past two years related to your health: any medical diagnoses, flare-ups of chronic conditions, broken bones, pain \u2013 anything like that.",
+    "type": "factual",
+    "requirement": "Inquire about significant health events in the interviewee's recent past. Encourage a detailed account of the events leading up to a significant health incident. Your objective is accomplished if the participant says there is nothing wrong with their health.",
+    "condition": "",
+    "max_sec": 30
+  }
+}

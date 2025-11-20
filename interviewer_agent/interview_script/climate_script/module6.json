@@ -1,0 +1,33 @@
+{
+  "q1": {
+    "content": "Now, I am going to ask you about communication with students at MIT.",
+    "type": "non-question",
+    "requirement": "",
+    "condition": "",
+    "max_sec": 0
+  },
+  "q2": {
+    "content": "First, what types of communication do you actually pay attention to on campus?",
+    "type": "qualitative",
+    "requirement": "Learn what types of communication the interviewee pays attention to on campus. Be curious about their thoughts. Once they have shared what they pay attention to, your objective is accomplished.",
+    "max_sec": 45,
+    "condition": ""
+  },  
+  "q3": {
+    "content": "Who would you trust to give you accurate information at MIT and why? For example, would you trust friends, professors, clubs, or admin emails?",
+    "type": "qualitative",
+    "requirement": "Learn who the interviewee would trust and why. Be curious about their thoughts. Once they have shared who they would trust and why, your objective is accomplished.",
+    "condition": "The interviewer is not sure who the interviewee would trust to give them accurate information about recycling at MIT.",
+    "max_sec": 45
+  },
+  "q4": {
+    "content": "What would be the best way to deliver information about sustainability at MIT to you or your peers?",
+    "type": "factual",
+    "requirement": "Be curious on what the interviewee thinks would be the best way to deliver this information to them or their peers. You can ask them about specific examples of what they think would be effective. Once they have shared an idea and you have some detail about it, your objective is accomplished. However, if they repeatedly say they don't know the best way to communicate information about sustainability at MIT or don't have any ideas, your objective is also accomplished.",
+    "condition": "",
+    "max_sec": 45
+  }
+
+
+
+}

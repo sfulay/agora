@@ -1,0 +1,16 @@
+{
+  "q1": {
+    "content": "One topic a lot of people have been talking about recently is race and/or racism and policing. Some tell us issues raised by the Black Lives Matter movement have affected them a lot, some say they\u2019ve affected them somewhat, others say they haven\u2019t affected them at all. How about for you?",
+    "type": "qualitative",
+    "requirement": "Understand the impact of issues raised by the Black Lives Matter movement on the interviewee.",
+    "condition": "",
+    "max_sec": 40
+  },
+  "q2": {
+    "content": "How have you been thinking about the issues Black Lives Matter raises?",
+    "type": "qualitative",
+    "requirement": "Explore the interviewee's thoughts on the issues highlighted by the Black Lives Matter movement.",
+    "condition": "The interviewer is uncertain how the interviewee has been thinking about the issues Black Lives Matter raises.",
+    "max_sec": 40
+  }
+}

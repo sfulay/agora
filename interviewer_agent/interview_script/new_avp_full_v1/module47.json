@@ -1,0 +1,16 @@
+{
+  "q1": {
+    "content": "Were you born in the United States? If you were not born in the U.S., what country were you born, and what year did you first come to the U.S. to live?",
+    "type": "factual",
+    "requirement": "Establish whether the interviewee was born in the United States.",
+    "condition": "",
+    "max_sec": 10
+  },
+  "q2": {
+    "content": "What city and state were you born in?",
+    "type": "factual",
+    "requirement": "Identify the city and state (or country) of the interviewee's birth.",
+    "condition": "",
+    "max_sec": 10
+  }
+}

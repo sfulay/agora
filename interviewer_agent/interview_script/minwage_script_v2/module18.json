@@ -1,0 +1,9 @@
+{
+  "q1": {
+    "content": "Do you think it matters where someone is from when hiring for a job, as long as they’re qualified? Why or why not?",
+    "type": "qualitative",
+    "requirement": "Understand the interviewee's thoughts on whether it matters where someone is from when hiring for a job, as long as they’re qualified. Try to understand the benefits and drawbacks they see. Also follow up by asking if there are any situations where nationality or immigration status should be considered.",
+    "condition": "",
+    "max_sec": 45
+  }
+} 

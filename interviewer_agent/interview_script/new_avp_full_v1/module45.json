@@ -1,0 +1,9 @@
+{
+  "q1": {
+    "content": "Are you now married, widowed, divorced, separated, or have you never been married? If you are not currently married, are you currently living with a romantic partner?",
+    "type": "factual",
+    "requirement": "Identify the current marital status of the interviewee.",
+    "condition": "",
+    "max_sec": 15
+  }
+}

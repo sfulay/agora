@@ -1,0 +1,23 @@
+{
+  "q1": {
+    "content": "Some people we\u2019ve talked to tell us about experiences with law enforcement. How about for you?",
+    "type": "qualitative",
+    "requirement": "Understand the interviewee's personal experiences with law enforcement, if any.",
+    "condition": "",
+    "max_sec": 30
+  },
+  "q2": {
+    "content": "What other experiences with law enforcement stand out in your mind?",
+    "type": "factual",
+    "requirement": "If the participant says they had no interaction with law enforcement, your objective is accomplished. If not, explore other notable encounters the interviewee has had with law enforcement.",
+    "condition": "The participant had experiences with law enforcement in the past (in any capacity).",
+    "max_sec": 15
+  },
+  "q3": {
+    "content": "Some people tell us about experiences of arrest \u2013 of loved ones, family members, friends, or themselves. How about for you?",
+    "type": "factual",
+    "requirement": "If the participant says their family had no interaction with law enforcement, your objective is accomplished. If not, inquire about the interviewee's experiences related to arrests, whether personal or involving others close to them.",
+    "condition": "The participant had experiences with law enforcement in the past (in any capacity).",
+    "max_sec": 15
+  }
+}

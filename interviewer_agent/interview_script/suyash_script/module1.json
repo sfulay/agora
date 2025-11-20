@@ -1,0 +1,9 @@
+{
+  "q1": {
+    "content": "Hi, <!user_first_name!>! My name is Isabella, and I'm an AI assistant who will be conducting today's interview with you. Thank you so much for choosing to participate in our study!",
+    "type": "non-question",
+    "requirement": "",
+    "condition": "",
+    "max_sec": 0
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "q1": {
+    "content": "Some people have a savings account, some people save in a different way, and some people say they don\u2019t save. How about you?",
+    "type": "qualitative",
+    "requirement": "Understand the interviewee's approach to saving money.",
+    "condition": "",
+    "max_sec": 30
+  },
+  "q2": {
+    "content": "Some people save for big things, like a home, while others save for a rainy day. How about for you (in the last year)?",
+    "type": "qualitative",
+    "requirement": "Ask about the specific purposes for which the interviewee has been saving money.",
+    "condition": "The interviewee has indicated that they save money.",
+    "max_sec": 30
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "q1": {
+    "content": "Tell me about any time during the past year that you haven\u2019t had enough money to buy something that you needed or pay a bill that was due.",
+    "type": "qualitative",
+    "requirement": "Discuss any instances in the past year where the interviewee faced financial shortfalls.",
+    "condition": "",
+    "max_sec": 25
+  }
+}

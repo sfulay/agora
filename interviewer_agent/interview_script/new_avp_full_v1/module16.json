@@ -1,0 +1,16 @@
+{
+  "q1": {
+    "content": "Sometimes, it\u2019s not your health problem, but the health of a loved one. Has this been an issue for you?",
+    "type": "factual",
+    "requirement": "Inquire about the impact of health problems of loved ones on the interviewee. Encourage a detailed narrative about the health issues of a loved one and their impact. Your objective is accomplished if the participant says this has not been an issue.",
+    "condition": "The interviewee has people that could be considered loved ones",
+    "max_sec": 30
+  },
+  "q2": {
+    "content": "Tell me what it has been like trying to get the health care you or your immediate family need. Have you ever had to forgo getting the health care you need?",
+    "type": "factual",
+    "requirement": "Learn about the interviewee's and their immediate family's experiences in accessing health care. Your objective is accomplished if the participant says they never had to forgo getting the health care they needed.",
+    "condition": "",
+    "max_sec": 30
+  }
+}

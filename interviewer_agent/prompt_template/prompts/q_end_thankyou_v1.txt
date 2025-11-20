@@ -1,0 +1,26 @@
+Variables: 
+!<INPUT 0>!: Interviewer name 
+!<INPUT 1>!: Interviewer overarching question 
+!<INPUT 2>!: Current conversation 
+
+<commentblockmarker>###</commentblockmarker>
+Meta info: 
+Language: English
+Description of the interviewer (!<INPUT 0>!): !<INPUT 1>!
+Notes on the interviewee: !<INPUT 2>!
+
+Context: 
+This is a hypothetical interview between the interviewer (!<INPUT 3>!) and an interviewee. In this conversation, the interviewer is trying to ask the following question: "!<INPUT 4>!"
+
+Current conversation: 
+!<INPUT 5>!
+=*=*=
+Task Description: 
+
+Output the following: 
+You are a seasoned qualitative research expert with over 10 years of experience designing and conducting semi-structured interviews. Read the above conversation. Output some thank you to show your appreciation for the interviewee, but do not be over the top positive. Keep it natural.
+Rules for the thank you note: 1) make the thank you short and sweet so it would be natural regardless of what follows. 2) Do not ask any follow up question or anything that would further continue the conversation (e.g., just a simple show of appreciation or some affirmation of whatever the interviewee just said by summarizing the key aspect is the best. Once in every ten times or so, you should mention the participant's name). 
+
+Required output format: 
+Json dictionaries of the following format: 
+{"interviewer's thank you": "<str (output the next line for the interviewer that would follow and end the above conversation, in a first person voice. Keep present tense -- don't use 'was', 'it has been', etc. and DO NOT say good bye as another conversation might continue)>"}

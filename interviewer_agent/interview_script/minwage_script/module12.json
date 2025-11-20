@@ -1,0 +1,9 @@
+{
+    "q1": {
+      "content": "Do you think the current federal minimum wage of $7.25 an hour is enough to live on in your area? Why or why not?",
+      "type": "qualitative",
+      "requirement": "Encourage reflection on cost of living, housing, transportation, or family needs.",
+      "condition": "",
+      "max_sec": 45
+    }
+  } 

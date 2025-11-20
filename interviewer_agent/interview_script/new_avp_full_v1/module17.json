@@ -1,0 +1,9 @@
+{
+  "q1": {
+    "content": "Have you or your immediate family ever used alternative forms of medicine? This might include indigenous, non-western, or informal forms of care.",
+    "type": "factual",
+    "requirement": "Ask about the interviewee's and their family's use of alternative forms of medicine. Your objective is accomplished if the interviewee (and their family) never used alternative forms of medicine.",
+    "condition": "",
+    "max_sec": 30
+  }
+}

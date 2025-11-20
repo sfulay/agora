@@ -1,0 +1,9 @@
+{
+  "q1": {
+    "content": "To start off, can you tell me a bit about your background? Where did you grow up, and what was it like? You can share anything about your family, your neighborhood, friends, or anything else you can think of.",
+    "type": "qualitative",
+    "requirement": "Learn as much as you can about the interviewee's life experience, and their personal background. Be respectful but curious as you hear about their story. Try to get some specific and detailed experiences or memories about the interviewee's life.",
+    "condition": "",
+    "max_sec": 30
+  }
+} 

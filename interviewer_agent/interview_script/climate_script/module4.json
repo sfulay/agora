@@ -1,0 +1,37 @@
+{
+  "q1": {
+    "content": "Now, moving on, I'd like to ask you about your experiences with the environment and environmental sustainability specifically. We know that everyone has varying levels of interest and experience with this topic, so feel free to ask clarifying questions.",
+    "type": "non-question",
+    "requirement": "",
+    "condition": "",
+    "max_sec": 0
+  },
+  "q2": {
+    "content": "First, do you remember a time where you felt connected to nature? What made that moment stand out for you?",
+    "type": "qualitative",
+    "requirement": "Understand whether the interviewee had any meaningful experiences with nature. If they do not, you can give examples to help them think. Be curious about their experience. Once they have shared an experience with some detail, your objective is accomplished.",
+    "condition": "",
+    "max_sec": 45
+  },
+  "q3": {
+    "content": "Growing up, how aware were you of environmental sustainability practices, such as proper waste management, recycling, or energy conservation? Were there any moments or experiences that shaped how you think about the environment today?",
+    "type": "factual",
+    "requirement": "Understand whether the interviewee had an interest in sustainability growing up and what experiences they had. If they don't share any experiences or don't express any interest, ask them why they think this is the case. You can also use examples if they can’t remember anything (for example, food waste, recycling). If they repeatedly say they don't know or don't have experiences or do not seem to have anything to add, your objective is accomplished. Once they have shared an experience with detail, your objective is accomplished.",
+    "condition": "",
+    "max_sec": 45
+  },
+  "q4": {
+    "content": "Did your family or community ever talk about sustainability or environmental issues?",
+    "type": "factual",
+    "requirement": "If the participant answers whether their family or community talked about sustainability or environmental issues, your objective is accomplished.",
+    "condition": "",
+    "max_sec": 15
+  },
+  "q5": {
+    "content": "What kinds of things did your family or community say or emphasize?",
+    "type": "factual",
+    "requirement": "Learn about what the interviewee's family and community talked about sustainability when they were growing up. Be curious but respectful as you hear about their story. If their answer is not complete, provide examples, such as discussions around food waste, littering, or saving energy. Once they have shared an experience, your objective is accomplished.",
+    "condition": "The interviewee's family or community talked about sustainability or environmental issues when they were growing up.",
+    "max_sec": 45 
+  }
+}

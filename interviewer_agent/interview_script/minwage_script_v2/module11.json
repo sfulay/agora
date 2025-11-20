@@ -1,0 +1,9 @@
+{
+  "q1": {
+    "content": "If you earned more, what would you do with the extra money?",
+    "type": "qualitative",
+    "requirement": "Learn about how the interviewee would spend extra money. You can also ask how it would make them feel to have the extra money, and what goals it would allow them to achieve.",
+    "condition": "",
+    "max_sec": 45
+  }
+} 

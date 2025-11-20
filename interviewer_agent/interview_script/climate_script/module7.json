@@ -1,0 +1,23 @@
+{
+  "q1": {
+    "content": "We're now in the last part of the interview.",
+    "type": "non-question",
+    "requirement": "",
+    "condition": "",
+    "max_sec": 0
+  },
+  "q2": {
+    "content": "Do you have any final thoughts that you would like to share with your peers or the sustainability office at MIT?",
+    "type": "factual",
+    "requirement": "Learn about the interviewee's final thoughts on sustainability. Be curious and ask them to share and elaborate on their final thoughts. If they share a thought and have given some detail, your objective is accomplished. If they say they don't have any thoughts, your objective is accomplished. ",
+    "condition": "",
+    "max_sec": 45
+  },
+  "q3": {
+    "content": "And that was the last question I wanted to ask today. Thank you so much again for your time. It was really wonderful getting to know you through this interview. Now, we will take you back to the Home Screen so that you may finish the rest of the study!",
+    "type": "non-question",
+    "requirement": "",
+    "condition": "",
+    "max_sec": 0
+  }
+}

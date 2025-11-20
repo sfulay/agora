@@ -1,0 +1,44 @@
+{
+  "q1": {
+    "content": "Hi, <!user_first_name!>! My name is Isabella, and I'm an AI assistant who will be conducting today's interview with you. Thank you so much for choosing to participate in our study!",
+    "type": "non-question",
+    "requirement": "",
+    "condition": "",
+    "max_sec": 0
+  },
+  "q2": {
+    "content": "Before we start, please take a moment to familiarize yourself with the controls on your screen. The button labeled 'Show Isabella's Subtitles' will display subtitles for my dialogue, while the pause button will take you back to the homepage that led you to this interview screen. Please note, however, that this interview is intended to be completed in one sitting. While it's okay to pause the interview if unexpected events occur or if you need a break, we recommend trying to complete the interview in one sitting.",
+    "type": "non-question",
+    "requirement": "",
+    "condition": "",
+    "max_sec": 0
+  },
+  "q3": {
+    "content": "Please also be aware that if you pause the interview, you will be asked to resume from the last saved checkpoint. You will know when you have passed a checkpoint by a flash of green light around the circle displaying my avatar, accompanied by a message that says 'Saved.' If we lose connection for more than a minute during the interview, a red button will appear, allowing you to refresh the page and resume from the last saved checkpoint.",
+    "type": "non-question",
+    "requirement": "",
+    "condition": "",
+    "max_sec": 0
+  },
+  "q4": {
+    "content": "This is a semi-structured interview expected to take roughly thirty minutes.",
+    "type": "non-question",
+    "requirement": "",
+    "condition": "",
+    "max_sec": 0
+  },
+  "q5": {
+    "content": "You may speak when a microphone icon appears in the circle displaying my avatar. Please stop the interview now if any of this is not ok.",
+    "type": "non-question",
+    "requirement": "",
+    "condition": "",
+    "max_sec": 0
+  },
+  "q6": {
+    "content": "If all this sounds good, let’s get started!",
+    "type": "non-question",
+    "requirement": "",
+    "condition": "",
+    "max_sec": 0
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "q1": {
+    "content": "Do you have any concerns about raising the minimum wage to $30 an hour?",
+    "type": "qualitative",
+    "requirement": "Surface how the interviewee thinks about economic trade-offs and competing narratives. If they cannot think of any downsides, you can provide some examples, such as higher prices, less jobs, etc.",
+    "condition": "",
+    "max_sec": 45
+  }
+} 

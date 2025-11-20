@@ -1,0 +1,9 @@
+{
+  "q1": {
+    "content": "Sometimes, health problems get in the way. They can even affect people\u2019s ability to work or care for their children. How about you?",
+    "type": "factual",
+    "requirement": "Explore how health issues have impacted the interviewee's daily life and responsibilities. Determine the frequency of health-related challenges in the interviewee's life. Your objective is accomplished if the participant says there is no health related challenges.",
+    "condition": "",
+    "max_sec": 20
+  }
+}

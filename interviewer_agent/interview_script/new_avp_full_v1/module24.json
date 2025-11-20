@@ -1,0 +1,9 @@
+{
+  "q1": {
+    "content": "Tell me a story about a time in the last year when you were in a rough place or struggling emotionally.",
+    "type": "qualitative",
+    "requirement": "Encourage the interviewee to share a specific instance when they faced emotional challenges in the last year.",
+    "condition": "",
+    "max_sec": 30
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "q1": {
+    "content": "Have you ever served on active duty in the U.S. Armed Forces, Reserves, or National Guard?",
+    "type": "factual",
+    "requirement": "Inquire about the interviewee's military service history.",
+    "condition": "",
+    "max_sec": 5
+  }
+}

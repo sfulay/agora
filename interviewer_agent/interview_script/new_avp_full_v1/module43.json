@@ -1,0 +1,9 @@
+{
+  "q1": {
+    "content": "Do you receive any payments or benefits from SNAP, food stamps, housing voucher payments, supplemental security income, or any other programs like that?",
+    "type": "factual",
+    "requirement": "If the participant says they do not receive any payments or benefits from such programs, your objective is accomplished. If not, ask further.",
+    "condition": "",
+    "max_sec": 10
+  }
+}

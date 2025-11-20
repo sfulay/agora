@@ -1,0 +1,11 @@
+Variables: 
+!<INPUT 0>!: Curr convo
+<commentblockmarker>###</commentblockmarker>
+Here is a conversation between an interviewer and an interviewee. 
+!<INPUT 0>!
+
+=*=*=
+Task: Very succinctly summarize the facts about the interviewee based on the conversation above in a few bullet points -- again, think short, concise, bullet points.
+Output format: Json dictionaries of 1~3 key-value pair(s) where the keys are a keyword describing the bullet point, and values are a phrase or a one sentence description of that keyword: 
+{"<key>": "<val>"}
+(Example json output: {"name": "Jane Doe", "age": "21", "favorite food": "pasta"})

@@ -1,0 +1,16 @@
+{
+  "q1": {
+    "content": "Some people tell us they use Facebook, Instagram, or other social media to stay connected with the wider world. How about for you? Tell me all about how you use these types of platforms.",
+    "type": "qualitative",
+    "requirement": "Discover how the interviewee uses social media platforms to connect with others.",
+    "condition": "",
+    "max_sec": 45
+  },
+  "q2": {
+    "content": "Some people say they use Facebook or Twitter to get (emotional or financial) support during tough times. What about you?",
+    "type": "qualitative",
+    "requirement": "Find out if the interviewee uses social media for support during difficult periods.",
+    "condition": "The interviewee indicated that they use social media.",
+    "max_sec": 20
+  }
+}

@@ -1,0 +1,29 @@
+[Context]: 
+These are the transcripts from a set of interviews about sustainability at MIT.
+
+[Transcripts]:
+!<INPUT 0>!
+=*=*=
+Task Description: 
+The goal is to answer the question: What is common knowledge about being sustainable at MIT, what isn’t, and how do we share that new information with students?
+Your job is to create a set of recommendations, using evidence from the interview transcripts, to answer this question.
+
+Concretely, output the followings: 
+1) A list of recommendations that summarizes what is common knowledge about being sustainable at MIT, what isn’t, and how to best communicate with students.
+2) For each recommendation, a list of Audio IDs and the corresponding Participant ID that provides evidence for that recommendation.
+
+Generate at least five recommendations that answer all of these questions.
+Required output format is a JSON list: 
+[
+  {
+    "recommendation": "Write a clear recommendation here.",
+    "evidence_audio_ids": ["audio_id1", "audio_id2"],
+    "participant_ids" : ["participant_id_for_audio_1", "participant_id_for_audio_2"]
+  },
+  {
+    "recommendation": "Write another recommendation here.",
+    "evidence_audio_ids": ["audio_id3"],
+    "participant_ids" : ["participant_id_for_audio_3"]
+
+  }
+]

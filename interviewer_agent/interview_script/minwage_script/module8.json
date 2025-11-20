@@ -1,0 +1,9 @@
+{
+  "q1": {
+    "content": "Can you tell me about a time when work felt especially good or satisfying? What made it that way?",
+    "type": "qualitative",
+    "requirement": "Learn what aspects of work have positively impacted the interviewee in the past. Try to get them to share specific examples of times or experiences that made them feel good about their work. Try to understand what conditions, relationships, or events led to that experience, and whether those could be made more common in their current or future work life.",
+    "condition": "",
+    "max_sec": 30
+  }
+} 

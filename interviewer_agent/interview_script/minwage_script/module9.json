@@ -1,0 +1,9 @@
+{
+  "q1": {
+    "content": "On the flip side, are there any barriers or challenges that make it harder for you to do your job well or enjoy your work? Were there times you felt especially frustrated or stressed?",
+    "type": "qualitative",
+    "requirement": "Identify concrete obstacles that affect the interviewee's work satisfaction or performance. These might be related to scheduling, management, health, physical environment, work policies, or anything else. Try to get specific examples or experiences about the barriers or challenges they've faced.",
+    "condition": "",
+    "max_sec": 30
+  }
+}   

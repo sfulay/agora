@@ -1,0 +1,23 @@
+{
+  "q1": {
+    "content": "Tell me about times over the last year when your income was especially low. And tell me about all the things you did to make ends meet during that time.",
+    "type": "qualitative",
+    "requirement": "Discuss periods in the past year when the interviewee experienced particularly low income.",
+    "condition": "",
+    "max_sec": 20
+  },
+  "q2": {
+    "content": "What would it be like for you if you had to spend $400 for an emergency? Would you have the money, and if not, how would you get it?",
+    "type": "qualitative",
+    "requirement": "Gauge the interviewee's financial preparedness for an unexpected expense of $400.",
+    "condition": "",
+    "max_sec": 20
+  },
+  "q3": {
+    "content": "Overall, how do you feel about your financial situation?",
+    "type": "qualitative",
+    "requirement": "Understand the interviewee's general feelings and perspectives on their current financial situation.",
+    "condition": "",
+    "max_sec": 40
+  }
+}

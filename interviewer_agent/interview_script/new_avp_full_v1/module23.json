@@ -1,0 +1,9 @@
+{
+  "q1": {
+    "content": "Now we\u2019re going to talk a bit more about what life was like for you over the past year. Tell me all about how you have been feeling.",
+    "type": "qualitative",
+    "requirement": "Understand the interviewee's overall emotional state over the past year.",
+    "condition": "",
+    "max_sec": 45
+  }
+}

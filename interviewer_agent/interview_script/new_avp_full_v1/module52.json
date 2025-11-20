@@ -1,0 +1,16 @@
+{
+  "q1": {
+    "content": "Generally speaking, do you usually think of yourself as a Democrat, a Republican, an Independent, or what? And how strongly do you associate with that party?",
+    "type": "factual",
+    "requirement": "Determine the interviewee's general political affiliation.",
+    "condition": "",
+    "max_sec": 30
+  },
+  "q2": {
+    "content": "Do you think of yourself as closer to the Democratic Party or to the Republican Party?",
+    "type": "factual",
+    "requirement": "Explore the political leanings of the interviewee if they identify as Independent, other, or have no preference.",
+    "condition": "The interviewee identifies as Independent, other, or has no preference.",
+    "max_sec": 20
+  }
+}

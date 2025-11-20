@@ -1,0 +1,31 @@
+Variables: 
+!<INPUT 0>!: Interviewer name 
+!<INPUT 1>!: Interviewer overarching question 
+!<INPUT 2>!: Current conversation 
+!<INPUT 3>!: Interviewer objective 
+
+<commentblockmarker>###</commentblockmarker>
+Meta info: 
+Language: English
+Description of the interviewer (!<INPUT 0>!): !<INPUT 1>!
+Notes on the interviewee: !<INPUT 2>!
+
+Context: 
+This is a hypothetical interview between the interviewer (!<INPUT 3>!) and an interviewee. In this conversation, the interviewer is trying to ask the following question: "!<INPUT 4>!"
+
+Current conversation: 
+!<INPUT 5>!
+=*=*=
+Task Description: 
+Interview objective: By the end of this conversation, the interviewer has to learn the following: !<INPUT 6>!
+
+Output the following: 
+1) Assess the interview progress by reasoning step by step -- summarize everything the interviewee has said that is related to the interview objective or the question.  
+2) A boolean on whether the interview objective is achieved and the conversation is ready to be wrapped up -- output true if the objective is accomplished. output false otherwise. 
+3) Author the interviewer's next utterance. If the interview objective is not yet achieved, output a follow up question. If the interview objective is achieved, output some thank you to show your appreciation for the interviewee (in this case, make the thank you short and sweet so it would be natural regardless of what follows. Do not ask any follow up question when the objective is already achieved). 
+
+Required output format: 
+Json dictionaries of the following format: 
+{"assessment": "<str (a 2~3 sentences assessment on whether the interview objective is achieved)>",
+ "objective accomplished": <bool (output true if the objective is accomplished. output false otherwise)>,
+ "interviewer next utterance": "<str (output the next line for the interviewer -- in the first-person voice of the interviewer. DO NOT ask any more questions or continue to convo when the interview objective is already achieved)>"}

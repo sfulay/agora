@@ -1,0 +1,9 @@
+{
+  "q1": {
+    "content": "Some people say that religion or spirituality is important in their lives, for others not so much. How about you?",
+    "type": "qualitative",
+    "requirement": "Learn about the role of religion or spirituality in the interviewee's life.",
+    "condition": "",
+    "max_sec": 60
+  }
+}

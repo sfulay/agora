@@ -1,0 +1,9 @@
+{
+  "q1": {
+    "content": "What do you like to eat now, and what do you prefer not to eat?",
+    "type": "qualitative",
+    "requirement": "Learn about the interviewee's relationship with food now. Try to get a sense of their preferences and dislikes. Follow up and ask why they like or dislike certain foods. Be respectful but curious as you hear about their story.",
+    "condition": "",
+    "max_sec": 90
+  }
+}

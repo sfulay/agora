@@ -1,0 +1,16 @@
+{
+  "q1": {
+    "content": "We all have hopes about what our future will look like. Imagine yourself a few years from now. Maybe you want your life to be the same in some ways as it is now. Maybe you want it to be different in some ways. What do you hope for?",
+    "type": "qualitative",
+    "requirement": "",
+    "condition": "",
+    "max_sec": 60
+  },
+  "q2": {
+    "content": "What do you value the most in your life?",
+    "type": "qualitative",
+    "requirement": "",
+    "condition": "",
+    "max_sec": 30
+  }
+}

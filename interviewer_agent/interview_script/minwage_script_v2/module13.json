@@ -1,0 +1,9 @@
+{
+  "q1": {
+    "content": "I'd now like to ask you about discrimination. Have you ever experienced discrimination? If so, can you tell me about it?",
+    "type": "qualitative",
+    "requirement": "Learn about the interviewee's experiences with discrimination. Be curious and try to get some specific and detailed experiences or memories about the interviewee's experience with discrimination. Follow up with questions about whether they have experienced discrimination in the workplace or hiring. If they say they have never experienced discrimination, ask them if anyone they know has experienced discrimination. If they say they have not experienced discrimination nor have anyone they know has experienced discrimination, then ask them whether they think discrimination is a problem in society and why.",
+    "condition": "",
+    "max_sec": 60
+  }
+} 

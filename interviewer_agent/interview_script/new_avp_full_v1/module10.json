@@ -1,0 +1,23 @@
+{
+  "q1": {
+    "content": "Some people say they vote in every election, some tell us they don\u2019t vote at all. How about you?",
+    "type": "qualitative",
+    "requirement": "Gather information about the interviewee's voting habits.",
+    "condition": "",
+    "max_sec": 30
+  },
+  "q2": {
+    "content": "How would you describe your political views?",
+    "type": "qualitative",
+    "requirement": "Understand the interviewee's political orientation and viewpoints.",
+    "condition": "",
+    "max_sec": 120
+  },
+  "q3": {
+    "content": "Tell me about any recent changes in your political views.",
+    "type": "qualitative",
+    "requirement": "Learn about any shifts or changes in the interviewee's political views.",
+    "condition": "",
+    "max_sec": 45
+  }
+}
