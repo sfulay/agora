@@ -1345,7 +1345,7 @@ class Participant(AbstractUser):
   age = models.IntegerField(null=True, blank=True)
   occupation = models.CharField(max_length=255, null=True, blank=True)
   
-  # Avatar preference flag
+  # Avatar preference flag.
   use_generated_avatar = models.BooleanField(default=False)
 
   @property

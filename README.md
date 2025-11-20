@@ -106,8 +106,6 @@ Real-time predictions used in the recommendation editor interface.
 - `confidence_score` (0-100): AI's confidence in the prediction
 - `reasoning`: AI explanation for the predicted stance
 
-**Note:** The older `habermas_game.html` view uses `RecommendationParticipantSummary` instead, which has additional fields like `relevance_score`, `quality_score`, and `summary`.
-
 #### **Interview Models**
 
 **Interview**: Container for all interview data for a participant
@@ -163,12 +161,9 @@ Real-time predictions used in the recommendation editor interface.
 ### API Endpoints
 
 ```
-GET  /editor/<rec_id>/                          # Main editor interface
-POST /editable_recommendation/<rec_id>/edit/    # Update recommendation text
-GET  /api/prediction/<rec_id>/<username>/       # Get individual prediction
-POST /api/editor/<rec_id>/recompute-stream/     # Trigger batch predictions
-GET  /api/editor/<rec_id>/leaderboard/          # Leaderboard data
-GET  /api/meta-medley/<rec_id>/<type>/          # Group audio (bottom/middle/top)
+GET  /editor/<rec_id>/                           # Main editor interface
+POST /api/editor/<rec_id>/recompute-stream/      # Trigger batch predictions (EventSource)
+GET  /api/meta-medley/<rec_id>/<type>/           # Group audio (bottom/middle/top)
 GET  /api/editor/<rec_id>/participant/<username>/ # Participant profile modal
 ```
 
@@ -324,76 +319,42 @@ recommendation = Recommendation.objects.create(
 
 Or use Django admin to create recommendations via the web interface.
 
-### Step 5: Run AI Generation Pipeline
+### Step 5: How Predictions Work
 
-Once participants, transcripts, and recommendations are in place, generate AI predictions:
+When a user edits a recommendation in the editor, the `recompute_recommendation_stream` view handles the real-time prediction generation.
 
-#### 5.1 Generate Life Narratives
+**Location:** `pages/views.py:2977-3100`
 
-Create cohesive life story narratives from interview transcripts:
+**How it works:**
 
-```bash
-cd generating_v2
-python 01_run_life_narratives.py
-```
+1. User edits recommendation text in the editor
+2. Frontend calls `/api/editor/<rec_id>/recompute-stream/?rec_text=<new_text>`
+3. `recompute_recommendation_stream` creates a new Recommendation object
+4. Reads participant list from CSV (current hacky implementation):
+   ```python
+   participant_data = pd.read_csv("data/all_df_clean_pass_concept_measures_joined.csv")
+   participant_data = participant_data[participant_data["assignment"].isin(["treatment", "control"])]
+   participant_usernames = participant_data["PROLIFIC_PID"].tolist()
+   ```
+5. Processes participants in parallel (16 workers) using `process_single_participant`
+6. For each participant:
+   - Calls `RecommendationPredictionGenerator.process_participant_recommendation_fast()`
+   - Generates `Medley` with quality score
+   - Returns prediction data via Server-Sent Events
+7. Saves predictions to `LivePrediction` model
+8. Frontend updates visualization in real-time
 
-This reads all `InterviewUtterance` data and generates `Narrative` objects.
+**To customize which participants are included:**
 
-#### 5.2 Generate Recommendation Predictions
-
-Generate predictions for how each participant would respond to each recommendation:
-
-```bash
-python 02_run_rec_predictions.py
-```
-
-Edit the script to specify which recommendation IDs to process:
+Edit the CSV path or replace with a direct database query:
 
 ```python
-# In 02_run_rec_predictions.py
-recommendation_ids = [74, 75, 76]  # Your recommendation IDs
+# Instead of reading from CSV, query directly:
+participants_with_data = Participant.objects.filter(
+    has_completed_interview=True
+    # Add your filters here
+).distinct()
 ```
-
-This creates `RecommendationParticipantSummary` objects with:
-- Predicted agreement scores (0-100)
-- Supporting/opposing evidence from transcripts
-- Relevance and quality scores
-- AI-generated reasoning and summaries
-
-#### 5.3 Calculate Quality Scores
-
-Evaluate the quality of evidence for each prediction:
-
-```bash
-python 03_run_calculate_quality_scores.py
-```
-
-#### 5.4 Generate Audio Medleys (Optional)
-
-Create 60-second audio summaries per participant:
-
-```bash
-python 04_run_medleys.py
-```
-
-And generate group meta-medleys:
-
-```bash
-python 06_run_meta_medleys.py
-```
-
-### Step 6: Access the Editor
-
-Navigate to the editor interface with your recommendation ID:
-
-```
-http://localhost:8000/editor/<recommendation_id>/
-```
-
-You should now see:
-- Participant avatars positioned by predicted support
-- Ability to edit the recommendation text
-- Real-time re-calculation of predictions when you make changes
 
 ## Customizing AI Prompts
 
@@ -425,15 +386,13 @@ class RecommendationPredictionGenerator:
 
 ### Caching
 
-The system uses Django's ORM to cache predictions in `RecommendationParticipantSummary`. To force regeneration:
+The system caches predictions in `LivePrediction` models. Each time you edit a recommendation, it creates a new Recommendation object and generates fresh predictions. To clear old predictions:
 
 ```python
-from pages.models import RecommendationParticipantSummary
+from pages.models import LivePrediction
 
 # Delete existing predictions for a recommendation
-RecommendationParticipantSummary.objects.filter(recommendation_id=74).delete()
-
-# Then re-run the generation script
+LivePrediction.objects.filter(recommendation_id=74).delete()
 ```
 
 ## Deployment
