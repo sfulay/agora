@@ -15,62 +15,33 @@ The Habermas Game is an interactive policy deliberation tool that enables users 
 
 - Python 3.11
 - PostgreSQL (production) or SQLite (development)
-- AWS account (for S3 storage and deployment)
 - OpenAI API key (GPT-4 access required)
-- Google Cloud Speech API credentials (for audio transcription)
+- AWS account (for S3 storage - optional for local dev)
+- Google Cloud Speech API credentials (for audio transcription - optional)
 
 ## Quick Start
 
-### 1. Installation
-
-Clone the repository and install dependencies:
-
 ```bash
+# Clone and install
 git clone [repository-url]
 cd agora
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate
 pip install -r requirements.txt
-```
 
-### 2. Environment Configuration
+# Set environment variables
+export OPENAI_API_KEY=your-key-here
+export DJANGO_SETTINGS_MODULE=gabm_infra.settings.local
 
-Create a `.env` file with required credentials:
-
-```bash
-# Required
-OPENAI_API_KEY=your-openai-api-key
-ANTHROPIC_API_KEY=your-anthropic-api-key  # Optional, for Claude models
-
-# Database (use SQLite for local dev, PostgreSQL for production)
-DJANGO_SETTINGS_MODULE=gabm_infra.settings.local  # or gabm_infra.settings.production
-
-# AWS (for S3 storage)
-AWS_ACCESS_KEY_ID=your-aws-access-key
-AWS_SECRET_ACCESS_KEY=your-aws-secret-key
-AWS_STORAGE_BUCKET_NAME=your-bucket-name
-
-# Google Cloud (for audio transcription)
-GOOGLE_APPLICATION_CREDENTIALS=/path/to/credentials.json
-```
-
-### 3. Database Setup
-
-Run migrations to create the database schema:
-
-```bash
+# Setup database
 python manage.py migrate
-```
 
-### 4. Run the Development Server
-
-```bash
+# Run server
 python manage.py runserver
-```
 
-Access the Habermas Game at:
-- Main editor: `http://localhost:8000/editor/<recommendation_id>/`
-- Example: `http://localhost:8000/editor/273/` (Minimum wage recommendation)
+# Access editor at:
+# http://localhost:8000/editor/<recommendation_id>/
+```
 
 ## Technical Architecture
 
@@ -103,26 +74,91 @@ Access the Habermas Game at:
 
 ### Core Database Models
 
-#### Participant & Interview Data
-- `Participant`: User accounts (extends Django's AbstractUser)
-- `InterviewQuestion`: Questions asked during interviews
-- `InterviewUtterance`: Individual sentences from interview transcripts
-- `InterviewSegment`: Audio segments aligned with utterances
+The Habermas Game uses these key models:
 
-#### Recommendation & Prediction Data
-- `Recommendation`: Policy recommendations to deliberate on
-- `RecommendationParticipantSummary`: AI predictions per participant including:
-  - `predicted_agreement` (0-100): How much they'd support the policy
-  - `relevance_score` (0-100): How relevant the policy is to them
-  - `confidence_score` (0-100): AI's confidence in the prediction
-  - `quality_score` (0-100): Quality of supporting evidence
-  - `reasoning`: AI explanation of predicted stance
-  - `summary`: How their life experiences relate to the policy
+#### **Recommendation**
+Policy recommendations that users can edit and deliberate on.
 
-#### Audio Summary Data
-- `Medley`: Individual 60s audio summaries per participant
-- `MetaMedley`: Group audio medleys (Against/Fence/For categories)
-- `Narrative`: Life story narratives for each participant
+**Key fields:**
+- `rec_text`: The policy recommendation text
+- `base_rec`: Link to the original recommendation (if this is an edited version)
+- `participant_who_edited`: Who made this edit
+- `ai_rec_text`: AI-generated consensus recommendation
+- `ai_predicted_support`: Average support for AI recommendation
+
+#### **Participant**
+User accounts (extends Django's AbstractUser).
+
+**Key fields:**
+- `username`: Unique username (usually prolific_id)
+- `prolific_id`: Unique participant identifier
+- `display_name`: Human-readable name
+- `avatar`: Link to Avatar model for profile image
+- `has_completed_interview`: Boolean flag
+
+#### **LivePrediction**
+Real-time predictions used in the recommendation editor interface.
+
+**Key fields:**
+- `recommendation`: Link to Recommendation
+- `participant`: Link to Participant
+- `predicted_agreement` (0-100): How much they'd support the policy
+- `confidence_score` (0-100): AI's confidence in the prediction
+- `reasoning`: AI explanation for the predicted stance
+
+**Note:** The older `habermas_game.html` view uses `RecommendationParticipantSummary` instead, which has additional fields like `relevance_score`, `quality_score`, and `summary`.
+
+#### **Interview Models**
+
+**Interview**: Container for all interview data for a participant
+- `participant`: Link to Participant
+- `script_v`: Interview script version used
+- `completed`: Whether interview is finished
+
+**InterviewQuestion**: Individual questions asked during the interview
+- `interview`: Link to Interview
+- `question_id`: Question number
+- `q_content`: The question text
+- `convo`: Full conversation transcript for this question
+
+**InterviewUtterance**: Individual sentences from interview transcripts
+- `question`: Link to InterviewQuestion
+- `utterance_text`: The actual sentence text
+- `audio_id`: Reference to audio file
+- `is_interviewer`: True if interviewer spoke this, False if participant
+- `sequence_number`: Order within the question
+
+**InterviewAudio**: Full audio files for questions
+- `question`: Link to InterviewQuestion
+- `user_speech`: True if participant speech, False if interviewer
+- `audio_file`: Path to audio file in S3
+
+**InterviewSegment**: Sentence-level audio segments
+- `audio`: Link to InterviewAudio
+- `start_time`: Start time in seconds
+- `end_time`: End time in seconds
+- `segment_text`: Transcribed text for this segment
+- `segment_audio_file`: Path to segmented audio file
+- `sequence_number`: Order within the audio file
+
+#### **Audio Summary Models**
+
+**Medley**: Individual 60-second audio summaries per participant
+- `participant`: Link to Participant
+- `recommendation`: Link to Recommendation (optional)
+- `segments`: ManyToMany with InterviewSegment
+- `total_duration`: Actual duration in seconds
+- `quality_score` (0-100): Quality of the medley
+- `gpt_reasoning`: Why GPT selected these segments
+
+**MetaMedley**: Group audio summaries combining multiple participants
+- `recommendation`: Link to Recommendation
+- `participants`: ManyToMany with Participant
+- `source_medleys`: ManyToMany with Medley (top K by quality)
+- `selected_segments`: JSON array of segments from across participants
+- `total_duration`: Total duration (target: 60-90s)
+- `gpt_reasoning`: GPT's explanation of narrative flow
+- `participant_cache_key`: Hash for deduplication
 
 ### API Endpoints
 
@@ -514,23 +550,10 @@ Solutions:
 2. Reduce number of participants processed
 3. Use caching (predictions are cached by default)
 
-## Data Privacy & Ethics
-
-This platform processes interview transcripts and generates AI predictions about real people's views. Please:
-
-- Obtain informed consent from all participants
-- Anonymize personally identifiable information
-- Clearly communicate how AI predictions are generated
-- Allow participants to review and correct their data
-- Follow IRB guidelines for human subjects research
-
 ## License
 
 [Specify your license here]
 
 ## Support
 
-For issues or questions:
-- GitHub Issues: [Your repo URL]
-- Email: [Your contact]
-- Documentation: See `generating_v2/README.md` for AI generation details
+For issues or questions, see `generating_v2/README.md` for additional documentation on AI generation details.
