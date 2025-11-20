@@ -10,10 +10,11 @@ def main():
     hostname = socket.gethostname()
     print(f"Hostname: {hostname}")
     # If running on local machine, use local settings
-    if 'prerna' in hostname.lower() or ".dyn.MIT.EDU" in hostname or "suyash" in hostname.lower():  # Add any other local machine names here
-        settings_module = 'gabm_infra.settings.local'
-    else:
-        settings_module = 'gabm_infra.settings.production'
+    settings_module = "gabm_infra.settings.local"
+    # if 'prerna' in hostname.lower() or ".dyn.MIT.EDU" in hostname or "suyash" in hostname.lower():  # Add any other local machine names here
+    #     settings_module = 'gabm_infra.settings.local'
+    # else:
+    #     settings_module = 'gabm_infra.settings.production'
     print(f"Using settings module: {settings_module}")
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', settings_module)
     
