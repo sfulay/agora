@@ -19,29 +19,60 @@ The Habermas Game is an interactive policy deliberation tool that enables users 
 - AWS account (for S3 storage - optional for local dev)
 - Google Cloud Speech API credentials (for audio transcription - optional)
 
-## Quick Start
+## Setup Instructions
 
+### 1. SSH Key Setup
+Add `agora.pem` to your `.ssh` folder:
 ```bash
-# Clone and install
-git clone [repository-url]
-cd agora
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-
-# Set environment variables
-export OPENAI_API_KEY=your-key-here
-export DJANGO_SETTINGS_MODULE=gabm_infra.settings.local
-
-# Setup database
-python manage.py migrate
-
-# Run server
-python manage.py runserver
-
-# Access editor at:
-# http://localhost:8000/editor/<recommendation_id>/
+cp agora.pem ~/.ssh/
+chmod 400 ~/.ssh/agora.pem
 ```
+
+### 2. Environment Variables
+Create a `.env` file with:
+```bash
+OPENAI_API_KEY=your-openai-key
+AWS_ACCESS_KEY_ID=your-aws-key
+AWS_SECRET_ACCESS_KEY=your-aws-secret
+```
+**Note:** Use the AWS key with proper permissions (proper permission setup pending).
+
+### 3. Create Conda Environment
+```bash
+conda create -n test_habermas_2 python=3.11
+conda activate test_habermas_2
+```
+
+### 4. Install Dependencies
+```bash
+pip install -r requirements.txt
+conda install -c conda-forge awscli
+```
+
+### 5. Connect to Production Database
+```bash
+# Set the Elastic Beanstalk environment
+eb use agora-prolific
+
+# SSH into the EC2 instance with port forwarding to access the RDS database
+ssh -i ~/.ssh/agora.pem ec2-user@44.223.23.188 -L 6543:***REMOVED***:5432
+```
+
+This command does two things:
+- Connects to the EC2 instance at `44.223.23.188`
+- Forwards local port `6543` to the RDS PostgreSQL database (port `5432`)
+
+### 6. Run Development Server
+In a new terminal (keep the SSH tunnel running):
+```bash
+conda activate test_habermas_2
+python manage.py runserver
+```
+
+### 7. Access the Editor
+Open your browser to:
+- `http://localhost:8000/editor/<recommendation_id>/`
+- Example: `http://localhost:8000/editor/273/`
 
 ## Technical Architecture
 
@@ -122,14 +153,19 @@ Real-time predictions used in the recommendation editor interface.
 **InterviewUtterance**: Individual sentences from interview transcripts
 - `question`: Link to InterviewQuestion
 - `utterance_text`: The actual sentence text
-- `audio_id`: Reference to audio file
+- `audio_id`: **Required** - References the `id` of the corresponding `InterviewAudio` record
 - `is_interviewer`: True if interviewer spoke this, False if participant
 - `sequence_number`: Order within the question
 
 **InterviewAudio**: Full audio files for questions
 - `question`: Link to InterviewQuestion
 - `user_speech`: True if participant speech, False if interviewer
-- `audio_file`: Path to audio file in S3
+- `audio_file`: Path to audio file in S3 (uploaded by user)
+
+**Relationship:** Each `InterviewUtterance` must have an `audio_id` that points to an `InterviewAudio.id`. When constructing audio URLs, the system uses:
+```python
+f"InterviewAudios/interview{interview_id}/module{module_id}/question{question_id}/user_{audio_id}.wav"
+```
 
 **InterviewSegment**: Sentence-level audio segments
 - `audio`: Link to InterviewAudio
@@ -283,24 +319,68 @@ for prolific_id, participant_data in data.items():
     # (Full implementation depends on your data structure)
 ```
 
-### Step 3: Add Audio Segments (Optional)
+### Step 3: Add Audio Files
 
-If you have audio files, process them into sentence-level segments:
+Audio files are essential for the Habermas Game to work. Here's how to upload and connect them:
+
+**Step 3.1: Upload Audio to S3**
+
+Upload audio files to S3 following the expected path structure:
+```
+s3://your-bucket/InterviewAudios/interview{interview_id}/module{module_id}/question{question_id}/user_{audio_id}.wav
+```
+
+**Step 3.2: Create InterviewAudio Records**
+
+For each audio file, create an `InterviewAudio` record:
+
+```python
+from pages.models import InterviewAudio, InterviewQuestion
+
+# Get the question this audio is for
+question = InterviewQuestion.objects.get(id=question_id)
+
+# Create the audio record
+audio = InterviewAudio.objects.create(
+    question=question,
+    user_speech=True,  # True if participant speaking, False if interviewer
+    audio_file="InterviewAudios/interview123/module1/question5/user_42.wav"
+)
+
+# Note the audio.id - you'll need this for InterviewUtterance
+print(f"Created InterviewAudio with id: {audio.id}")
+```
+
+**Step 3.3: Link Utterances to Audio**
+
+When creating `InterviewUtterance` objects (from Step 2), set the `audio_id` to reference the `InterviewAudio.id`:
+
+```python
+from pages.models import InterviewUtterance
+
+# The audio_id must match an InterviewAudio.id
+InterviewUtterance.objects.create(
+    question=question,
+    utterance_text="I've worked in retail for 5 years.",
+    audio_id=audio.id,  # <-- This is the InterviewAudio.id from Step 3.2
+    is_interviewer=False,
+    sequence_number=0,
+)
+```
+
+**Step 3.4: Process Sentence-Level Segments (Optional)**
+
+If you want sentence-level audio segments for medleys, run:
 
 ```bash
-# First, upload raw audio to S3 in the expected structure:
-# s3://your-bucket/InterviewAudios/{prolific_id}/{question_id}/audio.wav
-
-# Then run the audio processing script:
 cd generating_v2
 python 05_process_sentence_segments.py
 ```
 
-This script will:
-1. Transcribe audio using Google Cloud Speech API
-2. Split into sentence-level segments
-3. Create `InterviewSegment` objects with timestamps
-4. Link segments to `InterviewUtterance` objects
+This creates `InterviewSegment` objects by:
+1. Transcribing audio using Google Cloud Speech API
+2. Splitting into sentence-level segments with timestamps
+3. Storing individual segment audio files
 
 ### Step 4: Create Recommendations
 
