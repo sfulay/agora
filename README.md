@@ -1,6 +1,6 @@
-# Habermas Game - AI-Powered Policy Deliberation Platform
+# Agora - AI-Powered Policy Deliberation Platform
 
-The Habermas Game is an interactive policy deliberation tool that enables users to iteratively refine policy proposals while receiving real-time AI predictions about public support. Users can edit policy recommendations, see live predictions of how real people would respond based on their interview data, and explore detailed participant perspectives through audio clips and narrative summaries.
+Agora is an interactive policy deliberation tool that enables users to iteratively refine policy proposals while receiving real-time AI predictions about public support. Users can edit policy recommendations, see live predictions of how real people would respond based on their interview data, and explore detailed participant perspectives through audio clips and narrative summaries.
 
 ## Core Features
 
@@ -39,8 +39,8 @@ AWS_SECRET_ACCESS_KEY=your-aws-secret
 
 ### 3. Create Conda Environment
 ```bash
-conda create -n test_habermas_2 python=3.11
-conda activate test_habermas_2
+conda create -n agora python=3.11
+conda activate agora
 ```
 
 ### 4. Install Dependencies
@@ -88,7 +88,7 @@ ssh -i ~/.ssh/agora.pem ec2-user@44.223.23.188 -L 6543:***REMOVED***:5432
 ### 6. Run Development Server
 In a new terminal (keep the SSH tunnel running):
 ```bash
-conda activate test_habermas_2
+conda activate agora
 python manage.py runserver
 ```
 
@@ -128,7 +128,7 @@ Open your browser to:
 
 ### Core Database Models
 
-The Habermas Game uses these key models:
+Agora uses these key models:
 
 #### **Recommendation**
 Policy recommendations that users can edit and deliberate on.
@@ -192,13 +192,15 @@ Real-time predictions used in the recommendation editor interface.
 f"InterviewAudios/interview{interview_id}/module{module_id}/question{question_id}/user_{audio_id}.wav"
 ```
 
-**InterviewSegment**: Sentence-level audio segments
-- `audio`: Link to InterviewAudio
-- `start_time`: Start time in seconds
-- `end_time`: End time in seconds
-- `segment_text`: Transcribed text for this segment
-- `segment_audio_file`: Path to segmented audio file
-- `sequence_number`: Order within the audio file
+**InterviewSegment**: Sentence-level audio segments within an utterance
+- `audio`: Link to InterviewAudio (the parent audio for the full utterance)
+- `start_time`: Start time in seconds (within the parent audio)
+- `end_time`: End time in seconds (within the parent audio)
+- `segment_text`: Transcribed text for this segment (typically one sentence)
+- `segment_audio_file`: Path to individual segment audio file in S3
+- `sequence_number`: Order within the parent audio file
+
+**Relationship:** Since an `InterviewUtterance` (speaker turn) may contain multiple sentences, `InterviewSegment` objects break down the utterance's audio into sentence-level chunks. Multiple segments can belong to one `InterviewAudio` record.
 
 #### **Audio Summary Models**
 
@@ -230,7 +232,7 @@ GET  /api/editor/<rec_id>/participant/<username>/ # Participant profile modal
 
 ## Integrating New Data Sources
 
-This section explains how to add new participants, interview data, and policy recommendations to the Habermas Game.
+This section explains how to add new participants, interview data, and policy recommendations to Agora.
 
 ### Data Format Requirements
 
@@ -352,7 +354,7 @@ for prolific_id, participant_data in data.items():
 
 ### Step 3: Add Audio Files
 
-Audio files are essential for the Habermas Game to work. Here's how to upload and connect them:
+Audio files are essential for Agora to work. Here's how to upload and connect them:
 
 **Step 3.1: Upload Audio to S3**
 
@@ -400,19 +402,29 @@ InterviewUtterance.objects.create(
 )
 ```
 
-**Step 3.4: Process Sentence-Level Segments (Optional)**
+**Step 3.4: Process Sentence-Level Segments**
 
-If you want sentence-level audio segments for medleys, run:
+**Required for Agora to function properly.**
+
+Since each `InterviewUtterance` (speaker turn) may contain multiple sentences, you need to break down the audio into sentence-level `InterviewSegment` objects:
 
 ```bash
 cd generating_v2
 python 05_process_sentence_segments.py
 ```
 
-This creates `InterviewSegment` objects by:
-1. Transcribing audio using Google Cloud Speech API
-2. Splitting into sentence-level segments with timestamps
-3. Storing individual segment audio files
+This script:
+1. Loads each `InterviewAudio` record
+2. Uses Google Cloud Speech API to transcribe with word-level timestamps
+3. Detects sentence boundaries within the utterance
+4. Splits the audio file into individual sentence segments
+5. Creates `InterviewSegment` objects for each sentence with:
+   - `start_time` and `end_time` (within the parent audio)
+   - `segment_text` (one sentence from the utterance)
+   - `segment_audio_file` (individual WAV file)
+6. Stores segment files in S3 at: `InterviewAudios/interview{id}/module{id}/question{id}/user_{audio_id}/sentence_{seq}.wav`
+
+**Why this is required:** Agora uses these segments to create Medleys (60-second audio summaries). Medleys select specific sentences from across an utterance, which requires sentence-level segmentation.
 
 ### Step 4: Create Recommendations
 
@@ -561,13 +573,13 @@ agora/
 │   └── wsgi.py          # WSGI application
 ├── pages/               # Main Django app
 │   ├── models.py        # Database models
-│   ├── views.py         # View logic (Habermas Game in views.py:1060-3000)
+│   ├── views.py         # View logic (recommendation editor in views.py:2849-3100)
 │   ├── admin.py         # Django admin config
 │   └── management/      # Django management commands
 ├── templates/           # HTML templates
 │   └── pages/
 │       └── recommendations/
-│           ├── recommendation_editor.html  # Main Habermas Game UI
+│           ├── recommendation_editor.html  # Main Agora UI
 │           └── habermas_game.html         # Alternative interface
 ├── static_dirs/         # Static files (CSS, JS, images)
 ├── generating_v2/       # AI generation scripts
