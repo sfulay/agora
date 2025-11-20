@@ -173,12 +173,14 @@ Real-time predictions used in the recommendation editor interface.
 - `q_content`: The question text
 - `convo`: Full conversation transcript for this question
 
-**InterviewUtterance**: Individual sentences from interview transcripts
+**InterviewUtterance**: Individual speaker turns from interview transcripts
 - `question`: Link to InterviewQuestion
-- `utterance_text`: The actual sentence text
+- `utterance_text`: The text of this speaker turn
 - `audio_id`: **Required** - References the `id` of the corresponding `InterviewAudio` record
 - `is_interviewer`: True if interviewer spoke this, False if participant
 - `sequence_number`: Order within the question
+
+**Note:** Each utterance represents a complete speaker turn, not individual sentences. A turn may contain multiple sentences.
 
 **InterviewAudio**: Full audio files for questions
 - `question`: Link to InterviewQuestion
@@ -273,7 +275,7 @@ python manage.py createsuperuser
 
 ### Step 2: Add Interview Transcripts
 
-Interview data should be structured as `InterviewUtterance` objects. Each utterance represents one sentence spoken during the interview.
+Interview data should be structured as `InterviewUtterance` objects. Each utterance represents a complete speaker turn (which may contain multiple sentences).
 
 **Option A: Manual import via Python**
 
@@ -290,18 +292,20 @@ question = InterviewQuestion.objects.create(
     # ... other fields
 )
 
-# Add utterances from the interview
+# Add utterances (speaker turns) from the interview
+# Each utterance is a complete turn - may contain multiple sentences
 utterances = [
-    "I've worked in retail for 5 years.",
-    "The pay was always minimum wage.",
-    "It was hard to make ends meet.",
+    ("What kind of work have you done?", True),  # Interviewer turn
+    ("I've worked in retail for 5 years. The pay was always minimum wage.", False),  # Participant turn
+    ("How did that affect you?", True),  # Interviewer turn
+    ("It was really hard to make ends meet. I had to work two jobs.", False),  # Participant turn
 ]
 
-for i, text in enumerate(utterances):
+for i, (text, is_interviewer) in enumerate(utterances):
     InterviewUtterance.objects.create(
         question=question,
         utterance_text=text,
-        is_interviewer=False,  # False for participant, True for interviewer
+        is_interviewer=is_interviewer,
         sequence_number=i,
     )
 ```
@@ -318,14 +322,18 @@ Structure your data as:
         "question_id": 1,
         "content": "Tell me about your work experience",
         "utterances": [
-          {"text": "I've worked in retail for 5 years.", "is_interviewer": false},
-          {"text": "The pay was always minimum wage.", "is_interviewer": false}
+          {"text": "What kind of work have you done?", "is_interviewer": true},
+          {"text": "I've worked in retail for 5 years. The pay was always minimum wage.", "is_interviewer": false},
+          {"text": "How did that affect you?", "is_interviewer": true},
+          {"text": "It was really hard to make ends meet.", "is_interviewer": false}
         ]
       }
     ]
   }
 }
 ```
+
+Note: Each utterance represents one complete speaker turn.
 
 Then import:
 
@@ -382,9 +390,10 @@ When creating `InterviewUtterance` objects (from Step 2), set the `audio_id` to 
 from pages.models import InterviewUtterance
 
 # The audio_id must match an InterviewAudio.id
+# Remember: Each utterance is a complete speaker turn
 InterviewUtterance.objects.create(
     question=question,
-    utterance_text="I've worked in retail for 5 years.",
+    utterance_text="I've worked in retail for 5 years. The pay was always minimum wage.",
     audio_id=audio.id,  # <-- This is the InterviewAudio.id from Step 3.2
     is_interviewer=False,
     sequence_number=0,
