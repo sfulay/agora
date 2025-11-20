@@ -50,17 +50,40 @@ conda install -c conda-forge awscli
 ```
 
 ### 5. Connect to Production Database
-```bash
-# Set the Elastic Beanstalk environment
-eb use agora-prolific
 
-# SSH into the EC2 instance with port forwarding to access the RDS database
+First, set the Elastic Beanstalk environment:
+```bash
+eb use agora-prolific
+```
+
+**Get the current EC2 IP address** (changes when instance restarts):
+```bash
+eb ssh --dry-run
+```
+
+This will output something like:
+```
+INFO: Running ssh -i /Users/Suyash/.ssh/agora.pem -o IdentitiesOnly yes ec2-user@44.223.23.188
+```
+
+Copy the IP address from the output (e.g., `44.223.23.188`).
+
+**SSH with port forwarding:**
+```bash
+ssh -i ~/.ssh/agora.pem ec2-user@<EC2_IP_ADDRESS> -L 6543:***REMOVED***:5432
+```
+
+For example:
+```bash
 ssh -i ~/.ssh/agora.pem ec2-user@44.223.23.188 -L 6543:***REMOVED***:5432
 ```
 
-This command does two things:
-- Connects to the EC2 instance at `44.223.23.188`
+**What this does:**
+- Connects to the EC2 instance (IP changes when instance restarts)
 - Forwards local port `6543` to the RDS PostgreSQL database (port `5432`)
+- Allows your local Django app to connect to the production database
+
+**Note:** The EC2 IP address is **dynamic** and will change whenever the Elastic Beanstalk environment is restarted or redeployed. Always check with `eb ssh --dry-run` first.
 
 ### 6. Run Development Server
 In a new terminal (keep the SSH tunnel running):
