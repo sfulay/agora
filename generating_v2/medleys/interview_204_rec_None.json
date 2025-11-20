@@ -1,0 +1,85 @@
+{
+  "interview_id": 204,
+  "recommendation_id": null,
+  "participant": "666fb6f24d1c14f333eb4a0a",
+  "created_at": "2025-10-28T03:51:28.150876",
+  "total_duration": 47.47999954223633,
+  "gpt_estimated_duration": 55.96,
+  "segment_count": 5,
+  "segments": [
+    {
+      "segment_id": 1567,
+      "audio_id": 8087,
+      "text": "So, I grew up in Hawaii in a typical middle-class suburbs neighborhood, two working parents, went to a private school, just, I guess, just your typical American middle-class family growing up.",
+      "duration": 22.959999084472656,
+      "start_time": 0.0,
+      "end_time": 22.959999084472656,
+      "sequence_number": 1,
+      "question_id": 5073,
+      "global_question_id": 11,
+      "medley_order": 1,
+      "original_order": 1
+    },
+    {
+      "segment_id": 1586,
+      "audio_id": 8135,
+      "text": "So currently I'm the director of operations for the company I work for.",
+      "duration": 4.840000152587891,
+      "start_time": 0.0,
+      "end_time": 4.840000152587891,
+      "sequence_number": 1,
+      "question_id": 5095,
+      "global_question_id": 14,
+      "medley_order": 2,
+      "original_order": 20
+    },
+    {
+      "segment_id": 1603,
+      "audio_id": 8215,
+      "text": "So it wouldn't affect me directly, personally, or, you know, through acquaintances and whatnot, but how it would affect me indirectly is that, so first of all, I don't think that the federal minimum wage should be raised to $30. I think that's ridiculous.",
+      "duration": 7.920000076293945,
+      "start_time": 0.0,
+      "end_time": 7.920000076293945,
+      "sequence_number": 1,
+      "question_id": 5145,
+      "global_question_id": 17,
+      "medley_order": 3,
+      "original_order": 37
+    },
+    {
+      "segment_id": 1604,
+      "audio_id": 8215,
+      "text": "And the reason I think that is because by doing so, what you're going to do is that is going to affect things like pricing and inflation.",
+      "duration": 6.479999542236328,
+      "start_time": 7.920000076293945,
+      "end_time": 14.399999618530273,
+      "sequence_number": 2,
+      "question_id": 5145,
+      "global_question_id": 17,
+      "medley_order": 4,
+      "original_order": 38
+    },
+    {
+      "segment_id": 1605,
+      "audio_id": 8215,
+      "text": "And the residual consequences of that do affect myself and everyone in this country. So I don't believe that minimum wage should be raised to $30.",
+      "duration": 5.280000686645508,
+      "start_time": 14.399999618530273,
+      "end_time": 19.68000030517578,
+      "sequence_number": 3,
+      "question_id": 5145,
+      "global_question_id": 17,
+      "medley_order": 5,
+      "original_order": 39
+    }
+  ],
+  "gpt_reasoning": "The narrative begins with an introduction of the person's background (1567), providing context for their middle-class upbringing. The transition to their current role as Director of Operations (1586) establishes their expertise and experience. Their direct perspective on the federal minimum wage (1603, 1604, 1605) reveals a well-rounded understanding of economic consequences, offering a deep insight into wage impacts on businesses and the broader economy, making it relevant and compelling.",
+  "reordered": true,
+  "recommendation_text": "The federal minimum wage should be raised to $30 per hour.",
+  "quality_analysis": {
+    "opinion_vs_experiences": 80,
+    "relevance_score": 90,
+    "depth_score": 85,
+    "explanation": "The medley balances personal experiences (introduction and current role) with informed opinions on the topic, leading to a stronger narrative. Relevance is high due to direct discussion of minimum wage impacts. Depth is enhanced by explaining economic effects, though reliant significantly on opinion."
+  }
+}

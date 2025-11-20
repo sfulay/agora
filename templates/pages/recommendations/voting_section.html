@@ -1,0 +1,248 @@
+{% extends 'base_recs.html' %}
+
+{% block content %}
+<!-- ===================== VOTING SECTION ===================== -->
+<div class="container-xxl flex-grow-1 container-p-y" data-recommendation-id="{{ recommendation.id }}" data-mean-support="{{ mean_support|default:0 }}" data-condition="{{ condition }}">
+    {% csrf_token %}
+
+    <!-- ===================== RECOMMENDATION SECTION ===================== -->
+    <div class="scrollytelling-container">
+        <section class="scrollytelling-section" id="section-recommendation">
+            <div class="card">
+                <div class="card-body text-center">
+                    <div class="mb-4" style="max-width: 900px; margin: 0 auto;">
+                        <div style="color: #4f46e5; letter-spacing: 0.01em;">
+                            <br/>
+                            <br/>
+                            <span class="fw-bold" style="font-size: 1.15rem;">
+                                These proposals were generated with an artificial intelligence (AI) model based on interviews of participants in the study.
+                            </span>
+                        </div>
+                    </div>
+                    {% with rec_num=cur_index|add:"1" %}
+                    <h1 class="card-title mb-4" style="color: #4f46e5; font-weight: 800; font-size: 2.2rem; letter-spacing: -0.01em;">
+                        Proposal {{ rec_num }}/3
+                    </h1>
+                    <div class="recommendation-text p-4 bg-light rounded mx-auto shadow-sm mb-2" style="max-width: 900px; border-left: 6px solid #7c3aed; border-radius: 1.25rem; background: #f8faff;">
+                        <p class="card-text mb-0" style="font-size: 1.35rem; font-weight: 600; color: #2d2d2d; letter-spacing: 0.01em; line-height: 1.5;">
+                            {{ recommendation.rec_text }}
+                        </p>
+                    </div>
+                    {% endwith %}
+                    </div>
+                    <!-- Voting Form - integrated into the recommendation page -->
+                    <div class="mt-2" style="max-width: 900px; margin: 0 auto;">
+                        <form method="POST" action="{% url 'submit_recommendation_vote' recommendation.id %}" id="js-voting-form">
+                            {% csrf_token %}
+                            <div class="mb-4">
+                                <div class="radio-group-container">
+                                    <label class="radio-group-title" for="js-vote-agreement">
+                                        Please vote on whether you support implementing this proposal <span class="text-danger">*</span> <span class="text-danger" style="font-size: 0.8rem;">(Required)</span>
+                                    </label>
+                                    <div class="radio-options" id="js-vote-agreement">
+                                        <div class="radio-option"><input type="radio" id="agreement-1" name="agreement_level" value="1" required><label for="agreement-1">Strongly<br>Disagree</label></div>
+                                        <div class="radio-option"><input type="radio" id="agreement-2" name="agreement_level" value="2" required><label for="agreement-2">Disagree</label></div>
+                                        <div class="radio-option"><input type="radio" id="agreement-3" name="agreement_level" value="3" required><label for="agreement-3">Somewhat<br>Disagree</label></div>
+                                        <div class="radio-option"><input type="radio" id="agreement-4" name="agreement_level" value="4" required><label for="agreement-4">Somewhat<br>Agree</label></div>
+                                        <div class="radio-option"><input type="radio" id="agreement-5" name="agreement_level" value="5" required><label for="agreement-5">Agree</label></div>
+                                        <div class="radio-option"><input type="radio" id="agreement-6" name="agreement_level" value="6" required><label for="agreement-6">Strongly<br>Agree</label></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold" for="js-vote-explanation">
+                                    Provide an explanation for your vote. This will help you reflect on reasons for your stance. <span class="text-danger">*</span> <span class="text-danger" style="font-size: 0.8rem;">(Required)</span>
+                                </label>
+                                <textarea class="form-control" id="js-vote-explanation" name="explanation" rows="3" placeholder="Include evidence from your own experiences" required></textarea>
+                            </div>
+                            <div class="d-flex justify-content-end mt-4" style="min-height: 40px;">
+                                <!-- Submit Button -->
+                                <button type="submit" class="btn btn-primary btn-sm px-4" disabled id="js-submit-vote-btn" style="white-space: nowrap;">
+                                    Submit Vote <span class="ms-2">&rarr;</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}
+
+{% block custom_head_content %}
+<style>
+    .scrollytelling-container {
+        width: 100%;
+        max-width: none;
+        margin-right: 0;
+        padding-right: 0px;
+        overflow-x: hidden;
+        padding-top: 0px;
+        position: relative;
+    }
+    .scrollytelling-section {
+        min-height: calc(100vh - 80px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        position: relative;
+        transition: all 0.3s ease;
+        background-color: rgba(118, 75, 162, 0.05);
+    }
+    .scrollytelling-section .card {
+        width: 100%;
+        max-width: 1300px;
+        margin: 0 auto;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+        border: none;
+        border-radius: 1.5rem;
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+        background: rgba(255, 255, 255, 0.95);
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 2;
+        padding-bottom: 60px;
+    }
+    .scrollytelling-section .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+    }
+    .recommendation-text {
+        border-left: 4px solid var(--bs-primary);
+        background-color: rgba(var(--bs-primary-rgb), 0.05);
+    }
+
+    .radio-group-container {
+        margin: 2rem 0;
+    }
+    .radio-group-title {
+        font-weight: 600;
+        color: #212529;
+        margin-bottom: 1.5rem;
+        font-size: 1.1rem;
+    }
+    .radio-options {
+        display: flex;
+        justify-content: space-between;
+        align-items: stretch;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    .radio-option {
+        flex: 1;
+        position: relative;
+    }
+    .radio-option input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    .radio-option label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem 0.5rem;
+        background: #f8f9fa;
+        border: 2px solid #dee2e6;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: center;
+        min-height: 80px;
+        font-size: 0.85rem;
+        line-height: 1.3;
+        color: #495057;
+    }
+    .radio-option input[type="radio"]:checked + label {
+        background: #e3f2fd;
+        border-color: #2196f3;
+        color: #1976d2;
+        box-shadow: 0 2px 8px rgba(33, 150, 243, 0.2);
+    }
+    .radio-option label:hover {
+        background: #e9ecef;
+        border-color: #adb5bd;
+    }
+    .radio-option input[type="radio"]:focus + label {
+        box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.25);
+    }
+    .radio-option input[type="radio"]:disabled + label {
+        background: #f8f9fa;
+        border-color: #dee2e6;
+        color: #6c757d;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+    .radio-option input[type="radio"]:disabled:checked + label {
+        background: #e3f2fd;
+        border-color: #2196f3;
+        color: #1976d2;
+        opacity: 0.8;
+    }
+
+    @media (max-width: 768px) {
+      .scrollytelling-section {
+          min-height: auto;
+          padding: 0;
+      }
+      .radio-options {
+          flex-direction: column;
+          gap: 0.75rem;
+      }
+      .radio-option label {
+          min-height: 60px;
+          font-size: 0.8rem;
+          padding: 0.75rem 0.5rem;
+      }
+      .radio-group-title {
+          font-size: 1rem;
+      }
+    }
+</style>
+
+<script>
+// Voting form validation
+function checkVotingFormCompletion() {
+    const submitBtn = document.getElementById('js-submit-vote-btn');
+    const agreementSelected = document.querySelector('input[name="agreement_level"]:checked');
+    const explanationFilled = document.getElementById('js-vote-explanation').value.trim() !== '';
+    const allQuestionsAnswered = agreementSelected && explanationFilled;
+    if (submitBtn) {
+        submitBtn.disabled = !allQuestionsAnswered;
+        if (allQuestionsAnswered) {
+            submitBtn.classList.remove('btn-secondary');
+            submitBtn.classList.add('btn-primary');
+        } else {
+            submitBtn.classList.remove('btn-primary');
+            submitBtn.classList.add('btn-secondary');
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Voting form validation
+    const votingForm = document.getElementById('js-voting-form');
+    if (!votingForm) return;
+    
+    const radioButtons = votingForm.querySelectorAll('input[type="radio"]');
+    radioButtons.forEach(radio => {
+        radio.addEventListener('change', checkVotingFormCompletion);
+    });
+    
+    const explanationTextarea = document.getElementById('js-vote-explanation');
+    if (explanationTextarea) {
+        explanationTextarea.addEventListener('input', checkVotingFormCompletion);
+    }
+    
+    // Handle voting form submission - just let it submit normally
+    // The server will render the detail page directly after saving the vote
+    
+    checkVotingFormCompletion();
+});
+</script>
+{% endblock %} 

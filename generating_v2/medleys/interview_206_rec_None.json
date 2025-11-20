@@ -1,0 +1,85 @@
+{
+  "interview_id": 206,
+  "recommendation_id": null,
+  "participant": "6746c680672c3ab45f25efb7",
+  "created_at": "2025-10-28T03:55:02.278564",
+  "total_duration": 50.77999758720398,
+  "gpt_estimated_duration": 57.44,
+  "segment_count": 5,
+  "segments": [
+    {
+      "segment_id": 1794,
+      "audio_id": 8154,
+      "text": "I grew up in central New York.",
+      "duration": 3.8399999141693115,
+      "start_time": 0.0,
+      "end_time": 3.8399999141693115,
+      "sequence_number": 1,
+      "question_id": 5109,
+      "global_question_id": 11,
+      "medley_order": 1,
+      "original_order": 1
+    },
+    {
+      "segment_id": 1808,
+      "audio_id": 8206,
+      "text": "now I'm currently unemployed and seeking full-time employment, so in the meantime I do freelance work, I do online jobs and I have a lot of different like freelance gigs that I do to make money.",
+      "duration": 5.699999809265137,
+      "start_time": 0.0,
+      "end_time": 5.699999809265137,
+      "sequence_number": 1,
+      "question_id": 5143,
+      "global_question_id": 14,
+      "medley_order": 2,
+      "original_order": 15
+    },
+    {
+      "segment_id": 1813,
+      "audio_id": 8249,
+      "text": "I know in my last job that I managed a store, I could not ever get coverage when I was sick.",
+      "duration": 8.479999542236328,
+      "start_time": 35.720001220703125,
+      "end_time": 44.20000076293945,
+      "sequence_number": 3,
+      "question_id": 5161,
+      "global_question_id": 16,
+      "medley_order": 3,
+      "original_order": 20
+    },
+    {
+      "segment_id": 1825,
+      "audio_id": 8404,
+      "text": "I think a fair minimum wage in my area would be at least $25 an hour, and the reason why is I know people that are making $20 an hour, $21 an hour, and they're single and they can barely survive in terms of paying their rent, paying their insurance.",
+      "duration": 18.719999313354492,
+      "start_time": 0.0,
+      "end_time": 18.719999313354492,
+      "sequence_number": 1,
+      "question_id": 5240,
+      "global_question_id": 18,
+      "medley_order": 4,
+      "original_order": 32
+    },
+    {
+      "segment_id": 1826,
+      "audio_id": 8404,
+      "text": "Health insurance is a huge thing that costs people so much money, and at $21 an hour, if you are scraping by and barely making it, anything less than that isn't going to be sufficient.",
+      "duration": 14.039999008178711,
+      "start_time": 18.719999313354492,
+      "end_time": 32.7599983215332,
+      "sequence_number": 2,
+      "question_id": 5240,
+      "global_question_id": 18,
+      "medley_order": 5,
+      "original_order": 33
+    }
+  ],
+  "gpt_reasoning": "These segments provide a flow from the participant's background to their life experiences and perspectives related to the minimum wage debate. Starting with their background sets the stage, followed by their current employment struggles, which adds depth to their understanding of financial challenges. Their insight into the necessity of a higher minimum wage based on their observations leads to the conclusion.",
+  "reordered": true,
+  "recommendation_text": "The federal minimum wage should be raised to $30 per hour.",
+  "quality_analysis": {
+    "opinion_vs_experiences": 85,
+    "relevance_score": 95,
+    "depth_score": 90,
+    "explanation": "The segments chosen primarily reflect personal experiences, including financial struggles and employment. The relevance is high as all segments directly relate to discussions about wages and living conditions. The depth score is strong due to detailed accounts of experience and clear arguments about the need for a wage increase."
+  }
+}

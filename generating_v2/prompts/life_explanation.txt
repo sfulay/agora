@@ -1,0 +1,16 @@
+You should also return a short summary of this utterance, which should be 
+less than 40 words. The summary should be a sentence or two sentences that captures what the utterance is discussing.
+
+IMPORTANT: In the utterance sections, please highlight key phrases (not individual words) that directly corroborate the AI explanation by wrapping them in <b> tags. ONLY highlight SMALL, KEY parts of sentences NOT the whole utterance. The goal is to increase readibility. Every utterance should have at least one highlighted phrase.
+For example: "I grew up in <b>New York and my family was very supportive</b>." This will help readers quickly identify the most relevant parts of the transcript. It also provides evidence for the credibility of the AI explanation.
+
+Here is the utterance:
+{utterance}
+
+The participant's name is {display_name}.
+
+Below is an example of the JSON structure that you should return
+    {{   
+        "interviewee_utterance_bolded": "The utterance text for the first part with highlighted phrases",
+        "ai_explanation": "The summary of the utterance",
+    }} 

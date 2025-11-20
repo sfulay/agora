@@ -1,0 +1,79 @@
+{
+  "interview_id": 202,
+  "recommendation_id": null,
+  "participant": "656a1cf88a3cf09f538c6f25",
+  "created_at": "2025-10-24T17:45:58.771325",
+  "total_duration": 63.28000068664551,
+  "gpt_estimated_duration": 60.6,
+  "segment_count": 5,
+  "segments": [
+    {
+      "segment_id": 1403,
+      "audio_id": 8059,
+      "text": "Sure, I grew up in New York and it was very interesting.",
+      "duration": 5.0,
+      "start_time": 0.0,
+      "end_time": 5.0,
+      "sequence_number": 1,
+      "question_id": 5050,
+      "global_question_id": 11,
+      "medley_order": 1,
+      "original_order": 1
+    },
+    {
+      "segment_id": 1413,
+      "audio_id": 8090,
+      "text": "Well, the work I do now involves just looking after networks and doing maintenance and troubleshooting and responding to varying issues, you know, communicating with people, and with regards to setting up appointments to look after some of the issues that they're having, if any.",
+      "duration": 8.960000038146973,
+      "start_time": 9.199999809265137,
+      "end_time": 18.15999984741211,
+      "sequence_number": 2,
+      "question_id": 5080,
+      "global_question_id": 14,
+      "medley_order": 2,
+      "original_order": 11
+    },
+    {
+      "segment_id": 1424,
+      "audio_id": 8148,
+      "text": "However, people close to me who do work, you know, for the minimum wage, for example, my niece who is saving up for her education, et cetera, I would help her greatly so that she can meet her goals and achieve her, you know, her goals that, you know, getting a degree and a career, et cetera.",
+      "duration": 23.960000038146973,
+      "start_time": 15.880000114440918,
+      "end_time": 39.84000015258789,
+      "sequence_number": 4,
+      "question_id": 5096,
+      "global_question_id": 17,
+      "medley_order": 3,
+      "original_order": 22
+    },
+    {
+      "segment_id": 1425,
+      "audio_id": 8148,
+      "text": "And with a lot of people, you know, who are employed and struggling because the cost of living has really gone up, especially recently, so the minimum wage has to reflect that.",
+      "duration": 15.959999084472656,
+      "start_time": 39.84000015258789,
+      "end_time": 55.79999923706055,
+      "sequence_number": 5,
+      "question_id": 5096,
+      "global_question_id": 17,
+      "medley_order": 4,
+      "original_order": 23
+    },
+    {
+      "segment_id": 1428,
+      "audio_id": 8148,
+      "text": "That's why the minimum wage is so important, because people who are working need to be able to survive based on the wage they get.",
+      "duration": 9.400001525878906,
+      "start_time": 73.36000061035156,
+      "end_time": 82.76000213623047,
+      "sequence_number": 8,
+      "question_id": 5096,
+      "global_question_id": 17,
+      "medley_order": 5,
+      "original_order": 26
+    }
+  ],
+  "gpt_reasoning": "The medley begins with the person's introduction from segment 1403, establishing their background in New York. Segment 1413 introduces their current work, highlighting their practical insights into work challenges. Segment 1424 connects their personal narrative, showing empathy for those earning minimum wage, like their niece. Segment 1425 underscores the struggles of people with low wages amidst a rising cost of living. Finally, segment 1428 wraps up with a powerful rationale for why the minimum wage should ensure workers can survive, linking back to the topic of wages effectively. Together, these segments craft a coherent narrative that flows naturally from personal background to relevant socio-economic issues.",
+  "reordered": true,
+  "recommendation_text": "The federal minimum wage should be raised to $30 per hour."
+}

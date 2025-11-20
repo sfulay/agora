@@ -1,0 +1,175 @@
+<!-- ===================== PARTICIPANT MODALS ===================== -->
+{% for data in participants_data %}
+<div class="modal fade" id="participantModal-{{ data.participant.id }}" tabindex="-1" aria-labelledby="participantModalLabel-{{ data.participant.id }}" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header flex-column align-items-start position-relative pt-4" style="gap: 0.25rem;">
+        <!-- Close button in the absolute top right, inside the modal -->
+        <button type="button" class="btn-close position-absolute" style="top: 1.25rem; right: 1.5rem; z-index: 10;" data-bs-dismiss="modal" aria-label="Close"></button>
+        <!-- Policy at the top -->
+        <div class="w-100 mb-2">
+          <div class="alert alert-primary mb-0" style="font-size:1.05rem; font-weight:500; background:rgba(13,110,253,0.08); border-left:4px solid #0d6efd;">
+            <span class="text-primary">Recommendation:</span>
+            {{ recommendation.rec_text }}
+          </div>
+        </div>
+
+        <div class="d-flex w-100 justify-content-between align-items-center">
+          <div class="d-flex align-items-center">
+            <img src="{{ data.avatar_url }}" class="rounded-circle me-2" width="48" height="48" alt="Avatar">
+            <div>
+              <h5 class="modal-title mb-0" id="participantModalLabel-{{ data.participant.id }}">
+                {{ data.participant.get_full_name }}{% if data.age %}, Age {{ data.age }}{% endif %}
+              </h5>
+              {% if data.occupation %}
+                <div class="text-muted small">{{ data.occupation }}</div>
+              {% endif %}
+        </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-body">
+        <!-- Personal Experience Section -->
+        <div class="mb-4">
+          <h6 class="fw-bold">Learn more about {{ data.participant.get_full_name }}'s below. We encourage you to click play to hear them speak.</h6>
+          
+          {% if data.narrative_parts|length > 0 %}
+            {% with part=data.narrative_parts.0 %}
+              <div class="row">
+                <div class="col-md-8">
+                  <blockquote class="mb-2" style="font-style: italic; border-left: 4px solid #b3b3b3; padding-left: 1rem;">
+                    {% if part.utterance_text_with_bold %}
+                      <div class="karaoke-transcript-sent" data-audio-id="{{ part.utterance.audio_id }}"
+                      id="transcript-{{ part.utterance.audio_id }}">
+                        {{ part.utterance_text_with_bold|safe }}
+              </div>
+                    {% elif part.utterance %}
+                      <span class="karaoke-transcript-sent"
+                            data-audio-id="{{ part.utterance.audio_id }}"
+                            id="transcript-{{ part.utterance.audio_id }}">
+                        {{ part.utterance_text|safe }}
+                      </span>
+                    {% else %}
+                      &nbsp;
+                    {% endif %}
+              </blockquote>
+                  {% if part.utterance and part.utterance.audio_id %}
+                    <audio id="audio-{{ part.utterance.audio_id }}" class="w-100" controls>
+                      <source src="{{ MEDIA_URL }}InterviewAudios/interview{{ part.utterance.question.interview.id }}/module{{ part.utterance.question.module.id }}/question{{ part.utterance.question.id }}/user_{{ part.utterance.audio_id }}.wav" type="audio/wav">
+                    Your browser does not support the audio element.
+                  </audio>
+                  {% endif %}
+                </div>
+                <div class="col-md-4">
+                  <div class="sticky-note">
+                    {{ part.ai_explanation_text|default:"No annotation" }}
+                </div>
+                  <div class="text-muted small mt-1" style="font-size: 0.75rem;">
+                    <i class="bx bx-bot me-1"></i>AI-generated summary from {{ data.participant.get_full_name }}'s interview
+                  </div>
+                </div>
+              </div>
+            {% endwith %}
+          {% else %}
+            <div class="alert alert-info">No personal experience available.</div>
+                {% endif %}
+        </div>
+        <!-- Connection Slider -->
+        <div class="mb-4">
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <label for="connection-slider-{{ data.participant.id }}" class="form-label fw-bold mb-0">How connected do you feel to {{ data.participant.get_full_name }} after reading their personal experiences?</label>
+            <i class="bx bx-info-circle text-primary" 
+               data-bs-toggle="tooltip" 
+               data-bs-placement="top" 
+               title="This scaffold helps you reflect on and empathize with {{ data.participant.get_full_name }}'s personal background. This can help with building understanding across different viewpoints."></i>
+          </div>
+          <input type="range" class="form-range" min="1" max="7" id="connection-slider-{{ data.participant.id }}" name="connection_score" value="{{ data.reflection.connection_score|default:1 }}">
+          <div class="d-flex justify-content-between small text-muted">
+            <span>No connection at all</span>
+            <span>Extremely connected</span>
+          </div>
+          <textarea class="form-control mt-2" name="connection_text" rows="3" placeholder="Elaborate on your perceived connection to {{ data.participant.get_full_name }} here." style="font-size: 0.8rem;">{{ data.reflection.connection_text|default:"" }}</textarea>
+        </div>
+        <br/>
+        <!-- Policy-Relevant Experience Section -->
+        <div class="mb-4">
+          <h6 class="fw-bold">{{ data.participant.get_full_name }} has also shared experiences and thoughts related to the recommendation.</h6>
+          {% if data.narrative_parts|length > 1 %}
+            {% with part=data.narrative_parts.1 %}
+              <div class="row">
+                <div class="col-md-8">
+                  <blockquote class="mb-2" style="font-style: italic; border-left: 4px solid #b3b3b3; padding-left: 1rem;">
+                    {% if part.utterance_text_with_bold %}
+                      <div class="karaoke-transcript-sent"
+                            data-audio-id="{{ part.utterance.audio_id }}"
+                            id="transcript-{{ part.utterance.audio_id }}">
+                            {{ part.utterance_text_with_bold|safe }}
+
+                  </div>
+                    {% elif part.utterance %}
+                      <span class="karaoke-transcript-sent"
+                            data-audio-id="{{ part.utterance.audio_id }}"
+                            id="transcript-{{ part.utterance.audio_id }}">
+                        {{ part.utterance.utterance_text|safe }}
+                      </span>
+              {% else %}
+                      &nbsp;
+                    {% endif %}
+                  </blockquote>
+                  {% if part.utterance and part.utterance.audio_id %}
+                    <audio id="audio-{{ part.utterance.audio_id }}" class="w-100" controls>
+                      <source src="{{ MEDIA_URL }}InterviewAudios/interview{{ part.utterance.question.interview.id }}/module{{ part.utterance.question.module.id }}/question{{ part.utterance.question.id }}/user_{{ part.utterance.audio_id }}.wav" type="audio/wav">
+                      Your browser does not support the audio element.
+                    </audio>
+              {% endif %}
+            </div>
+                <div class="col-md-4">
+                  <div class="sticky-note">
+                    {{ part.ai_explanation_text|default:"No annotation" }}
+          </div>
+                  <div class="text-muted small mt-1" style="font-size: 0.75rem;">
+                    <i class="bx bx-bot me-1"></i>AI-generated summary from {{ data.participant.get_full_name }}'s interview
+                  </div>
+                </div>
+              </div>
+            {% endwith %}
+        {% else %}
+            <div class="alert alert-info">No policy-relevant experience available.</div>
+        {% endif %}
+      </div>
+        <!-- Vote Prediction Slider -->
+        <div class="mb-4">
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <label for="vote-prediction-slider-{{ data.participant.id }}" class="form-label fw-bold mb-0">How do you think {{ data.participant.get_full_name }} would vote on the above recommendation?</label>
+            <i class="bx bx-info-circle text-primary" 
+               data-bs-toggle="tooltip" 
+               data-bs-placement="top" 
+               title="This scaffold helps you understand {{ data.participant.get_full_name }}'s stance on the recommendation based on the experiences they have shared. Discussing different viewpoints is crucial for effective deliberation."></i>
+    </div>
+          <input type="range" class="form-range" min="1" max="7" id="vote-prediction-slider-{{ data.participant.id }}" name="vote_prediction" value="{{ data.reflection.vote_prediction|default:1 }}">
+          <div class="d-flex justify-content-between small text-muted">
+            <span>{{ data.participant.get_full_name }} would strongly disagree</span>
+            <span>{{ data.participant.get_full_name }} would strongly agree</span>
+          </div>
+          <textarea class="form-control mt-2" name="vote_explanation" rows="3" placeholder="Elaborate further on why you think {{ data.participant.get_full_name }} would vote like this on the policy." style="font-size: 0.8rem;">{{ data.reflection.vote_explanation|default:"" }}</textarea>
+        </div>
+        <!-- Connection Request Button -->
+        <div class="d-flex flex-column align-items-center my-2" style="gap: 0.5rem;">
+          <span class="form-label fw-bold" style="font-size: 0.8rem; text-align: center;">
+            You can optionally connect with {{ data.participant.get_full_name }} to discuss these experiences further. If you are interested, send {{ data.participant.get_full_name|default:'them'|cut:' ' }} a connection request.
+          </span>
+          {% if data.connection_request %}
+            <button class="btn btn-secondary btn-sm w-100" disabled style="font-size: 0.98rem; min-width: 260px; max-width: 260px; padding: 0.45rem 0; font-weight: 500; white-space: nowrap;">
+              <span style="font-size: 1.1rem; vertical-align: middle;">&#10148;</span> Connection Request Sent
+            </button>
+          {% else %}
+            <button type="button" class="btn btn-primary btn-sm w-100" disabled style="background: #a3a0f7; color: #fff; font-size: 0.98rem; min-width: 260px; max-width: 260px; padding: 0.45rem 0; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 0.5rem; border: none; box-shadow: none; white-space: nowrap;">
+              <span style="font-size: 1.1rem; vertical-align: middle;">&#10148;</span> Send connection request
+            </button>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}

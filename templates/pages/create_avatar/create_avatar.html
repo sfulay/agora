@@ -1,0 +1,1013 @@
+{% extends "base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block custom_head_content %}
+  <link rel="stylesheet" href="{% static 'gabm/sneat/assets/vendor/libs/select2/select2.css' %}" />
+  <link rel="stylesheet" href="{% static 'gabm/sneat/assets/vendor/libs/@form-validation/umd/styles/index.min.css' %}" />
+  <link rel="stylesheet" href="{% static 'gabm/sneat/assets/vendor/libs/bs-stepper/bs-stepper.css' %}" />
+
+
+
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: 'Arial', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      margin: 10% auto;
+    }
+
+    canvas {
+      background-color: #fff;
+      width: 128px;
+      height: 128px;
+      border: 20px solid #fff;
+      border-radius: 10px;
+      margin: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .canvas-container {
+      /*display: flex;
+      flex-direction: column;*/
+    }
+
+    .controls {
+      width: 450px;
+      background-color: #fff;
+      border-radius: 10px;
+      margin: 20px;
+      padding: 10px;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      z-index: 2;
+    }
+
+    .controls button.bx {
+      width: 30px;
+      height: 30px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+      background-color: #6d6dfc;
+      border: 1px solid #6d6dfc;
+      border-radius: 50%;
+      padding: 5px 10px;
+      margin: 10px;
+      cursor: pointer;
+      z-index: 2;
+      position: relative;
+    }
+
+    .option {
+      image-rendering: pixelated;
+      width: 40px;
+      display: inline-block;
+      margin: 5px;
+      cursor: pointer;
+      border: 4px solid transparent;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .option.active {
+      border-color: #6d6dfc;
+    }
+
+    #colorPicker {
+      width: 30px;
+      height: 30px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      border-width: 0px;
+      cursor: pointer;
+      align-self: flex-end;
+      background-size: auto, 1000px 1000px !important;
+    }
+
+    .button-wrapper {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 2px auto;
+    }
+
+    .button-text {
+      position: absolute;
+      color: #000;
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    #options-container {
+      max-width: 450px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
+
+    #tab-container {
+      display: flex;
+      margin-bottom: -34px;
+    }
+
+    .tab-button {
+      width: 80px;
+      height: 30px;
+      background-color: #fff;
+      border-bottom: none;
+      border: 0px;
+      border-radius: 10px;
+      cursor: pointer;
+      margin: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .tab-button.active {
+      background-color: #bcbcfb;
+    }
+
+    .controls-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    #saveButton {
+      width: 100px;
+      height: 30px;
+      align-self: flex-end;
+      margin-right: 20px;
+    }
+
+    #saveGifButton {
+      width: 100px;
+      height: 30px;
+      align-self: flex-end;
+      margin: 20px;
+    }
+
+    .animation-button {
+      color: #fff;
+      background-color: #6d6dfc;
+      border: 1px solid #6d6dfc;
+      border-radius: 20px;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      width: 30px;
+      height: 30px;
+      align-self: flex-end;
+      margin-top: -35px;
+/*      margin-right: 15px;*/
+/*      display: flex;*/
+      justify-content: center;
+      align-items: center;
+    }
+
+    .animation-button i {
+      font-size: 10px;
+    }
+
+
+
+    #loadingGif {
+        display: none;
+        width: 20px; /* Adjust as needed */
+        height: 20px; /* Adjust as needed */
+    }
+
+
+  </style>
+
+{% endblock custom_head_content %}
+
+{% block content %}
+
+
+<div class="content-wrapper">
+
+    <div class="container-xxl flex-grow-1 container-p-y">
+      <h4 class="py-3 mb-4" style="text-align: left"><a href="{% url 'home' %}">Home</a> / <strong>Create Your Avatar</strong></h4>
+
+      <div class="card g-3 mt-5" style="margin-top:0em !important">
+        <div class="card-body row g-3">
+          
+          <div class="col-lg-12">
+
+            <div class="card-body" >
+              <div class="added-cards">
+
+                <div class="cardMaster border p-3 rounded mb-3" style="border:none !important; " >
+                  <div class="d-flex justify-content-between flex-sm-row flex-column" style="">
+                    <div class="card-information" style="margin:0 auto; ">
+
+                      <div class="row" style='margin-bottom:3em'>
+                        <p class="col-md-8 col-10" style="text-align: left;">
+                          <strong>Instruction:</strong> Please take a minute to create an avatar that best represents you (it's okay to be a little fun, too)! The avatar you create here will be used to visually represent you in this study.
+                        </p>
+                      </div>
+                     
+                      <div class='row' id="editor_container" style="visibility: hidden; ">
+
+                        <div class="canvas-container col-md-3 col-sm-4 col-12" style="  ">
+                          <canvas id="canvas" width="500" height="500" style=""></canvas>
+                          <canvas id="animation-canvas" width="500" height="500" style=""></canvas>
+                          <div>
+                            <button id="animationDirection" class="animation-button"><i class="fas fa-undo"></i></button>
+                          </div>
+                        </div>
+
+
+                        <!-- pill table -->
+                        <div class="col-md-9 col-sm-8 col-12" style='margin-top:; '>
+                          <div class="card text-center" style="box-shadow: none; ">
+                            <div class="card-header py-3 controls-container" style="">
+                              <ul class="nav nav-pills" role="tablist" style="">
+                                <li class="nav-item">
+                                  <button id="base"
+                                    type="button"
+                                    class="nav-link active"
+                                    role="tab"
+                                    data-bs-toggle="tab"
+                                    data-bs-target="#navs-pills-eyes"
+                                    aria-controls="navs-pills-eyes"
+                                    aria-selected="false"
+                                    onclick="changeTab('base')">
+                                    Base
+                                  </button>
+                                </li>
+                                <li class="nav-item">
+                                  <button id="hair"
+                                    type="button"
+                                    class="nav-link"
+                                    role="tab"
+                                    data-bs-toggle="tab"
+                                    data-bs-target="#navs-pills-eyes"
+                                    aria-controls="navs-pills-eyes"
+                                    aria-selected="false"
+                                    onclick="changeTab('hair')">
+                                    Hair
+                                  </button>
+                                </li>
+                                <li class="nav-item">
+                                  <button id="eyes"
+                                    type="button"
+                                    class="nav-link"
+                                    role="tab"
+                                    data-bs-toggle="tab"
+                                    data-bs-target="#navs-pills-eyes"
+                                    aria-controls="navs-pills-eyes"
+                                    aria-selected="false"
+                                    onclick="changeTab('eyes')">
+                                    Eyes
+                                  </button>
+                                </li>
+                                <li class="nav-item">
+                                  <button id="clothes"
+                                    type="button"
+                                    class="nav-link"
+                                    role="tab"
+                                    data-bs-toggle="tab"
+                                    data-bs-target="#navs-pills-clothes"
+                                    aria-controls="navs-pills-clothes"
+                                    aria-selected="false"
+                                    onclick="changeTab('clothes')">
+                                    Clothes
+                                  </button>
+                                </li>
+                                <li class="nav-item">
+                                  <button id="head"
+                                    type="button"
+                                    class="nav-link"
+                                    role="tab"
+                                    data-bs-toggle="tab"
+                                    data-bs-target="#navs-pills-head"
+                                    aria-controls="navs-pills-head"
+                                    aria-selected="false"
+                                    onclick="changeTab('head')">
+                                    Head
+                                  </button>
+                                </li>
+                              </ul>
+                            </div>
+                            <div class="tab-content pt-0" style="box-shadow: none; margin:0 auto; margin-top:-0.5em; padding:0">
+
+                              <div class="controls"  style="box-shadow: none; border:solid; border-radius: 20px; border-color: #D9DEE2; border-width:1px; padding:3em">
+                                <div id="options-container" style=""></div>
+
+                                <div style="text-align: left; margin-top:4em; ">
+                                  <button id="colorPicker" class="colorPicker" style="border-radius:100%; margin-top: -2.5em"></button>&nbsp; &nbsp;  
+                                  <span class="button-text">Adjust Color</span>
+                                </div>
+
+
+                                <form id="spriteSheetForm" method="post" action="{% url 'handler_upload_spritesheet' %}" enctype="multipart/form-data" style='text-align: left; margin-top: 2em'>
+                                  {% csrf_token %}
+                                  <!-- Add hidden inputs for each file -->
+                                  <input type="file" name="front" hidden />
+                                  <input type="file" name="spritesheet" hidden />
+                                  <input type="file" name="right_gif" hidden />
+                                  <input type="file" name="back_gif" hidden />
+                                  <input type="file" name="left_gif" hidden />
+                                  <input type="file" name="front_gif" hidden />
+                                  <button id="saveButton" class="btn btn-primary"  type="submit" style="width:100px">
+                                    <span id="saveButtonLoading" class="spinner-border" role="status" aria-hidden="true" style="display:none"></span> <span id="saveButtonProgress" style="display:none">&nbsp; <span id="saveButtonProgressInner">0</span>%</span>
+                                    <span id="saveButtonOriginal">Submit</span>
+                                  </button>
+                                </form>
+
+
+                              </div>
+
+                            </div>
+                          </div>
+                        </div>
+                        <!--/ pill table -->
+                      </div>
+
+                      <div class="row" id="loading_div">
+                        <div class="col-md-12" style="text-align:center; margin-top:-10em; font-size:1.1em">
+                          <span id="LoadingSign" class="spinner-border" role="status" aria-hidden="true"></span>  <br><br><br>
+                          Loading -- this may take a few seconds... 
+                        </div>
+                      </div>
+
+
+
+
+
+
+
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+{% endblock content %}
+
+{% block modal_block %}
+{% endblock modal_block %}
+
+
+{% block js_content %}
+  <!-- Page JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jscolor/2.5.2/jscolor.js"></script>
+  <!-- <script src="% static 'gabm/sneat/assets/js/app-picrew.js' %"></script> -->
+  <script src="{% static 'gabm/sneat/assets/vendor/js/helpers.js' %}"></script>
+  <script src="{% static 'gabm/js/gif.js' %}"></script>
+
+
+  <script>
+    'use strict';
+
+    (async function () {
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
+      const animationCanvas = document.getElementById('animation-canvas');
+      const animationCtx = animationCanvas.getContext('2d');
+      const imageElements = {};
+      const optionElements = {};
+      const userIcon = new Image();
+
+      let colorPicker;
+      let iconWidth, iconHeight;
+      
+      window.onload = async function() {
+        colorPicker = new jscolor(document.getElementById('colorPicker'), {
+          borderRadius: 10,
+          alpha: 0.5,
+          forceStyle: false,
+          mode: 'HSV',
+          onInput: 'updateColorFromPicker(this)'
+        });
+        await Promise.all([preloadOptionImages(), preloadCanvasImages(dirFrames)]);
+
+        const editor_container = document.getElementById('editor_container');
+        editor_container.style.visibility = 'visible'
+        const loading_div = document.getElementById('loading_div');
+        loading_div.style.display = 'none'
+
+        updateIcon();
+        const frames = applyAnimationFrames();
+        startAnimationLoop(frames);
+      }
+
+
+      const p = "{% static 'gabm/img/pipoya-sprites/5/' %}";
+      userIcon.crossOrigin = "anonymous";
+      userIcon.src = "{{ empty_path|safe }}";
+
+      let currentPart = 0;
+      const partNames = ['base', 'clothes', 'eyes', 'hair', 'hat', 'glasses', 'beard'];
+
+      const parts = {{ image_paths|safe }};
+      const all_parts = {{ image_paths_all|safe }};
+
+      // const parts = {
+      //   base: Array.from({ length: 4 }, (_, i) => `${p}00Skin/${i + 1}.png`),
+      //   clothes: Array.from({ length: 46 }, (_, i) => `${p}01Costume/${i + 1}.png`),
+      //   eyes: Array.from({ length: 23 }, (_, i) => `${p}02Eye/${i + 1}.png`),
+      //   hair: Array.from({ length: 34 }, (_, i) => `${p}03Hair/${i + 1}.png`),
+      //   hat: Array.from({ length: 15 }, (_, i) => `${p}05Hat/${i + 1}.png`),
+      //   glasses: Array.from({ length: 11 }, (_, i) => `${p}06Glasses/${i + 1}.png`),
+      //   beard: Array.from({ length: 5 }, (_, i) => `${p}09Beard/${i + 1}.png`),
+      // };
+
+
+      const partColorSettings = {
+        base: { red: 128, green: 128, blue: 128, alpha: 0},
+        clothes: { red: 255, green: 255, blue: 255, alpha: 0},
+        eyes: { red: 255, green: 255, blue: 255, alpha: 0},
+        hair: { red: 255, green: 255, blue: 255, alpha: 0 },
+        hat: { red: 255, green: 255, blue: 255, alpha: 0 },
+        glasses: { red: 255, green: 255, blue: 255, alpha: 0 },
+        beard: { red: 255, green: 255, blue: 255, alpha: 0 },
+      };
+
+
+      const selectedOptions = {
+        base: parts['base'][Math.floor(Math.random() * parts['base'].length)],
+        clothes: parts['clothes'][Math.floor(Math.random() * parts['clothes'].length)],
+        eyes: parts['eyes'][Math.floor(Math.random() * parts['eyes'].length)],
+        hair: parts['hair'][Math.floor(Math.random() * parts['hair'].length)],
+        hat: parts['hat'][14],
+        glasses: parts['glasses'][10],
+        beard: parts['beard'][3],
+      };
+
+
+      function preloadOptionImages() {
+        const promises = [];
+        Object.keys(parts).forEach(part => {
+          optionElements[part] = parts[part].map(path => {
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+
+
+            const promise = new Promise((resolve, reject) => {
+              img.onload = resolve;
+              img.onerror = reject;
+            });
+            promises.push(promise);
+            img.className = 'option';
+            img.onclick = () => selectOption(part, path);
+            img.src = path;
+            return img;
+          });
+        });
+
+        return Promise.all(promises);
+      }
+
+
+      function preloadCanvasImages(dirFrames) {
+        const promises = [];
+
+        Object.keys(parts).forEach(part => {
+          imageElements[part] = {};
+          parts[part].forEach(path => {
+            // frame 5 static view
+            if (!imageElements[part][path]) {
+              promises.push(preloadImage(path, part));
+            }
+
+            dirFrames.forEach(frame => {
+              // const animationPath = path.replace('/5/', `/${frame}/`);
+              // const animationPath = all_parts[part][frame][1];
+              const animationPath = all_parts[path][frame];
+
+
+              // const animationPath = all_parts[path][frame];
+              // console.log(frame + "   " + path); 
+              // console.log(animationPath);
+              if (!imageElements[part][animationPath]) {
+                promises.push(preloadImage(animationPath, part));
+              }
+            });
+          });
+        });
+
+        return Promise.all(promises);
+      }
+
+
+      function preloadImage(path, part) {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+
+
+        const promise = new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = reject;
+        });
+        img.src = path;
+        imageElements[part][path] = img;
+        return promise;
+      }
+
+
+      function loadPartOptions() {
+        const optionsContainer = document.getElementById('options-container');
+        optionsContainer.innerHTML = '';
+        optionElements[partNames[currentPart]].forEach(imgElement => {
+          imgElement.draggable = false;
+          optionsContainer.appendChild(imgElement);
+          });
+          updateSelectedOption();
+      }
+
+
+      function selectOption(part, path) {
+        selectedOptions[part] = path;
+        if (['hat', 'glasses', 'beard'].includes(part)) {
+          updateHeadSelection(part);
+        } else {
+          updateSelectedOption();
+        }
+        preloadSelectedParts().then(() => {
+          updateIcon();
+        });
+      }
+
+
+      function updateSelectedOption() {
+        const imgs = document.querySelectorAll('#options-container .option');
+        imgs.forEach((img, index) => {
+          img.classList.remove('active');
+          const partOption = parts[partNames[currentPart]][index];
+          const selectedOption = selectedOptions[partNames[currentPart]];
+          if (partOption === selectedOption) {
+            img.classList.add('active');
+          }
+        });
+      }
+
+
+      function updateHeadSelection(headPart) {
+          const imgs = document.querySelectorAll(`#options-container .${headPart}`);
+          imgs.forEach((img, index) => {
+              img.classList.remove('active');
+              const partOption = parts[headPart][index];
+              const selectedOption = selectedOptions[headPart];
+              if (partOption === selectedOption) {
+                  img.classList.add('active');
+              }
+          });
+      }
+
+
+      window.changeTab = function (tabId) {
+        const tab = document.getElementById(tabId);
+        if (!tab) {
+          console.error('Invalid tab element');
+          return;
+        }
+        const tabs = document.querySelectorAll('.tab-button');
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+
+        if (tabId === 'head') {
+          currentPart = partNames.indexOf('beard');
+          const currentColor = partColorSettings[partNames[currentPart]];
+                                               // colorPicker.fromRGBA(currentColor.red, currentColor.green, currentColor.blue);
+          loadHeadOptions();
+        } else {
+          currentPart = partNames.indexOf(tabId);
+          const currentColor = partColorSettings[partNames[currentPart]];
+                                               // colorPicker.fromRGBA(currentColor.red, currentColor.green, currentColor.blue);
+          loadPartOptions();
+        }
+      };
+
+
+      function loadHeadOptions() {
+        const optionsContainer = document.getElementById('options-container');
+        optionsContainer.innerHTML = '';
+
+        ['hat', 'glasses', 'beard'].forEach(part => {
+          const partContainer = document.createElement('div');
+          partContainer.className = 'part-container';
+
+          const partLabel = document.createElement('div');
+          partLabel.textContent = part.charAt(0).toUpperCase() + part.slice(1);
+          partContainer.appendChild(partLabel);
+
+          optionElements[part].forEach(imgElement => {
+            imgElement.draggable = false;
+            imgElement.classList.add(part);
+            partContainer.appendChild(imgElement);
+          });
+
+          optionsContainer.appendChild(partContainer);
+        });
+
+        ['hat', 'glasses', 'beard'].forEach(headPart => {
+          updateHeadSelection(headPart);
+        });
+
+      }
+
+
+      window.updateColorFromPicker = function(picker) {
+          const rgbaString = picker.toRGBAString();
+          const colorValues = rgbaString.split('(')[1].slice(0, -1);
+          const alpha = rgbaString.split(',')[3].slice(0, -1);
+          const [red, green, blue] = colorValues.split(',').map(Number);
+
+          if (['hat', 'glasses', 'beard'].includes(partNames[currentPart])) {
+              ['hat', 'glasses', 'beard'].forEach(headPart => {
+                  partColorSettings[headPart] = { red, green, blue, alpha };
+              });
+          } else {
+              partColorSettings[partNames[currentPart]] = { red, green, blue, alpha };
+          }
+
+          updateIcon();
+      };
+
+        
+      function applyColorFilterToImage(image, color, part) {
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = canvas.width;
+        tempCanvas.height = canvas.height;
+        const tempCtx = tempCanvas.getContext('2d');
+
+        tempCtx.imageSmoothingEnabled = false;
+
+        tempCtx.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+        // color blend
+        tempCtx.globalCompositeOperation = 'source-atop';
+        let opacity = 0;
+
+        if (part === 'base') {
+          opacity = 0.1;
+        } else if(part === 'clothes') {
+          opacity = 0.4;
+        } else if(part === 'eyes') {
+          opacity = 0.2;
+        } else if(part === 'hair') {
+          opacity = 0.7;
+        } else if(part === 'hat') {
+          opacity = 0.3;
+        } else if (part === 'glasses') {
+          opacity = 0.5;
+        } else if (part === 'beard') {
+          opacity = 0.7;
+        }
+        
+
+        opacity = color.alpha * opacity;
+
+        tempCtx.fillStyle = `rgba(${color.red}, ${color.green}, ${color.blue}, ${opacity})`; // opacity
+        // TODO per-part opacity
+        tempCtx.fillRect(0, 0, canvas.width, canvas.height);
+        tempCtx.globalCompositeOperation = 'source-over';
+
+        return tempCanvas;
+    }
+
+      function updateIcon() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        partNames.forEach(part => {
+            const path = selectedOptions[part];
+            if (path && imageElements[part][path]) {
+                const colorSettings = partColorSettings[part];
+                const adjustedImageCanvas = applyColorFilterToImage(imageElements[part][path], colorSettings, part);
+                ctx.drawImage(adjustedImageCanvas, 0, 0, canvas.width, canvas.height);
+            }
+        });
+        
+        ctx.drawImage(userIcon, 0, 0, canvas.width, canvas.height);
+        const frames = applyAnimationFrames();
+        startAnimationLoop(frames);
+      }
+
+      let dirFrames = ['3', '7', '11', '7'];
+      
+      const dirFrameSets = [
+        ['3', '7', '11', '7'], // Right
+        ['4', '8', '12', '8'], // Back
+        ['2', '6', '10', '6'], // Left
+        ['1', '5', '9', '5'],  // Front
+      ];
+
+      let animDir = 0;
+
+      function updateDirection() {
+        animDir = (animDir + 1) % dirFrameSets.length;
+        dirFrames = dirFrameSets[animDir];
+
+        preloadSelectedParts().then(() => {
+          updateAnimation();
+        });
+      }
+
+
+      document.getElementById('animationDirection').addEventListener('click', updateDirection);
+
+
+      function applyAnimationFrames() {
+        const frameCanvases = [];
+
+        dirFrames.forEach(frame => {
+          const frameCanvas = document.createElement('canvas');
+          frameCanvas.width = canvas.width;
+          frameCanvas.height = canvas.height;
+          const frameCtx = frameCanvas.getContext('2d');
+          frameCtx.imageSmoothingEnabled = false;
+
+          partNames.forEach(part => {
+            const path = selectedOptions[part];
+            if (path && imageElements[part][path]) {
+              const colorSettings = partColorSettings[part];
+              // const animationPath = path.replace('/5/', `/${frame}/`);
+              const animationPath = all_parts[path][frame];
+
+              if (imageElements[part][animationPath]) {
+                const adjustedImageCanvas = applyColorFilterToImage(imageElements[part][animationPath], colorSettings, part);
+                frameCtx.drawImage(adjustedImageCanvas, 0, 0, canvas.width, canvas.height);
+              }
+            }
+          });
+
+          frameCanvases.push(frameCanvas);
+        });
+
+        return frameCanvases;
+      }
+
+      let currentAnimationFrame = 0;
+      let frameDelayCounter = 0;
+      const frameDelay = 30;
+      let animationFrameId = null;
+
+      function startAnimationLoop(frames) {
+        if (animationFrameId !== null) {
+          cancelAnimationFrame(animationFrameId);
+        }
+
+        function animate() {
+          if (frameDelayCounter % frameDelay === 0) {
+            animationCtx.clearRect(0, 0, animationCanvas.width, animationCanvas.height);
+            animationCtx.drawImage(frames[currentAnimationFrame], 0, 0);
+            currentAnimationFrame = (currentAnimationFrame + 1) % frames.length;
+            frameDelayCounter = 0;
+          }
+
+          frameDelayCounter++;
+          animationFrameId = requestAnimationFrame(animate);
+        }
+
+        animate();
+      }
+
+      function updateAnimation() {
+        const frames = applyAnimationFrames();
+        startAnimationLoop(frames);
+      }
+
+
+
+      window.updateColor = function(picker) {
+          const rgbColor = picker.rgb;
+          partColorSettings[partNames[currentPart]].red = rgbColor[0];
+          partColorSettings[partNames[currentPart]].green = rgbColor[1];
+          partColorSettings[partNames[currentPart]].blue = rgbColor[2];
+          updateIcon();
+      };
+
+        userIcon.onload = () => {
+          ctx.imageSmoothingEnabled = false;
+          preloadOptionImages();
+          preloadCanvasImages(['5']);
+          preloadSelectedParts();
+          loadPartOptions();
+          updateIcon();
+        };
+      
+      function preloadSelectedParts() {
+        const promises = [];
+        const framesToPreload = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
+
+        Object.keys(selectedOptions).forEach(part => {
+          const selectedPath = selectedOptions[part];
+          framesToPreload.forEach(frame => {
+            // const framePath = selectedPath.replace('/5/', `/${frame}/`);
+            const framePath = all_parts[selectedPath][frame];
+            if (!imageElements[part][framePath]) {
+              promises.push(preloadImage(framePath, part));
+            }
+          });
+        });
+
+        return Promise.all(promises);
+      }
+
+      
+      function renderFrame(frameNumber) {
+        const frameCanvas = document.createElement('canvas');
+        frameCanvas.width = canvas.width;
+        frameCanvas.height = canvas.height;
+        const frameCtx = frameCanvas.getContext('2d');
+
+        partNames.forEach(part => {
+          const path = selectedOptions[part];
+          if (path && imageElements[part][path]) {
+            const colorSettings = partColorSettings[part];
+            // const framePath = path.replace('/5/', `/${frameNumber}/`);
+            const framePath = all_parts[path][frameNumber];
+
+            const adjustedImageCanvas = applyColorFilterToImage(imageElements[part][framePath], colorSettings, part);
+            frameCtx.drawImage(adjustedImageCanvas, 0, 0, canvas.width, canvas.height);
+          }
+        });
+
+        frameCtx.drawImage(userIcon, 0, 0, canvas.width, canvas.height);
+
+        return frameCanvas;
+      }
+
+      
+      async function drawSpritesheet() {
+        const frameWidth = canvas.width;
+        const frameHeight = canvas.height;
+        const spritesheetCanvas = document.createElement('canvas');
+        const spritesheetCtx = spritesheetCanvas.getContext('2d');
+
+        const columns = 3;
+        const rows = 4;
+        spritesheetCanvas.width = frameWidth * columns;
+        spritesheetCanvas.height = frameHeight * rows;
+
+        let x = 0, y = 0;
+
+        for (let i = 1; i <= 12; i++) {
+          const frameCanvas = await renderFrame(i.toString());
+
+          spritesheetCtx.drawImage(frameCanvas, x, y, frameWidth, frameHeight);
+
+          y += frameHeight;
+          if (i % rows === 0) {
+            x += frameWidth;
+            y = 0;
+          }
+        }
+
+        return spritesheetCanvas;
+      }
+
+
+      function canvasToBlob(canvas) {
+          return new Promise(resolve => {
+              canvas.toBlob(blob => {
+                  resolve(blob);
+              });
+          });
+      }
+
+
+      let blobURL
+      fetch("{% static 'gabm/js/gif.worker.js' %}")
+        .then(response => response.text())
+        .then(workerScript => {
+          const blob = new Blob([workerScript], { type: 'application/javascript' });
+          blobURL = URL.createObjectURL(blob);
+        })
+        .catch(error => console.error('error loading worker script:', error));
+
+
+
+      async function framesToGifBlob(frames) {
+          const gif = new GIF({
+              workers: 2,
+              quality: 0,
+              transparent: 'rgba(0,0,0,0)',
+              globalPalette: true,
+              workerScript: blobURL
+          });
+
+          frames.forEach(frameCanvas => {
+              gif.addFrame(frameCanvas, { delay: 200 });
+          });
+
+          return new Promise(resolve => {
+              gif.on('finished', function(blob) {
+                  resolve(blob);
+              });
+              gif.render();
+          });
+      }
+
+
+
+
+      async function setFileInput(inputName, fileBlob, fileName) {
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(new File([fileBlob], fileName));
+        document.querySelector(`input[name="${inputName}"]`).files = dataTransfer.files;
+      }
+
+
+      async function saveAll() {
+        await preloadSelectedParts();
+        
+        const spritesheetBlob = await canvasToBlob(await drawSpritesheet());
+        await setFileInput('spritesheet', spritesheetBlob, 'spritesheet.png');
+
+        document.getElementById('saveButtonProgressInner').textContent = 1;
+
+        const frontBlob = await canvasToBlob(await renderFrame('5'));
+        await setFileInput('front', frontBlob, 'front.png');
+
+        document.getElementById('saveButtonProgressInner').textContent = 2;
+
+        // Save each direction as a GIF
+        const directions = ['right', 'back', 'left', 'front'];
+        let currentValue = 0 
+        for (let i = 0; i < dirFrameSets.length; i++) {
+          dirFrames = dirFrameSets[i];
+          let gifBlob = await framesToGifBlob(await applyAnimationFrames());
+          await setFileInput(`${directions[i]}_gif`, gifBlob, `${directions[i]}.gif`);
+
+          let element = document.getElementById('saveButtonProgressInner');
+          currentValue += 1;
+          // let currentValue = parseInt(element.textContent);
+          element.textContent = Math.floor((currentValue + 1) / 6 * 100);
+        }
+
+
+      }
+
+
+      saveButton.addEventListener('click', async function(event) {
+        var loading = document.getElementById('saveButtonLoading');
+        var loading_progress = document.getElementById('saveButtonProgress');
+
+        var original = document.getElementById('saveButtonOriginal');
+
+        loading.style.display = 'inline-block'; // Show the loading spinner
+        loading_progress.style.display = 'inline-block'; // Show the loading spinner
+        original.style.display = 'none'; // Hide the original text
+
+        event.preventDefault(); // Prevent the default form submission
+        await saveAll();
+        document.getElementById('spriteSheetForm').submit(); // Submit the form manually
+      });
+
+
+    })();
+
+
+
+
+
+  </script>
+
+
+{% endblock js_content %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

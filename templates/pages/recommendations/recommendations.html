@@ -1,0 +1,802 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-xxl flex-grow-1 container-p-y">
+    <div class="d-flex justify-content-between align-items-center">
+        <h4 class="fw-bold py-3 mb-4">Interview Analysis & Recommendations</h4>
+        {% if user.is_staff %}
+        <div class="mb-4">
+            <form action="{% url 'generate_recommendations' %}" method="post" class="mb-3">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary">
+                    Generate New Analysis
+                </button>
+            </form>
+            <form action="{% url 'delete_all_recommendations' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete all recommendations? This action cannot be undone.');">
+                    Delete All Recommendations
+                </button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Hidden form for CSRF token -->
+    <form id="csrfForm">
+        {% csrf_token %}
+    </form>
+
+    <div class="row">
+        {% for rec in recommendations %}
+        <div class="col-12 mb-4">
+            <div class="card">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0">Recommendation {{ forloop.counter }}</h5>
+                    <small class="text-muted float-end">Generated: {{ rec.created_at|date:"F j, Y" }}</small>
+                </div>
+                <div class="card-body">
+                    <div class="recommendation-text mb-4">
+                        <h5 class="text-primary">{{ rec.recommendation }}</h5>
+                    </div>
+                    
+                    <!-- Support Level Visualization -->
+                    <div class="support-visualization mb-4">
+                        <div class="support-scale">
+                            <div class="scale-labels d-flex justify-content-between mb-2">
+                                <span class="text-danger">Strongly Oppose</span>
+                                <span class="text-secondary">Neutral</span>
+                                <span class="text-success">Strongly Support</span>
+                            </div>
+                            <!-- Horizontal indicator line -->
+                            <div class="indicator-line mb-3" style="width: 100%; height: 6px; background: linear-gradient(to right, #dc3545, #6c757d, #28a745);"></div>
+                            
+                            <!-- Participant Avatars in rows -->
+                            <div class="avatar-rows">
+                                {% for support in rec.participantrecommendationsupport_set.all %}
+                                    {% with interview=support.interview %}
+                                    <div class="avatar-row d-flex align-items-center mb-2"
+                                         data-interview-id="{{ interview.id }}"
+                                         data-recommendation-id="{{ rec.id }}"
+                                         data-support-score="{{ support.support_score }}"
+                                         data-confidence-score="{{ support.confidence_score }}"
+                                         data-participant-name="{{ interview.participant.get_full_name }}"
+                                         data-explanation="{{ support.explanation|escapejs }}"
+                                         data-support-id="{{ support.id }}"
+                                         data-is-endorsed="{{ support.is_endorsed }}"
+                                         data-user-modified-explanation="{{ support.user_modified_explanation|default:''|escapejs }}">
+                                        <!-- Support level indicator -->
+                                        <div class="support-indicator" style="width: {{ support.support_score }}%; height: 4px; background: {% if support.support_score < 25 %}rgba(220, 53, 69, 0.5){% elif support.support_score < 50 %}rgba(255, 193, 7, 0.5){% elif support.support_score < 75 %}rgba(13, 202, 240, 0.5){% else %}rgba(40, 167, 69, 0.5){% endif %}; margin-right: 10px;"></div>
+                                        
+                                        <!-- Avatar and name as a button -->
+                                        <div class="avatar-container d-flex align-items-center">
+                                            <button class="btn btn-outline-primary btn-participant d-flex align-items-center"
+                                                   onclick="showParticipantDetails(this.closest('.avatar-row'))"
+                                                   aria-label="View details for {{ interview.participant.get_full_name }}">
+                                                <img src="{{ interview.participant.avatar.front_static.url|default:'/static/assets/img/avatars/default.png' }}" 
+                                                     class="rounded-circle avatar-image" 
+                                                     width="40" height="40" 
+                                                     alt="{{ interview.participant.get_full_name }} Avatar"
+                                                     style="opacity: {{ support.confidence_score|default:100 }}%;">
+                                                <div class="avatar-name ms-2">
+                                                    {{ interview.participant.prolific_id }}
+                                                </div>
+                                            </button>
+                                            <!-- Support score badge -->
+                                            <!-- <div class="ms-auto badge-spacing">
+                                                <span class="badge {% if support.support_score < 25 %}bg-danger{% elif support.support_score < 50 %}bg-warning{% elif support.support_score < 75 %}bg-info{% else %}bg-success{% endif %}">
+                                                    {{ support.support_score }}%
+                                                </span>
+                                            </div> -->
+                                        </div>
+                                    </div>
+                                    {% endwith %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <p class="text-muted text-center">No recommendations generated yet.</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Participant Details Modal -->
+<div class="modal fade" id="participantDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header py-2">
+                <h5 class="modal-title">Participant Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Participant Info Section -->
+                <div class="d-flex align-items-center mb-3">
+                    <img id="modalParticipantAvatar" src="" class="rounded-circle me-2" width="48" height="48" alt="Participant Avatar">
+                    <div>
+                        <span id="modalParticipantName" class="fw-semibold fs-5"></span>
+                    </div>
+                </div>
+                
+                <!-- First Question Transcript Section -->
+             <!----   <h6 class="fw-bold mb-2">First Question Response</h6> --->
+                <h6 class="fw-bold mb-2"><span id="backgroundTitle"></span></h6>
+
+                <div class="p-3 border rounded bg-light text-dark mb-4">
+                    <audio id="firstQuestionAudio" controls class="w-100 mb-3"></audio>
+                    <div id="transcriptText" style="max-height: 200px; overflow-y: auto;"></div>
+                </div>
+                
+                <!-- Combined Opinion Section -->
+                <div class="collapsible-section mb-3">
+                    <button class="btn btn-outline-primary w-100 d-flex justify-content-between align-items-center" 
+                            type="button" 
+                            data-bs-toggle="collapse" 
+                            data-bs-target="#opinionCollapse" 
+                            aria-expanded="false" 
+                            aria-controls="opinionCollapse">
+                        <span class="fw-bold d-flex align-items-center">
+                            <i class="bx bx-message-square-detail me-2"></i>
+                            See Opinion
+                        </span>
+                        <i class="bx bx-chevron-down"></i>
+                    </button>
+                    <div class="collapse mt-2" id="opinionCollapse">
+                        <!-- Explanation Section -->
+                        <div class="mt-4 mb-3">
+                            <h6 class="fw-bold mb-2">AI Explanation from Interview</h6>
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="support-indicator me-2">
+                                    <span class="badge" id="supportBadge"></span>
+                                </div>
+                                <div class="confidence-indicator">
+                                    <span class="badge bg-secondary" id="confidenceBadge"></span>
+                                </div>
+                                <div class="ms-auto" id="endorsementBadgeContainer">
+                                    <span class="badge bg-success d-none" id="endorsedBadge">
+                                        <i class="bx bx-check me-1"></i> Endorsed
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="p-3 border rounded bg-primary-subtle text-dark">
+                                <p id="explanationText" class="mb-0"></p>
+                            </div>
+                            
+                            <!-- Endorsement and Edit Controls - Only visible to the explanation owner -->
+                            <div id="explanationControls" class="mt-3 d-none">
+                                <div class="d-flex justify-content-between">
+                                    <button id="endorseBtn" class="btn btn-sm btn-outline-success">
+                                        <i class="bx bx-check me-1"></i> Endorse Explanation
+                                    </button>
+                                    <button id="editBtn" class="btn btn-sm btn-outline-primary">
+                                        <i class="bx bx-edit me-1"></i> Edit Explanation
+                                    </button>
+                                </div>
+                                
+                                <!-- Edit Form - Initially hidden -->
+                                <div id="editExplanationForm" class="mt-3 d-none">
+                                    <textarea id="modifiedExplanation" class="form-control mb-2" rows="4" placeholder="Enter your modified explanation here"></textarea>
+                                    <div class="d-flex justify-content-end">
+                                        <button id="cancelEditBtn" class="btn btn-sm btn-outline-secondary me-2">Cancel</button>
+                                        <button id="saveExplanationBtn" class="btn btn-sm btn-primary">Save Changes</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Supporting Evidence Section -->
+                        <div>
+                            <h6 class="fw-bold mb-2">Supporting Evidence</h6>
+                            <div id="supportingEvidenceContainer">
+                                <!-- Evidence clips will be added here dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js_content %}
+<script>
+function showParticipantDetails(element) {
+    // Add debugging for all data attributes
+    console.log('Element data attributes:', {
+        interviewId: element.getAttribute('data-interview-id'),
+        recommendationId: element.getAttribute('data-recommendation-id'),
+        supportScore: element.getAttribute('data-support-score'),
+        participantName: element.getAttribute('data-participant-name')
+    });
+    
+    var interviewId = element.getAttribute('data-interview-id');
+    if (!interviewId) {
+        console.error('No interview ID found');
+        return;
+    }
+    var recommendationId = element.getAttribute('data-recommendation-id');
+    var supportScore = element.getAttribute('data-support-score');
+    var confidenceScore = element.getAttribute('data-confidence-score');
+    var participantName = element.getAttribute('data-participant-name');
+    var explanation = element.getAttribute('data-explanation');
+    var supportId = element.getAttribute('data-support-id');
+    var isEndorsed = element.getAttribute('data-is-endorsed') === 'True';
+    var userModifiedExplanation = element.getAttribute('data-user-modified-explanation');
+    
+    // Reset collapsible sections to closed state
+    document.querySelectorAll('#opinionCollapse').forEach(function(collapse) {
+        if (bootstrap.Collapse.getInstance(collapse)) {
+            bootstrap.Collapse.getInstance(collapse).hide();
+        }
+    });
+    
+    // Set participant name and avatar
+    document.getElementById('modalParticipantName').textContent = participantName;
+    
+    // Find the avatar image in the row
+    var avatarImage = element.querySelector('img');
+    document.getElementById('modalParticipantAvatar').src = avatarImage.src;
+    var firstName = participantName.split(' ')[0];
+    document.getElementById('backgroundTitle').textContent = 'Who is ' + firstName + '?';
+
+    // Set support badge
+    var supportBadge = document.getElementById('supportBadge');
+    var supportText = '';
+    var supportClass = '';
+    
+    if (supportScore >= 75) {
+        supportText = 'Strongly Support';
+        supportClass = 'bg-success';
+    } else if (supportScore >= 50) {
+        supportText = 'Support';
+        supportClass = 'bg-info';
+    } else if (supportScore >= 25) {
+        supportText = 'Oppose';
+        supportClass = 'bg-warning';
+    } else {
+        supportText = 'Strongly Oppose';
+        supportClass = 'bg-danger';
+    }
+    
+    supportBadge.textContent = supportText;
+    supportBadge.className = 'badge ' + supportClass;
+    
+    // Set confidence badge
+    var confidenceBadge = document.getElementById('confidenceBadge');
+    confidenceBadge.textContent = 'Confidence: ' + confidenceScore + '%';
+    
+    // Set explanation text (use user modified explanation if available)
+    var explanationText = userModifiedExplanation || explanation;
+    document.getElementById('explanationText').textContent = explanationText;
+    
+    // Handle endorsement badge
+    var endorsedBadge = document.getElementById('endorsedBadge');
+    if (isEndorsed) {
+        endorsedBadge.classList.remove('d-none');
+    } else {
+        endorsedBadge.classList.add('d-none');
+    }
+    
+    // Handle explanation controls visibility
+    var explanationControls = document.getElementById('explanationControls');
+    var endorseBtn = document.getElementById('endorseBtn');
+    var editBtn = document.getElementById('editBtn');
+    var editForm = document.getElementById('editExplanationForm');
+    var modifiedExplanationTextarea = document.getElementById('modifiedExplanation');
+    var cancelEditBtn = document.getElementById('cancelEditBtn');
+    var saveExplanationBtn = document.getElementById('saveExplanationBtn');
+    
+    // Store support ID for later use
+    explanationControls.dataset.supportId = supportId;
+    
+    // Check if current user is the participant to show controls
+    var xhr = new XMLHttpRequest();
+    console.log("HEREREEEE");
+    xhr.open('GET', '/api/interview/' + interviewId + '/transcript/', true);
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            console.log("IN hxr");
+            var data = JSON.parse(xhr.responseText);
+            console.log(data);
+            var isCurrentUserParticipant = data.participant_id == {{ user.id }};
+            
+            if (isCurrentUserParticipant) {
+                explanationControls.classList.remove('d-none');
+                
+                // Update endorsement button text based on current state
+                if (isEndorsed) {
+                    endorseBtn.innerHTML = '<i class="bx bx-x me-1"></i> Remove Endorsement';
+                    endorseBtn.classList.remove('btn-outline-success');
+                    endorseBtn.classList.add('btn-outline-danger');
+                } else {
+                    endorseBtn.innerHTML = '<i class="bx bx-check me-1"></i> Endorse Explanation';
+                    endorseBtn.classList.remove('btn-outline-danger');
+                    endorseBtn.classList.add('btn-outline-success');
+                }
+                
+                // Set the textarea value
+                modifiedExplanationTextarea.value = explanationText;
+            } else {
+                explanationControls.classList.add('d-none');
+            }
+        } else {
+            console.error('Error checking participant:', xhr.statusText);
+            explanationControls.classList.add('d-none');
+        }
+    };
+    xhr.onerror = function() {
+        console.error('Error checking participant: Network error');
+        explanationControls.classList.add('d-none');
+    };
+    xhr.send();
+    
+    // Fetch first question audio and transcript
+    var audioXhr = new XMLHttpRequest();
+    audioXhr.open('GET', '/api/interview/' + interviewId + '/first-question-audio/', true);
+    audioXhr.onload = function() {
+        if (audioXhr.status === 200) {
+            var data = JSON.parse(audioXhr.responseText);
+            var audioPlayer = document.getElementById('firstQuestionAudio');
+            audioPlayer.src = data.audio_url;
+            audioPlayer.load();
+            
+            // // Auto-play the audio when loaded
+            // audioPlayer.addEventListener('canplaythrough', function() {
+            //     audioPlayer.play().catch(function(e) {
+            //         console.warn('Auto-play was prevented:', e);
+            //         // Some browsers require user interaction before playing audio
+            //     });
+            // }, { once: true });
+            
+            // Display the transcript
+            var transcriptContainer = document.getElementById('transcriptText');
+            transcriptContainer.innerHTML = ''; // Clear previous content
+            
+            data.transcript.forEach(function(text) {
+                var textDiv = document.createElement('div');
+                textDiv.className = 'mb-2';
+                textDiv.innerHTML = '"<span class="fst-italic">' + text + '</span>"';
+                transcriptContainer.appendChild(textDiv);
+            });
+        } else {
+            console.error('Error fetching audio:', audioXhr.statusText);
+        }
+    };
+    audioXhr.onerror = function() {
+        console.error('Error fetching audio: Network error');
+    };
+    audioXhr.send();
+    
+    // Fetch supporting evidence
+    var evidenceXhr = new XMLHttpRequest();
+    evidenceXhr.open('GET', '/api/recommendation/' + recommendationId + '/interview/' + interviewId + '/evidence/', true);
+    evidenceXhr.onload = function() {
+        if (evidenceXhr.status === 200) {
+            var data = JSON.parse(evidenceXhr.responseText);
+            var evidenceContainer = document.getElementById('supportingEvidenceContainer');
+            evidenceContainer.innerHTML = ''; // Clear previous content
+            
+            if (data.clips && data.clips.length > 0) {
+                data.clips.forEach(function(clip) {
+                    var clipDiv = document.createElement('div');
+                    clipDiv.className = 'evidence-card border rounded p-3 bg-light mb-3';
+                    
+                    var clipHtml = '<p class="mb-2">"<span class="fst-italic">' + clip.transcript + '</span>"</p>' +
+                                  '<p class="text-muted small mb-2">Audio ID: ' + (clip.audio_id || 'Not available') + '</p>';
+                    
+                    if (clip.audio_url) {
+                        clipHtml += '<audio controls class="w-100"><source src="' + clip.audio_url + '" type="audio/wav">Your browser does not support the audio element.</audio>';
+                    }
+                    
+                    clipDiv.innerHTML = clipHtml;
+                    evidenceContainer.appendChild(clipDiv);
+                });
+            } else {
+                evidenceContainer.innerHTML = '<p class="text-muted">No supporting evidence available.</p>';
+            }
+        } else {
+            console.error('Error fetching evidence:', evidenceXhr.statusText);
+            document.getElementById('supportingEvidenceContainer').innerHTML = 
+                '<p class="text-danger">Error loading supporting evidence.</p>';
+        }
+    };
+    evidenceXhr.onerror = function() {
+        console.error('Error fetching evidence: Network error');
+        document.getElementById('supportingEvidenceContainer').innerHTML = 
+            '<p class="text-danger">Error loading supporting evidence.</p>';
+    };
+    evidenceXhr.send();
+    
+    // Show the modal
+    var modal = new bootstrap.Modal(document.getElementById('participantDetailsModal'));
+    modal.show();
+}
+
+// Helper function to get CSRF token
+function getCsrfToken() {
+    return document.querySelector('#csrfForm [name=csrfmiddlewaretoken]').value;
+}
+
+// Event listeners for endorsement and edit functionality
+document.addEventListener('DOMContentLoaded', function() {
+    var endorseBtn = document.getElementById('endorseBtn');
+    var editBtn = document.getElementById('editBtn');
+    var cancelEditBtn = document.getElementById('cancelEditBtn');
+    var saveExplanationBtn = document.getElementById('saveExplanationBtn');
+    var editForm = document.getElementById('editExplanationForm');
+    
+    // Endorse/Unendorse button click
+    if (endorseBtn) {
+        endorseBtn.addEventListener('click', function() {
+            var supportId = document.getElementById('explanationControls').dataset.supportId;
+            var isCurrentlyEndorsed = endorseBtn.innerHTML.includes('Remove');
+            
+            // Send request to update endorsement
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/api/update-explanation/', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.setRequestHeader('X-CSRFToken', getCsrfToken());
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    var data = JSON.parse(xhr.responseText);
+                    if (data.success) {
+                        // Update UI
+                        var endorsedBadge = document.getElementById('endorsedBadge');
+                        
+                        if (data.is_endorsed) {
+                            endorsedBadge.classList.remove('d-none');
+                            endorseBtn.innerHTML = '<i class="bx bx-x me-1"></i> Remove Endorsement';
+                            endorseBtn.classList.remove('btn-outline-success');
+                            endorseBtn.classList.add('btn-outline-danger');
+                        } else {
+                            endorsedBadge.classList.add('d-none');
+                            endorseBtn.innerHTML = '<i class="bx bx-check me-1"></i> Endorse Explanation';
+                            endorseBtn.classList.remove('btn-outline-danger');
+                            endorseBtn.classList.add('btn-outline-success');
+                        }
+                        
+                        // Update the data attribute in the original row
+                        var avatarRow = document.querySelector('.avatar-row[data-support-id="' + supportId + '"]');
+                        if (avatarRow) {
+                            avatarRow.setAttribute('data-is-endorsed', data.is_endorsed ? 'True' : 'False');
+                        }
+                    } else {
+                        console.error('Error updating endorsement:', data.error);
+                        alert('Error updating endorsement: ' + data.error);
+                    }
+                } else {
+                    console.error('Error:', xhr.statusText);
+                    alert('An error occurred while updating the endorsement.');
+                }
+            };
+            xhr.onerror = function() {
+                console.error('Error: Network error');
+                alert('A network error occurred while updating the endorsement.');
+            };
+            xhr.send(JSON.stringify({
+                support_id: supportId,
+                is_endorsed: !isCurrentlyEndorsed
+            }));
+        });
+    }
+    
+    // Edit button click
+    if (editBtn) {
+        editBtn.addEventListener('click', function() {
+            editForm.classList.remove('d-none');
+        });
+    }
+    
+    // Cancel edit button click
+    if (cancelEditBtn) {
+        cancelEditBtn.addEventListener('click', function() {
+            editForm.classList.add('d-none');
+        });
+    }
+    
+    // Save explanation button click
+    if (saveExplanationBtn) {
+        saveExplanationBtn.addEventListener('click', function() {
+            var supportId = document.getElementById('explanationControls').dataset.supportId;
+            var modifiedExplanation = document.getElementById('modifiedExplanation').value;
+            
+            if (!modifiedExplanation.trim()) {
+                alert('Explanation cannot be empty.');
+                return;
+            }
+            
+            // Send request to update explanation
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/api/update-explanation/', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.setRequestHeader('X-CSRFToken', getCsrfToken());
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    var data = JSON.parse(xhr.responseText);
+                    if (data.success) {
+                        // Update UI
+                        document.getElementById('explanationText').textContent = data.explanation;
+                        editForm.classList.add('d-none');
+                        
+                        // Update the data attribute in the original row
+                        var avatarRow = document.querySelector('.avatar-row[data-support-id="' + supportId + '"]');
+                        if (avatarRow) {
+                            avatarRow.setAttribute('data-user-modified-explanation', modifiedExplanation);
+                        }
+                    } else {
+                        console.error('Error updating explanation:', data.error);
+                        alert('Error updating explanation: ' + data.error);
+                    }
+                } else {
+                    console.error('Error:', xhr.statusText);
+                    alert('An error occurred while updating the explanation.');
+                }
+            };
+            xhr.onerror = function() {
+                console.error('Error: Network error');
+                alert('A network error occurred while updating the explanation.');
+            };
+            xhr.send(JSON.stringify({
+                support_id: supportId,
+                modified_explanation: modifiedExplanation
+            }));
+        });
+    }
+});
+
+// Stop audio when modal is closed
+document.getElementById('participantDetailsModal').addEventListener('hidden.bs.modal', function () {
+    // Pause first question audio
+    document.getElementById('firstQuestionAudio').pause();
+    
+    // Pause all evidence audio players
+    document.querySelectorAll('#supportingEvidenceContainer audio').forEach(function(audio) {
+        audio.pause();
+    });
+    
+    // Reset collapsible sections to closed state
+    document.querySelectorAll('#opinionCollapse').forEach(function(collapse) {
+        if (bootstrap.Collapse.getInstance(collapse)) {
+            bootstrap.Collapse.getInstance(collapse).hide();
+        }
+    });
+});
+</script>
+{% endblock %}
+
+{% block css_content %}
+<style>
+.support-scale {
+    width: 100%;
+}
+
+/* Styles for the avatar rows */
+.avatar-rows {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.avatar-row {
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-bottom: 8px;
+    border: 1px solid transparent;
+}
+
+.avatar-row:hover {
+    background-color: #f8f9fa;
+    border-color: #e9ecef;
+}
+
+.avatar-row:last-child {
+    margin-bottom: 0;
+}
+
+/* Make the support indicator more visible but transparent */
+.support-indicator {
+    height: 6px !important;
+    margin-bottom: 8px !important;
+    opacity: 0.6;
+    border-radius: 3px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.avatar-container {
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.avatar-name {
+    font-size: 0.9rem;
+    color: #333;
+    margin-left: 12px;
+    margin-right: 20px;
+    font-weight: 500;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
+}
+
+.avatar-image {
+    border: 2px solid #fff;
+    box-shadow: 0 0 3px rgba(0,0,0,0.2);
+    min-opacity: 0.4;
+}
+
+/* Custom scrollbar styling */
+#transcriptText::-webkit-scrollbar,
+#supportingEvidenceContainer::-webkit-scrollbar,
+.avatar-rows::-webkit-scrollbar {
+    width: 8px;
+}
+
+#transcriptText::-webkit-scrollbar-track,
+#supportingEvidenceContainer::-webkit-scrollbar-track,
+.avatar-rows::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+#transcriptText::-webkit-scrollbar-thumb,
+#supportingEvidenceContainer::-webkit-scrollbar-thumb,
+.avatar-rows::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+#transcriptText::-webkit-scrollbar-thumb:hover,
+#supportingEvidenceContainer::-webkit-scrollbar-thumb:hover,
+.avatar-rows::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Add spacing for the support score badge */
+.ms-auto.ms-3 {
+    margin-left: 20px !important;
+}
+
+/* Style for the top indicator line */
+.indicator-line {
+    border-radius: 2px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    height: 6px;
+}
+
+.badge-spacing {
+    margin-left: 10rem;
+}
+
+/* Participant button styling */
+.btn-participant {
+    background-color: #e9ecef;
+    border: 2px solid #ced4da;
+    border-radius: 5px;
+    padding: 8px 12px;
+    text-align: left;
+    width: auto;
+    margin-right: auto;
+    display: flex;
+    align-items: center;
+}
+
+.btn-participant:hover {
+    background-color: #dee2e6;
+    border-color: #adb5bd;
+}
+
+.btn-participant:active {
+    background-color: #dee2e6;
+}
+
+.btn-participant .avatar-name {
+    margin-right: 0;
+    color: #495057;
+}
+
+.btn-icon {
+    color: #0d6efd;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+/* Collapsible section styles */
+.collapsible-section .btn {
+    text-align: left;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    transition: all 0.2s;
+}
+
+.collapsible-section .btn:hover {
+    background-color: #e9ecef;
+}
+
+.collapsible-section .btn:focus {
+    box-shadow: none;
+}
+
+.collapsible-section .btn[aria-expanded="true"] i {
+    transform: rotate(180deg);
+    transition: transform 0.2s;
+}
+
+.collapsible-section .btn i {
+    transition: transform 0.2s;
+}
+
+/* Opinion section styling */
+#opinionCollapse {
+    padding: 15px;
+    border: 1px solid #e9ecef;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+}
+
+#opinionCollapse h6 {
+    color: #495057;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 8px;
+    margin-top: 5px;
+}
+
+#opinionCollapse .mb-3:last-child {
+    margin-bottom: 0 !important;
+}
+
+/* Evidence card styling */
+.evidence-card {
+    background-color: #f8f9fa !important;
+    border-color: #e9ecef !important;
+}
+
+.evidence-card p:first-child {
+    color: #495057;
+    font-size: 0.95rem;
+}
+
+.evidence-card .fst-italic {
+    color: #212529;
+}
+
+.collapse {
+    transition: all 0.3s ease;
+}
+
+.collapse.show {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
+{% endblock %} 

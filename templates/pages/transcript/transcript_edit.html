@@ -1,0 +1,291 @@
+{% extends "base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block custom_head_content %}
+  <style>
+    .module-title {
+      font-weight:800;
+    }
+
+    #consent_form input {
+      margin-bottom:1.2em
+    }
+
+    .active_module {
+      border-width:3px !important;
+      border-color: #F72C25 !important;
+    }
+
+    .question-container {
+      margin-bottom: 2rem;
+      padding: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    .question-header {
+      font-weight: bold;
+      margin-bottom: 1rem;
+      padding: 0.5rem;
+      background-color: #f8f9fa;
+      border-radius: 4px;
+    }
+
+    .utterance-container {
+      margin-bottom: 1rem;
+      padding: 0.5rem;
+    }
+
+    .interviewer-utterance {
+      color: #666;
+      margin-bottom: 0.5rem;
+    }
+
+    .interviewee-utterance {
+      margin-bottom: 1rem;
+    }
+
+    .utterance-edit {
+      width: 100%;
+      min-height: 60px;
+      padding: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin-bottom: 0.5rem;
+    }
+
+    .utterance-view {
+      white-space: pre-wrap;
+      padding: 0.5rem;
+      border: 1px solid transparent;
+      border-radius: 4px;
+    }
+
+    .utterance-view:hover {
+      border-color: #ddd;
+      background-color: #f8f9fa;
+    }
+
+    .save-button {
+      margin-top: 1rem;
+    }
+
+    .redaction-toggle {
+      margin-top: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .redaction-toggle input[type="checkbox"] {
+      margin: 0;
+    }
+  </style>
+
+  <link rel="stylesheet" href="{% static 'gabm/sneat/assets/vendor/libs/select2/select2.css' %}" />
+  <link rel="stylesheet" href="{% static 'gabm/sneat/assets/vendor/libs/@form-validation/umd/styles/index.min.css' %}" />
+  <link rel="stylesheet" href="{% static 'gabm/sneat/assets/vendor/libs/bs-stepper/bs-stepper.css' %}" />
+{% endblock custom_head_content %}
+
+{% block content %}
+  <div class="content-wrapper">
+    <div class="container-xxl flex-grow-1 container-p-y">
+      <h4 class="py-3 mb-4"><a href="{% url 'home' %}">Home</a> / <strong>Interview Transcription</strong></h4>
+
+      <div class="card g-3 mt-5" style="margin-top:0em !important">
+        <div class="card-body row g-3">
+          <div class="col-lg-8">
+            <div class="card-body">
+              <div class="added-cards">
+                <div class="cardMaster border p-3 rounded mb-3">
+                  <div class="d-flex justify-content-between flex-sm-row flex-column">
+                    <div class="card-information">
+                      <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="mb-0">Transcription</h4>
+                      </div>
+
+                      {% for question in questions %}
+                        {% if question.has_non_interviewer %}
+                          <div class="question-container">
+                            <div class="question-header">
+                              Question {{ question.global_question_id }}
+                            </div>
+                            <form method="POST" action="{% url 'edit_transcript' curr_user.username script_v %}" class="question-form">
+                              {% csrf_token %}
+                              <input type="hidden" name="question_id" value="{{ question.id }}">
+                              {% for utterance in question.utterances.all %}
+                                {% if utterance.is_interviewer %}
+                                  <div class="utterance-container">
+                                    <div class="interviewer-utterance">
+                                      <strong>Interviewer:</strong> {{ utterance.utterance_text|default:"" }}
+                                    </div>
+                                  </div>
+                                {% else %}
+                                  <div class="utterance-container">
+                                    <div class="interviewee-utterance">
+                                      <strong>Interviewee:</strong>
+                                      <div class="utterance-view" data-utterance-id="{{ utterance.id }}" onclick="makeEditable(this)">
+                                        {{ utterance.utterance_text|default:"" }}
+                                      </div>
+                                      <textarea class="utterance-edit" name="utterance_{{ utterance.id }}" style="display: none;">{{ utterance.utterance_text|default:"" }}</textarea>
+                                      <div class="redaction-toggle">
+                                        <input type="checkbox" id="redact_{{ utterance.id }}" name="redact_{{ utterance.id }}" {% if utterance.is_redacted %}checked{% endif %}>
+                                        <label for="redact_{{ utterance.id }}">Redact this response</label>
+                                      </div>
+                                    </div>
+                                  </div>
+                                {% endif %}
+                              {% endfor %}
+                              <div class="d-flex justify-content-end gap-2 save-button">
+                                <button type="button" class="btn btn-label-secondary" onclick="resetQuestion(this)">Reset</button>
+                                <button type="submit" class="btn btn-label-primary">Save Changes</button>
+                              </div>
+                            </form>
+                          </div>
+                        {% endif %}
+                      {% endfor %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-4">
+            <div class="card-header align-items-center">
+              <h5 class="card-action-title mb-0">Study Instructions</h5>
+            </div>
+            <div class="card-body">
+              <small class="text-muted text-uppercase">About</small>
+              <p>Review and edit your interview transcript to ensure accuracy. You can make corrections to your responses and choose to redact sensitive information.</p>
+              <small class="text-muted text-uppercase">Instructions</small>
+              <p>Click on any of your responses to edit them. Use the redaction toggle to mark responses that should be kept private. When finished, click "Save Changes" to update that question's transcript.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock content %}
+
+{% block modal_block %}
+{% endblock modal_block %}
+
+{% block js_content %}
+  <script src="{% static 'gabm/sneat/assets/vendor/libs/cleavejs/cleave.js' %}"></script>
+  <script src="{% static 'gabm/sneat/assets/vendor/libs/cleavejs/cleave-phone.js' %}"></script>
+  <script src="{% static 'gabm/sneat/assets/vendor/libs/select2/select2.js' %}"></script>
+  <script src="{% static 'gabm/sneat/assets/vendor/libs/@form-validation/umd/bundle/popular.min.js' %}"></script>
+  <script src="{% static 'gabm/sneat/assets/vendor/libs/@form-validation/umd/plugin-bootstrap5/index.min.js' %}"></script>
+  <script src="{% static 'gabm/sneat/assets/vendor/libs/@form-validation/umd/plugin-auto-focus/index.min.js' %}"></script>
+  <script src="{% static 'gabm/sneat/assets/vendor/libs/bs-stepper/bs-stepper.js' %}"></script>
+
+  <script>
+    function makeEditable(element) {
+      const utteranceId = element.dataset.utteranceId;
+      const viewDiv = element;
+      const editTextarea = document.querySelector(`textarea[name="utterance_${utteranceId}"]`);
+      
+      viewDiv.style.display = 'none';
+      editTextarea.style.display = 'block';
+      editTextarea.focus();
+      
+      // Add blur event to switch back to view mode
+      editTextarea.addEventListener('blur', function() {
+        viewDiv.textContent = this.value;
+        viewDiv.style.display = 'block';
+        this.style.display = 'none';
+      });
+    }
+
+    function resetQuestion(button) {
+      const form = button.closest('.question-form');
+      const textareas = form.querySelectorAll('.utterance-edit');
+      const viewDivs = form.querySelectorAll('.utterance-view');
+      const redactCheckboxes = form.querySelectorAll('input[type="checkbox"]');
+      
+      textareas.forEach((textarea, index) => {
+        textarea.value = textarea.defaultValue;
+        textarea.style.display = 'none';
+        viewDivs[index].textContent = textarea.defaultValue;
+        viewDivs[index].style.display = 'block';
+      });
+
+      redactCheckboxes.forEach(checkbox => {
+        checkbox.checked = checkbox.defaultChecked;
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add form submission handler
+      document.querySelectorAll('.question-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          
+          // Get the question ID
+          const questionId = this.querySelector('input[name="question_id"]').value;
+          
+          // Collect all utterance data
+          const utterances = {};
+          const redactions = {};
+          this.querySelectorAll('.utterance-edit').forEach(textarea => {
+            utterances[textarea.name] = textarea.value;
+          });
+          this.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            redactions[checkbox.name] = checkbox.checked;
+          });
+          
+          // Send the data
+          fetch(this.action, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({
+              question_id: questionId,
+              utterances: utterances,
+              redactions: redactions
+            })
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              // Show success message
+              const successMessage = document.createElement('div');
+              successMessage.className = 'alert alert-success mt-2';
+              successMessage.textContent = 'Changes saved successfully!';
+              this.appendChild(successMessage);
+              
+              // Remove message after 3 seconds
+              setTimeout(() => {
+                successMessage.remove();
+              }, 3000);
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+          });
+        });
+      });
+    });
+  </script>
+{% endblock js_content %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

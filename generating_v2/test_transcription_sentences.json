@@ -1,0 +1,25 @@
+{
+  "text": "I was born in India and I moved to Indonesia when I was relatively young. I stayed there till my high school, around which time I moved back to India for high school and for my engineering studies. In terms of family, I have a sibling who is here in the United States and I have my parents who are currently residing in Indonesia.",
+  "duration": 34.959999084472656,
+  "sentence_segments": [
+    {
+      "id": 0,
+      "start": 0.0,
+      "end": 7.0,
+      "text": "I was born in India and I moved to Indonesia when I was relatively young."
+    },
+    {
+      "id": 1,
+      "start": 7.0,
+      "end": 19.0,
+      "text": "I stayed there till my high school, around which time I moved back to India for high school and for my engineering studies."
+    },
+    {
+      "id": 2,
+      "start": 19.0,
+      "end": 31.0,
+      "text": "In terms of family, I have a sibling who is here in the United States and I have my parents who are currently residing in Indonesia."
+    }
+  ],
+  "total_sentences": 3
+}

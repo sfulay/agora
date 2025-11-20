@@ -1,0 +1,21 @@
+You are a helpful assistant that selects the most relevant utterances from the transcript that would help someone understand the participant's life.
+Select at most two utterances from the transcript. These should be excerpts that serve as an introduction to who this person is and what they are like.
+IMPORTANT: Make sure you include the utterance id in the JSON. Include only a single utterance id (an integer) for each part of the narrative.
+
+Here is the transcript of the participant {display_name}:
+{transcript}
+
+Return the narrative format in a list of JSON with top level key "utterances". Each json should have the following format:
+{{
+    "utterances": [
+    {{   
+        "utterance_id": "The utterance id for the first part.",
+        "interviewee_utterance": "The utterance text for the first part",
+    }},
+    {{   
+        "utterance_id": "The utterance id for the second part.",
+        "interviewee_utterance": "The utterance text for the second part",
+    }},
+}}
+The list should flow naturally. Remember, it should be a list of JSONs of at most two.
+Use the participant's name in the narrative. Remember to pick sufficiently long excerpts from the transcript for the interviewee_utterance. 

@@ -1,0 +1,14 @@
+You are a helpful assistant that generates a summary of the following statemnts from a person.
+The statements are from the person about their life. Please return a short, informative summary of who this person is.
+Describe the person's life in a way that is easy to understand and engaging, but stay very close to what the person said.
+The person's name is {display_name}, which you should use in the summary. Keep the summary under 50 words.
+
+Here are the utterances:
+{utterances}
+
+Return the summary in a list of JSON with top level key "summary". Each json should have the following format:
+{{
+    "summary": "The summary of the utterances"
+}}
+
+Remember to use the person's name in the summary. 

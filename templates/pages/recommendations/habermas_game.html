@@ -1,0 +1,609 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- ===================== MESSAGES ===================== -->
+<div class="container-xxl flex-grow-1 container-p-y">
+    {% if messages %}
+    <div class="messages mb-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-12">
+            <!-- ===================== RECOMMENDATION ===================== -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title mb-4 text-primary">Recommendation</h2>
+                    <div class="recommendation-text p-4 bg-light rounded position-relative">
+                        <p class="card-text fs-5 mb-0" id="recommendation-text">{{ recommendation.rec_text }}</p>
+                        {% if user.is_authenticated %}
+                        <div id="edit-recommendation-form" class="mt-3">
+                            <textarea class="form-control mb-2" id="edit-recommendation-textarea" rows="3" placeholder="Edit recommendation text">{{ recommendation.rec_text }}</textarea>
+                            <div class="d-flex gap-2 mt-2">
+                                <button type="button" id="submit-edit-btn" class="btn btn-success btn-sm">Submit</button>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===================== SUPPORT VISUALIZATION ===================== -->
+    
+            <div class="card mt-4 mb-4">
+                <div class="card-body">
+                    <h4 class="card-title mb-4">Participant Support Distribution</h4>
+                    <p class="card-text mb-4">Participants positioned by their predicted support level. Hover over avatars to see details.</p>
+                    <div id="edit-recommendation-message" class="mb-3"></div>
+                    <div id="prediction-progress-container" class="mb-3" style="display: none;">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted small">Generating predictions...</span>
+                            <span class="text-muted small" id="prediction-progress-text">0/{{ participants_data|length }}</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div id="prediction-progress-bar" class="progress-bar bg-warning" role="progressbar" style="width: 0%; transition: width 0.3s ease;"></div>
+                        </div>
+                    </div>
+                    <div class="mb-3 d-flex align-items-center" style="gap: 1rem;">
+                        <label for="js-relevance-threshold" class="form-label mb-0 fw-bold" style="min-width: 180px;">Relevance threshold:</label>
+                        <input type="number" id="js-relevance-threshold" class="form-control" style="width: 100px;" min="0" max="100" value="0">
+                        <span class="text-muted" id="js-relevance-threshold-label">Show participants with relevance ≥ 0%</span>
+                    </div>
+                    <div class="support-visualization-container" style="position: relative; height: 300px; border: 1px solid #e9ecef; border-radius: 0.5rem; background: linear-gradient(to right, #f8d7da, #fff3cd, #d4edda);">
+                        <div class="support-labels" style="position: absolute; top: -25px; left: 0; right: 0; display: flex; justify-content: space-between; font-size: 0.8rem; color: #6c757d;">
+                            <span>Strongly Disagree</span>
+                            <span>Neutral</span>
+                            <span>Strongly Agree</span>
+                        </div>
+                        <div class="support-scale" style="position: absolute; top: 20px; left: 0; right: 0; height: 100%; display: flex; align-items: flex-start; justify-content: space-between; padding: 0 20px;">
+                            <div class="scale-marker" style="position: relative; width: 1px; height: 20px; background: rgba(0,0,0,0.2);">
+                                <span style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); font-size: 0.7rem; color: #6c757d;">0%</span>
+                            </div>
+                            <div class="scale-marker" style="position: relative; width: 1px; height: 20px; background: rgba(0,0,0,0.2);">
+                                <span style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); font-size: 0.7rem; color: #6c757d;">20%</span>
+                            </div>
+                            <div class="scale-marker" style="position: relative; width: 1px; height: 20px; background: rgba(0,0,0,0.2);">
+                                <span style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); font-size: 0.7rem; color: #6c757d;">40%</span>
+                            </div>
+                            <div class="scale-marker" style="position: relative; width: 1px; height: 20px; background: rgba(0,0,0,0.2);">
+                                <span style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); font-size: 0.7rem; color: #6c757d;">60%</span>
+                            </div>
+                            <div class="scale-marker" style="position: relative; width: 1px; height: 20px; background: rgba(0,0,0,0.2);">
+                                <span style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); font-size: 0.7rem; color: #6c757d;">80%</span>
+                            </div>
+                            <div class="scale-marker" style="position: relative; width: 1px; height: 20px; background: rgba(0,0,0,0.2);">
+                                <span style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); font-size: 0.7rem; color: #6c757d;">100%</span>
+                            </div>
+                        </div>
+                        {% if mean_support is not None %}
+                        <div id="mean-support-line" style="position: absolute; bottom: 25px; height: calc(100% - 45px); width: 2px; background: #007bff; z-index: 20; pointer-events: none;">
+                            <div style="position: absolute; bottom: -25px; left: 50%; transform: translateX(-50%); color: #007bff; font-size: 0.8rem; font-weight: bold; white-space: nowrap;">
+                                &#x25BC; Mean: <span id="mean-support-value">{{ mean_support|floatformat:2 }}</span>%
+                            </div>
+                        </div>
+                        {% endif %}
+                        <div class="participant-avatars-container" style="position: relative; width: 100%; height: 100%;">
+                            {% for data in participants_data %}
+                            {% if data.predicted_agreement is not None %}
+                            <div class="participant-avatar js-participant-avatar" 
+                                 data-support="{{ data.predicted_agreement }}"
+                                 data-relevance="{{ data.relevance_score }}"
+                                 data-participant-id="{{ data.participant.id }}"
+                                 data-participant-name="{{ data.participant.get_full_name }}"
+                                 data-participant-username="{{ data.participant.username }}"
+                                 data-participant-reasoning="{{ data.participant_summary|default:''|escapejs }}"
+                                 style="position: absolute; cursor: pointer; transition: all 0.6s ease; z-index: 10;">
+                                <img src="{{ data.avatar_url }}" 
+                                     class="rounded-circle border border-3 border-white shadow-sm participant-avatar-img" 
+                                     alt="{{ data.participant.get_full_name }}"
+                                     style="transition: all 0.6s ease;">
+                                <div class="avatar-tooltip" style="position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 0.5rem; border-radius: 0.25rem; font-size: 0.8rem; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; margin-bottom: 0.5rem;">
+                                    {{ data.participant.get_full_name }}<br>
+                                    Support: {{ data.predicted_agreement }}%<br>
+                                    Relevance: {{ data.relevance_score }}%
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Reasoning display section below avatars -->
+            <div id="participant-reasoning-section" class="mt-4" style="min-height: 2.5em;">
+                <div id="participant-reasoning-content" class="alert alert-secondary" style="display: none;"></div>
+                <div id="participant-reasoning-placeholder" class="text-muted small">Click a participant avatar to see their reasoning here.</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===================== PARTICIPANT MODALS ===================== -->
+{% for data in participants_data %}
+<div class="modal fade" id="narrativeModal-{{ data.participant.id }}" tabindex="-1" aria-labelledby="narrativeModalLabel-{{ data.participant.id }}" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header flex-column align-items-start" style="gap: 0.25rem;">
+        <div class="d-flex w-100 justify-content-between align-items-center">
+          <h5 class="modal-title mb-0" id="narrativeModalLabel-{{ data.participant.id }}">Who is {{ data.participant.get_full_name }}?</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="w-100">
+          <div class="modal-subtitle medium text-muted mt-1" id="narrativeModalSubtitle-{{ data.participant.id }}" style="white-space: pre-line; word-break: break-word;">
+            <strong>Proposal:</strong> {{ recommendation.rec_text }}
+          </div>
+        </div>
+      </div>
+      <div class="modal-body">
+        {% if data.narrative_parts %}
+          {% for part in data.narrative_parts %}
+          <div class="row mb-4 align-items-center">
+            <div class="col-md-6">
+              <div class="summary-text mb-3">
+                {{ part.ai_explanation_text|default:"<em>No explanation</em>"|safe }}
+              </div>
+            </div>
+            <div class="col-md-6">
+              {% if part.utterance_text %}
+              <blockquote class="mb-0 utterance-text" style="font-style: italic; border-left: 4px solid #b3b3b3; padding-left: 1rem; color: #555;">
+                {{ part.utterance_text }}
+              </blockquote>
+                {% if part.audio_url %}
+                <div class="mt-4">
+                <div class="d-flex justify-content-center">
+                  <audio class="w-50 hover-audio" style="height: 28px; min-width: 120px;" preload="none" controls>
+                    <source src="{{MEDIA_URL}}{{ part.audio_url }}" type="audio/wav">
+                    Your browser does not support the audio element.
+                  </audio>
+                </div>
+                </div>
+                {% endif %}
+              {% else %}
+                <em>No utterance</em>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="alert alert-info">No narrative available for this participant.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
+
+{% endblock %}
+
+{% block custom_head_content %}
+<!-- ===================== CUSTOM STYLES ===================== -->
+<style>
+    .recommendation-text {
+        border-left: 4px solid var(--bs-primary);
+        background-color: rgba(var(--bs-primary-rgb), 0.05);
+    }
+
+    /* Support badge gradient styling */
+    .support-badge {
+        color: white;
+        font-weight: 600;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+
+    /* Support visualization styles */
+    .support-visualization-container {
+        background: linear-gradient(to right, #f8d7da, #fff3cd, #d4edda);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .participant-avatar {
+        transition: all 0.6s ease;
+    }
+
+    .participant-avatar:hover {
+        transform: scale(1.1);
+        z-index: 20 !important;
+    }
+
+    .participant-avatar:hover .avatar-tooltip {
+        opacity: 1 !important;
+    }
+
+    .participant-avatar:hover img {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        border-color: #007bff !important;
+    }
+
+    .avatar-tooltip::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 5px solid transparent;
+        border-top-color: rgba(0,0,0,0.8);
+    }
+
+
+</style>
+
+<!-- ===================== CUSTOM SCRIPTS ===================== -->
+<script>
+// ---- Support Badge Gradient ----
+function calculateSupportGradient(supportPercent) {
+    const value = supportPercent / 100;
+    let r, g, b;
+    if (value <= 0.5) {
+        const t = value * 2;
+        r = Math.round(139 + (255 - 139) * t);
+        g = Math.round(0 + (140 - 0) * t);
+        b = Math.round(0);
+    } else {
+        const t = (value - 0.5) * 2;
+        r = Math.round(255 - (255 - 0) * t);
+        g = Math.round(140 + (100 - 140) * t);
+        b = Math.round(0);
+    }
+    return `rgb(${r}, ${g}, ${b})`;
+}
+function applySupportGradients() {
+    document.querySelectorAll('.support-badge').forEach(badge => {
+        const supportPercent = parseInt(badge.getAttribute('data-support'));
+        if (!isNaN(supportPercent)) {
+            const color = calculateSupportGradient(supportPercent);
+            badge.style.background = color;
+        }
+    });
+}
+
+// ---- Avatar Positioning ----
+function positionParticipantAvatars() {
+    const container = document.querySelector('.participant-avatars-container');
+    const avatars = Array.from(document.querySelectorAll('.js-participant-avatar')).filter(a => a.style.display !== 'none');
+    const containerWidth = container.offsetWidth;
+    const containerHeight = container.offsetHeight;
+    const minSize = 40;
+    const maxSize = 80;
+    const baseSize = 50;
+    const n = avatars.length;
+    let avatarSize = Math.max(minSize, Math.min(maxSize, Math.round(baseSize * (10 / n))));
+    const increment = 5;
+    const supportGroups = {};
+    avatars.forEach(avatar => {
+        const img = avatar.querySelector('img.participant-avatar-img');
+        if (img) {
+            img.style.width = avatarSize + 'px';
+            img.style.height = avatarSize + 'px';
+        }
+        avatar.style.width = avatarSize + 'px';
+        avatar.style.height = avatarSize + 'px';
+        const support = parseInt(avatar.getAttribute('data-support'));
+        const roundedSupport = Math.round(support / increment) * increment;
+        if (!supportGroups[roundedSupport]) {
+            supportGroups[roundedSupport] = [];
+        }
+        supportGroups[roundedSupport].push(avatar);
+    });
+    Object.keys(supportGroups).forEach(supportLevel => {
+        const avatarsInGroup = supportGroups[supportLevel];
+        const x = (parseInt(supportLevel) / 100) * (containerWidth - avatarSize);
+        avatarsInGroup.forEach((avatar, index) => {
+            const y = containerHeight - avatarSize - 20 - (index * (avatarSize * 0.6));
+            avatar.style.left = x + 'px';
+            avatar.style.top = y + 'px';
+        });
+    });
+}
+
+// ---- Avatar Click Handlers ----
+function addAvatarClickHandlers() {
+    document.querySelectorAll('.js-participant-avatar').forEach(avatar => {
+        avatar.addEventListener('mouseenter', function() {
+            const reasoning = this.getAttribute('data-participant-reasoning') || this.getAttribute('data-participant-summary') || '';
+            const name = this.getAttribute('data-participant-name');
+            const reasoningContent = document.getElementById('participant-reasoning-content');
+            const reasoningPlaceholder = document.getElementById('participant-reasoning-placeholder');
+            if (reasoning && reasoning.trim().length > 0) {
+                reasoningContent.innerHTML = `<strong>${name}'s reasoning:</strong><br><span style='font-size:0.95em;'>${reasoning}</span>`;
+                reasoningContent.style.display = '';
+                reasoningPlaceholder.style.display = 'none';
+            } else {
+                reasoningContent.style.display = 'none';
+                reasoningPlaceholder.style.display = '';
+            }
+        });
+
+        avatar.addEventListener('click', function() {
+            const participantId = this.getAttribute('data-participant-id');
+            const modal = document.getElementById(`narrativeModal-${participantId}`);
+            if (modal) {
+                const modalInstance = new bootstrap.Modal(modal);
+                modalInstance.show();
+            }
+        });
+    });
+}
+
+// ---- DOMContentLoaded Handler ----
+document.addEventListener('DOMContentLoaded', function() {
+    applySupportGradients();
+    positionParticipantAvatars();
+    addAvatarClickHandlers();
+    document.querySelectorAll('.modal .utterance-text').forEach(el => {
+        const audio = el.parentElement.querySelector('.hover-audio');
+        if (audio) {
+            el.addEventListener('mouseenter', () => { audio.play(); });
+            el.addEventListener('mouseleave', () => { audio.pause(); });
+        }
+    });
+    window.addEventListener('resize', function() {
+        setTimeout(positionParticipantAvatars, 100);
+    });
+    const thresholdInput = document.getElementById('js-relevance-threshold');
+    const thresholdLabel = document.getElementById('js-relevance-threshold-label');
+    function filterAvatarsByRelevance() {
+        const threshold = parseInt(thresholdInput.value) || 0;
+        thresholdLabel.textContent = `Show participants with relevance ≥ ${threshold}%`;
+        document.querySelectorAll('.js-participant-avatar').forEach(avatar => {
+            const relevance = parseInt(avatar.getAttribute('data-relevance')) || 0;
+            avatar.style.display = (relevance >= threshold) ? '' : 'none';
+        });
+        positionParticipantAvatars();
+    }
+    thresholdInput.addEventListener('input', filterAvatarsByRelevance);
+    filterAvatarsByRelevance();
+    // Position mean support line
+    function positionMeanSupportLine() {
+        var meanSupportValue = parseFloat('{{ mean_support|default:0|floatformat:2 }}');
+        var container = document.querySelector('.support-visualization-container');
+        var line = document.getElementById('mean-support-line');
+        if (container && line) {
+            var leftPadding = 20; // matches .support-scale padding
+            var rightPadding = 20;
+            var width = container.offsetWidth - leftPadding - rightPadding;
+            var x = leftPadding + (meanSupportValue / 100) * width;
+            line.style.left = x + 'px';
+        }
+    }
+    positionMeanSupportLine();
+    window.addEventListener('resize', function() {
+        setTimeout(positionMeanSupportLine, 100);
+    });
+});
+
+// ---- Recommendation Edit with AJAX ----
+document.addEventListener('DOMContentLoaded', function() {
+    const editForm = document.getElementById('edit-recommendation-form');
+    const textarea = document.getElementById('edit-recommendation-textarea');
+    const submitBtn = document.getElementById('submit-edit-btn');
+    const recText = document.getElementById('recommendation-text');
+    const messageDiv = document.getElementById('edit-recommendation-message');
+    
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    if (submitBtn && textarea) {
+        submitBtn.addEventListener('click', function() {
+            const newText = textarea.value.trim();
+            
+            if (!newText) {
+                messageDiv.innerHTML = '<div class="alert alert-danger">Recommendation text cannot be empty.</div>';
+                return;
+            }
+            
+            messageDiv.innerHTML = '<div class="text-info">Saving...</div>';
+            
+            fetch('{% url "edit_editable_recommendation" recommendation.id %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+                body: JSON.stringify({ rec_text: newText })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update the displayed text
+                    recText.textContent = newText;
+                    messageDiv.innerHTML = '<div class="alert alert-warning">Predictions in progress...</div>';
+                        
+                    // Start prediction polling
+                    startPredictionPolling(data.new_recommendation_id);
+                } else {
+                    messageDiv.innerHTML = '<div class="alert alert-danger">' + (data.error || 'Failed to update.') + '</div>';
+                }
+            })
+            .catch((err) => {
+                console.error('Edit fetch error:', err);
+                messageDiv.innerHTML = '<div class="alert alert-danger">Network error. Please try again.</div>';
+            });
+        });
+    }
+});
+
+// ---- Prediction Polling ----
+const PARTICIPANT_USERNAMES = ["janus", "suyash2", "marinar", "emily_kubin", "prerna_2", "bcroy", "dougb", "maya_d", "michielb"];
+
+function animateAvatar(participantUsername, predictedAgreement, relevance, reasoning) {
+    console.log(relevance)
+    const avatars = document.querySelectorAll('.js-participant-avatar');
+    let targetAvatar = null;
+    
+    // Find the avatar for this specific participant by username
+    for (let avatar of avatars) {
+        const username = avatar.getAttribute('data-participant-username');
+        if (username === participantUsername) {
+            targetAvatar = avatar;
+            break;
+        }
+    }
+    
+    if (!targetAvatar) {
+        console.log(`Avatar not found for participant: ${participantUsername}`);
+        return;
+    }
+    
+    // Update the data-support attribute to the new value
+    targetAvatar.setAttribute('data-support', predictedAgreement);
+    targetAvatar.setAttribute('data-relevance', relevance);
+
+    // Update the tooltip content
+    const tooltip = targetAvatar.querySelector('.avatar-tooltip');
+    if (tooltip) {
+        const name = targetAvatar.getAttribute('data-participant-name');
+        const support = targetAvatar.getAttribute('data-support');
+        const relevance = targetAvatar.getAttribute('data-relevance');
+        tooltip.innerHTML = `${name}<br>Support: ${support}%<br>Relevance: ${relevance}%`
+    }
+    
+    // Re-run the positioning function to move all avatars to their new positions
+    positionParticipantAvatars();
+    
+    // Add visual feedback to the specific avatar
+    targetAvatar.style.transform = 'scale(1.2)';
+    setTimeout(() => {
+        targetAvatar.style.transform = 'scale(1)';
+    }, 800);
+}
+
+function checkNextParticipant(recommendationId, participantIndex = 0) {
+    if (participantIndex >= PARTICIPANT_USERNAMES.length) {
+        console.log('All participants checked!');
+        // Update mean support line after all participants are updated
+        updateMeanSupportLine();
+        // Update the message to show completion
+        const messageDiv = document.getElementById('edit-recommendation-message');
+        if (messageDiv) {
+            messageDiv.innerHTML = '<div class="alert alert-success">Predictions completed!</div>';
+        }
+        // Hide the progress bar
+        const progressContainer = document.getElementById('prediction-progress-container');
+        if (progressContainer) {
+            progressContainer.style.display = 'none';
+        }
+        return;
+    }
+    
+    // Update progress bar
+    updatePredictionProgress(participantIndex);
+    
+    const username = PARTICIPANT_USERNAMES[participantIndex];
+    
+    fetch(`/api/prediction/${recommendationId}/${username}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'complete') {
+                // Prediction is ready - animate the avatar
+                animateAvatar(username, data.predicted_agreement, data.relevance_score, data.reasoning);
+                console.log(`✓ ${username}: ${data.predicted_agreement}%`);
+                
+                // Move to next participant after a short delay
+                setTimeout(() => {
+                    checkNextParticipant(recommendationId, participantIndex + 1);
+                }, 1000);
+            } else {
+                // Prediction not ready yet - check again in 2 seconds
+                setTimeout(() => {
+                    checkNextParticipant(recommendationId, participantIndex);
+                }, 2000);
+            }
+        })
+        .catch(error => {
+            console.error(`Error checking ${username}:`, error);
+            // Move to next participant even if there's an error
+            setTimeout(() => {
+                checkNextParticipant(recommendationId, participantIndex + 1);
+            }, 1000);
+        });
+}
+
+function updatePredictionProgress(completedCount) {
+    const progressContainer = document.getElementById('prediction-progress-container');
+    const progressBar = document.getElementById('prediction-progress-bar');
+    const progressText = document.getElementById('prediction-progress-text');
+    
+    if (progressContainer && progressBar && progressText) {
+        const totalParticipants = PARTICIPANT_USERNAMES.length;
+        const percentage = (completedCount / totalParticipants) * 100;
+        
+        progressBar.style.width = percentage + '%';
+        progressText.textContent = `${completedCount}/${totalParticipants}`;
+        
+        // Show the progress container if it's hidden
+        if (progressContainer.style.display === 'none') {
+            progressContainer.style.display = 'block';
+        }
+    }
+}
+
+function startPredictionPolling(recommendationId) {
+    console.log('Starting prediction polling...');
+    // Show progress bar and reset it
+    const progressContainer = document.getElementById('prediction-progress-container');
+    const progressBar = document.getElementById('prediction-progress-bar');
+    if (progressContainer && progressBar) {
+        progressContainer.style.display = 'block';
+        progressBar.style.width = '0%';
+    }
+    checkNextParticipant(recommendationId, 0);
+}
+
+function updateMeanSupportLine() {
+    // Calculate new mean from all visible avatars
+    const avatars = document.querySelectorAll('.js-participant-avatar');
+    let totalSupport = 0;
+    let visibleCount = 0;
+    
+    avatars.forEach(avatar => {
+        if (avatar.style.display !== 'none') {
+            const support = parseFloat(avatar.getAttribute('data-support')) || 0;
+            totalSupport += support;
+            visibleCount++;
+        }
+    });
+    
+    if (visibleCount > 0) {
+        const newMean = totalSupport / visibleCount;
+        
+        // Update the mean value display
+        const meanValueElement = document.getElementById('mean-support-value');
+        if (meanValueElement) {
+            meanValueElement.textContent = newMean.toFixed(2);
+        }
+        
+        // Reposition the mean line
+        const container = document.querySelector('.support-visualization-container');
+        const line = document.getElementById('mean-support-line');
+        if (container && line) {
+            const leftPadding = 20; // matches .support-scale padding
+            const rightPadding = 20;
+            const width = container.offsetWidth - leftPadding - rightPadding;
+            const x = leftPadding + (newMean / 100) * width;
+            line.style.left = x + 'px';
+        }
+        
+        console.log(`Mean support updated to: ${newMean.toFixed(2)}%`);
+    }
+}
+</script>
+{% endblock %} 

@@ -1,0 +1,296 @@
+<style>
+  .modal-xl {
+    max-width: 500px;
+  }
+
+  /* Right-side modal styles */
+  .modal-dialog-right {
+    position: fixed;
+    margin: 0;
+    width: 100%;
+    max-width: 450px;
+    height: 100%;
+    top: 0;
+    right: 0;
+    transform: translateX(100%);
+    transition: transform 0.3s ease-out;
+  }
+
+  .modal-dialog-right.show {
+    transform: translateX(0);
+  }
+
+  .modal-dialog-right .modal-content {
+    height: 100%;
+    border-radius: 0;
+    border-left: 1px solid #dee2e6;
+  }
+
+  .modal-dialog-right .modal-body {
+    overflow-y: auto;
+    padding: 1.5rem;
+  }
+
+  .modal-backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+
+  /* Header section */
+  .participant-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .participant-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #212529;
+    margin: 0;
+  }
+
+  .support-badge {
+    color: #6c757d;
+    font-size: 1rem;
+    margin-left: 0.5rem;
+  }
+
+  /* Audio player */
+  .medley-audio-player {
+    width: 100%;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Tabs */
+  .nav-tabs {
+    border-bottom: none !important;
+    margin-bottom: 0.75rem;
+    gap: 0.5rem;
+  }
+
+  .nav-tabs .nav-item {
+    margin-bottom: 0;
+  }
+
+  .nav-tabs .nav-link {
+    color: #6c757d !important;
+    border: 1px solid #dee2e6 !important;
+    border-radius: 12px !important;
+    padding: 0.5rem 0.85rem;
+    font-weight: 500;
+    font-size: 0.85rem;
+    background: transparent !important;
+    background-color: transparent !important;
+    margin-right: 0;
+  }
+
+  .nav-tabs .nav-link.active {
+    color: #000000 !important;
+    border: 1px solid #dee2e6 !important;
+    border-radius: 12px !important;
+    font-weight: 500;
+    background: transparent !important;
+    background-color: transparent !important;
+  }
+
+  .nav-tabs .nav-link:hover {
+    background: #f8f9fa !important;
+    background-color: #f8f9fa !important;
+    border: 1px solid #dee2e6 !important;
+    border-radius: 12px !important;
+  }
+
+  .tab-content {
+    padding: 0.5rem 0 0 0;
+  }
+
+  .medley-transcript-box {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    background: transparent;
+  }
+
+  .summary-box {
+    padding: 1rem;
+    border-radius: 8px;
+    background: #e3f2fd;
+    font-size: 13px;
+  }
+
+  .tab-pane p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #495057;
+    margin: 0;
+  }
+
+  /* Utterances section */
+  .utterance-card {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .utterance-heading {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #212529;
+    margin-bottom: 0.5rem;
+  }
+
+  .utterance-text {
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: #495057;
+    margin-bottom: 0.75rem;
+    font-size: 14px;
+  }
+
+  .utterance-audio {
+    width: 100%;
+    height: 32px;
+  }
+
+  .segment-audio {
+    display: none;
+  }
+
+  /* Karaoke highlighting styles */
+  .medley-segment {
+    display: inline;
+    transition: all 0.3s ease;
+    padding: 2px 0;
+    border-radius: 3px;
+    font-size: 14px;
+  }
+
+  .medley-segment.highlight {
+    background: linear-gradient(120deg, #ffe066 0%, #ffeb99 100%);
+    font-weight: 600;
+    color: #000;
+    padding: 2px 4px;
+    border-radius: 3px;
+    box-shadow: 0 2px 4px rgba(255, 224, 102, 0.3);
+  }
+
+  @media (max-width: 768px) {
+    .modal-dialog-right {
+      max-width: 100%;
+    }
+
+    .modal-dialog-right .modal-body {
+      padding: 1rem;
+    }
+  }
+</style>
+
+<div class="modal-dialog modal-xl modal-dialog-right">
+  <div class="modal-content">
+    <div class="modal-header border-0">
+      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+
+    <div class="modal-body">
+
+      <!-- Participant Header -->
+      <div class="participant-header mb-3">
+        <img src="{{ data.avatar_url }}" class="rounded-circle me-3" width="48" height="48" alt="Avatar">
+        <div>
+          <h2 class="participant-name">
+            {{ data.participant.get_full_name }}
+            {% if data.support_percentage is not None %}
+            <span class="support-badge">· {{ data.support_percentage }}% support</span>
+            {% endif %}
+          </h2>
+        </div>
+      </div>
+
+      <!-- Hidden segment audio elements for sequential playback -->
+      {% for segment in data.segments_data %}
+      {% if segment.audio_url %}
+      <audio class="segment-audio" id="segment-audio-{{ forloop.counter }}" data-segment-index="{{ forloop.counter }}" data-audio-url="{{ MEDIA_URL }}{{ segment.audio_url }}">
+        <source src="{{ MEDIA_URL }}{{ segment.audio_url }}" type="audio/wav">
+      </audio>
+      {% else %}
+      <!-- Segment {{ forloop.counter }} has no audio URL -->
+      <div class="d-none" data-debug="Segment {{ forloop.counter }}: No audio_url</div>
+      {% endif %}
+      {% endfor %}
+
+
+      <!-- Tabs: Summary and Quotes -->
+      <ul class="nav nav-tabs" id="medleyTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary" type="button" role="tab">
+            Summary
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="quotes-tab" data-bs-toggle="tab" data-bs-target="#quotes" type="button" role="tab">
+            Quotes
+          </button>
+        </li>
+      </ul>
+
+      <div class="tab-content" id="medleyTabContent">
+        <!-- Summary Tab -->
+        <div class="tab-pane fade show active" id="summary" role="tabpanel">
+          <!-- Medley Audio Player -->
+          <audio id="medley-player" class="medley-audio-player" controls>
+            <source id="medley-source" src="" type="audio/wav">
+            Your browser does not support the audio element.
+          </audio>
+
+          <!-- Medley Transcript -->
+          {% if data.segments_data %}
+          <div class="medley-transcript-box">
+            <p id="medley-transcript">
+              "{% for segment in data.segments_data %}<span class="medley-segment" data-segment-index="{{ forloop.counter }}" data-duration="{{ segment.duration }}">{{ segment.text }}</span>{% if not forloop.last %} ... {% endif %}{% endfor %}"
+            </p>
+          </div>
+          {% else %}
+          <div class="medley-transcript-box">
+            <p class="text-muted">No medley transcript available.</p>
+          </div>
+          {% endif %}
+
+          <!-- Summary -->
+          <div class="summary-box">
+            {% if data.live_prediction and data.live_prediction.reasoning %}
+            <p style="font-size: 14px;">{{ data.live_prediction.reasoning }}</p>
+            {% else %}
+            <p class="text-muted">No reasoning available.</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Quotes Tab -->
+        <div class="tab-pane fade" id="quotes" role="tabpanel">
+          <!-- Utterances Section -->
+          {% if data.utterances_data|length > 0 %}
+            {% for utterance in data.utterances_data %}
+            <div class="utterance-card">
+              <div class="utterance-text">
+                {{ utterance.text }}
+              </div>
+
+              {% if utterance.audio_url %}
+              <audio class="utterance-audio" controls>
+                <source src="{{ MEDIA_URL }}{{ utterance.audio_url }}" type="audio/wav">
+                Your browser does not support the audio element.
+              </audio>
+              {% endif %}
+            </div>
+            {% endfor %}
+          {% else %}
+            <p class="text-muted">No utterances available.</p>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

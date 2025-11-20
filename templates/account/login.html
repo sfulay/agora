@@ -1,0 +1,100 @@
+{% extends "account/base.html" %}
+
+{% load static %}
+{% load i18n %}
+{% load account socialaccount %}
+{% load crispy_forms_tags %}
+
+{% block head_title %}
+  {% trans "Sign In" %}
+{% endblock %}
+
+{% block extra_head %}
+  <style type="text/css">
+    body {background-color: white}
+  </style>
+{% endblock %}
+
+{% block content %}
+  {% get_providers as socialaccount_providers %}
+  <!-- Content -->
+  <div class="container-xxl">
+    <div class="authentication-wrapper authentication-basic container-p-y">
+      <div class="authentication-inner">
+        <!-- Register -->
+        <div class="card" style="box-shadow: none; border:solid; border-width:1px; border-color: #D3D4FF">
+          <div class="card-body">
+            <!-- Logo -->
+            <div class="justify-content-center">
+              <a href="index.html" class="app-brand-link gap-2">
+                <span class="app-brand-text demo text-body fw-bold">Agora</span>
+              </a>
+            </div>
+            <!-- /Logo -->
+
+            <h4 class="mb-2">Welcome back 👋</h4>
+            <p class="mb-4">
+              {% blocktrans %}If you have not created an account yet, then please <a href="{{ signup_url }}">sign up</a> first.{% endblocktrans %} 
+            </p>
+
+            <form class="login" method="POST" action="{% url 'account_login' %}">
+              {% csrf_token %}
+              <div class="mb-3">
+                {{ form.prolific_id|as_crispy_field }}
+              </div>
+              {% if redirect_field_value %}
+              <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+              {% endif %}
+              
+              {% if form.non_field_errors %}
+              <div class="alert alert-danger">
+                {% for error in form.non_field_errors %}
+                  {{ error }}
+                {% endfor %}
+              </div>
+              {% endif %}
+              
+              <br>
+              <button class="primaryAction btn btn-outline-primary" type="submit" style="width: 100%; ">{% trans "Sign In" %}</button>
+            </form>
+
+          </div>
+        </div>
+        <!-- /Register -->
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block extra_body %}
+  <!-- Core JS -->
+  <!-- build:js assets/vendor/js/core.js -->
+  <script src="{% static 'gabm/sneat/assets/vendor/libs/jquery/jquery.js' %}"></script>
+  <script src="{% static 'gabm/sneat/assets/vendor/libs/popper/popper.js' %}"></script>
+  <script src="{% static 'gabm/sneat/assets/vendor/js/bootstrap.js' %}"></script>
+  <script src="{% static 'gabm/sneat/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js' %}"></script>
+  <script src="{% static 'gabm/sneat/assets/vendor/libs/hammer/hammer.js' %}"></script>
+  <script src="{% static 'gabm/sneat/assets/vendor/libs/i18n/i18n.js' %}"></script>
+  <script src="{% static 'gabm/sneat/assets/vendor/libs/typeahead-js/typeahead.js' %}"></script>
+  <script src="{% static 'gabm/sneat/assets/vendor/js/menu.js' %}"></script>
+  <!-- endbuild -->
+
+  <!-- Vendors JS -->
+  <script src="{% static 'gabm/sneat/assets/vendor/libs/@form-validation/umd/bundle/popular.min.js' %}"></script>
+  <script src="{% static 'gabm/sneat/assets/vendor/libs/@form-validation/umd/plugin-bootstrap5/index.min.js' %}"></script>
+  <script src="{% static 'gabm/sneat/assets/vendor/libs/@form-validation/umd/plugin-auto-focus/index.min.js' %}"></script>
+
+  <!-- Main JS -->
+  <script src="{% static 'gabm/sneat/assets/js/main.js' %}"></script>
+
+  <!-- Page JS -->
+  <script src="{% static 'gabm/sneat/assets/js/pages-auth.js' %}"></script>
+{% endblock %}
+
+
+
+
+
+
+
+

@@ -1,0 +1,32 @@
+[
+  {
+    "sequence_number": 1,
+    "filename": "sentence_001.wav",
+    "path": "generating_v2/sample_segments/sentence_001.wav",
+    "start_time": 0.0,
+    "end_time": 7.0,
+    "duration": 7.0,
+    "text": "I was born in India and I moved to Indonesia when I was relatively young.",
+    "word_count": "N/A"
+  },
+  {
+    "sequence_number": 2,
+    "filename": "sentence_002.wav",
+    "path": "generating_v2/sample_segments/sentence_002.wav",
+    "start_time": 7.0,
+    "end_time": 19.0,
+    "duration": 12.0,
+    "text": "I stayed there till my high school, around which time I moved back to India for high school and for my engineering studies.",
+    "word_count": "N/A"
+  },
+  {
+    "sequence_number": 3,
+    "filename": "sentence_003.wav",
+    "path": "generating_v2/sample_segments/sentence_003.wav",
+    "start_time": 19.0,
+    "end_time": 31.0,
+    "duration": 12.0,
+    "text": "In terms of family, I have a sibling who is here in the United States and I have my parents who are currently residing in Indonesia.",
+    "word_count": "N/A"
+  }
+]

@@ -1,0 +1,2975 @@
+{% extends 'base_recs.html' %}
+
+{% block content %}
+<div class="container-fluid flex-grow-1 container-p-y px-0">
+    {% csrf_token %}
+    
+    <!-- Side-by-side Layout: Policy and Live Prediction Results -->
+    <div class="row g-0">
+        <!-- Policy Section - Left Side -->
+        <div class="col-lg-3 col-md-4" style="border-right: 1px solid #e0e0e0; max-width: 18%;">
+            <div class="h-100">
+                <div style="padding-left: 1rem; padding-right: 1rem;">
+                    <h5 class="mb-3">Policy</h5>
+                    
+                    <!-- Original Recommendation -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold text-muted">Original</label>
+                        <div class="p-3 rounded" style="border: 1px solid #e8e8e8; background: #ffffff;">
+                            <small>{{ original_text }}</small>
+                        </div>
+                    </div>
+
+                    <!-- Editable Recommendation -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label for="recommendation-text" class="form-label fw-semibold mb-0">You</label>
+                            <div class="d-flex gap-2">
+                                <button
+                                    id="reset-btn"
+                                    class="btn btn-sm"
+                                    type="button"
+                                    title="Reset to Original"
+                                    style="border: none; background: transparent; color: #6c757d; padding: 0.25rem 0.5rem;"
+                                >
+                                    <i class="fas fa-undo"></i>
+                                </button>
+                                {% if ai_rec_text %}
+                                <button
+                                    id="use-ai-btn"
+                                    class="btn btn-sm"
+                                    type="button"
+                                    onclick="useAIRecommendation()"
+                                    title="Use AI Recommendation"
+                                    style="border: none; background: transparent; color: #6c757d; padding: 0.25rem 0.5rem;"
+                                >
+                                    <i class="fas fa-star"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <textarea
+                            id="recommendation-text"
+                            class="form-control"
+                            rows="8"
+                            maxlength="500"
+                            placeholder="Enter your modified recommendation text here..."
+                            style="background-color: #f5f5f5;"
+                        >{{ original_text }}</textarea>
+                        <div class="form-text">
+                            <span id="char-count">{{ original_text|length }}</span> / 500 characters
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex flex-column gap-3">
+                        <button
+                            id="recompute-btn"
+                            class="btn btn-dark btn-sm"
+                            type="button"
+                        >
+                            Calculate
+                        </button>
+
+                        <!-- Topic Selection -->
+                        <div class="mt-2">
+                            <div class="dropdown w-100">
+                                <button class="btn btn-outline-secondary btn-sm dropdown-toggle w-100" type="button" id="topicDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-list me-2"></i>Select Topic
+                                </button>
+                                <ul class="dropdown-menu w-100" aria-labelledby="topicDropdown">
+                                    <li><a class="dropdown-item" href="{% url 'recommendation_editor' 273 %}">
+                                        <i class="fas fa-dollar-sign me-2"></i>Minimum Wage
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="{% url 'recommendation_editor' 269 %}">
+                                        <i class="fas fa-balance-scale me-2"></i>Local vs. Global Hiring
+                                    </a></li>
+                                    <!-- <li><a class="dropdown-item" href="{% url 'recommendation_editor' 283 %}">
+                                        <i class="fas fa-building me-2"></i>Race/Gender in Hiring
+                                    </a></li> -->
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Prediction Results Section - Right Side -->
+        <div class="col-lg-9 col-md-8">
+            <div class="h-100">
+                <div class="support-column-content">
+                    <div class="support-header-row d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0">Public Response to Policy</h5>
+                        <div id="status-indicator" class="badge bg-secondary">Ready</div>
+                    </div>
+
+                    <!-- Progress Indicator (hidden by default) -->
+                    <div id="live-progress" class="mb-4 support-section-block" style="display: none;">
+                        <div class="bg-light p-3 rounded">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <small class="text-muted fw-semibold">Processing Progress</small>
+                                <small id="progress-text" class="text-muted">0 / 0 completed</small>
+                            </div>
+                            <div class="progress" style="height: 6px;">
+                                <div id="live-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated bg-secondary"
+                                     role="progressbar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div id="loading-state" class="text-center py-5 support-section-block" style="display: none;">
+                        <div class="spinner-border text-primary mb-3" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <h6 class="text-muted">Recomputing predictions...</h6>
+                        <p class="small text-muted">This may take a few moments</p>
+                        <div class="progress mt-3" style="max-width: 300px; margin: 0 auto;">
+                            <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" 
+                                 role="progressbar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Support Visualization -->
+                    <div id="results-section" class="support-section-block">
+                        <!-- Support-Relevance Plot -->
+                        <div id="editor-support-plot" class="support-relevance-plot position-relative"
+                             style="width: 100%; max-width: calc(100vw - 18% - 4rem); height: 600px; margin: 0;
+                                     background: #ffffff;
+                                     border-radius: 0.5rem; overflow: visible; transition: max-width 0.3s ease-out;">
+                            
+                            <!-- Axis Labels -->
+                            <div class="axis-label x-axis-label"
+                                 style="position: absolute; left: 50%; bottom: -40px; transform: translateX(-50%);
+                                        font-size: 0.75rem; color: #6c757d; font-weight: 600;">
+                                Support
+                            </div>
+                            <div class="axis-label y-axis-label"
+                                 style="position: absolute; left: -50px; top: 50%; transform: translateY(-50%) rotate(-90deg);
+                                        font-size: 0.75rem; color: #6c757d; font-weight: 600;">
+                                No. of people
+                            </div>
+
+                            <!-- X Axis Labels (no ticks) -->
+                            <div class="x-tick-label" style="position: absolute; left: calc(0% - 10px); bottom: -20px; font-size: 0.6rem; color: #888;">0%</div>
+                            <div class="x-tick-label" style="position: absolute; left: calc(25% - 12px); bottom: -20px; font-size: 0.6rem; color: #888;">25%</div>
+                            <div class="x-tick-label" style="position: absolute; left: calc(50% - 12px); bottom: -20px; font-size: 0.6rem; color: #888;">50%</div>
+                            <div class="x-tick-label" style="position: absolute; left: calc(75% - 12px); bottom: -20px; font-size: 0.6rem; color: #888;">75%</div>
+                            <div class="x-tick-label" style="position: absolute; left: calc(100% - 16px); bottom: -20px; font-size: 0.6rem; color: #888;">100%</div>
+
+                            <!-- Meta-Medley Buttons -->
+                            {% if meta_medleys and show_avatars %}
+                            <button class="medley-button medley-button-against"
+                                    data-medley-type="bottom"
+                                    style="position: absolute; left: 15%; bottom: -85px; transform: translateX(-50%);">
+                                <span class="medley-icon"><i class="fas fa-thumbs-down"></i></span>
+                                <span class="medley-label">Against</span>
+                            </button>
+
+                            <button class="medley-button medley-button-fence"
+                                    data-medley-type="middle"
+                                    style="position: absolute; left: 50%; bottom: -85px; transform: translateX(-50%);">
+                                <span class="medley-icon"><i class="fas fa-balance-scale"></i></span>
+                                <span class="medley-label">On the fence</span>
+                            </button>
+
+                            <button class="medley-button medley-button-for"
+                                    data-medley-type="top"
+                                    style="position: absolute; left: 85%; bottom: -85px; transform: translateX(-50%);">
+                                <span class="medley-icon"><i class="fas fa-thumbs-up"></i></span>
+                                <span class="medley-label">For</span>
+                            </button>
+                            {% endif %}
+
+                            <!-- Center axis lines -->
+                            <div class="axis-x" style="position: absolute; left: 0; right: 0; bottom: 20px; height: 1px; background: #d0d0d0; z-index: 2;"></div>
+                            <div class="axis-y" style="position: absolute; top: 0; bottom: 20px; left: 50%; width: 1px; background: #d0d0d0; z-index: 2;"></div>
+
+                            <!-- Quarter lines at 25% and 75% -->
+                            <div style="position: absolute; top: 0; bottom: 20px; left: 25%; width: 1px; border-left: 1px dotted #d0d0d0; z-index: 1;"></div>
+                            <div style="position: absolute; top: 0; bottom: 20px; left: 75%; width: 1px; border-left: 1px dotted #d0d0d0; z-index: 1;"></div>
+
+                            <!-- Mean Support Line -->
+                            <div id="mean-support-line" class="mean-support-line"
+                                 style="position: absolute; left: 50%; top: 0; bottom: 20px; width: 2px;
+                                        background: #007bff;
+                                        opacity: 0.85; z-index: 9; transition: left 0.8s ease;"></div>
+                            <div id="mean-support-label" class="mean-support-label"
+                                 style="position: absolute; left: calc(50% - 75px); top: 5px; width: 150px; text-align: center;
+                                        font-size: 0.75rem; color: #fff; font-weight: 700; background: #007bff;
+                                        border-radius: 1rem; padding: 2px 0; z-index: 10; transition: left 0.8s ease;">
+                                <span style="opacity: 0.8;">Avg. Support:</span> <span id="mean-support-value">50</span>%
+                            </div>
+
+                            <!-- Participant Avatars Container -->
+                            <div id="avatars-container">
+                                <!-- Avatars will be dynamically generated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Leaderboard Section - Third Row -->
+    <div class="row mt-5 pt-4">
+        <div class="col-12">
+            <div style="padding-left: 1rem;">
+                <div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0">
+                            <button class="btn btn-link p-0 text-decoration-none text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#leaderboardCollapse" aria-expanded="false" aria-controls="leaderboardCollapse">
+                                Performance Leaderboard
+                                <i id="leaderboard-chevron" class="fas fa-chevron-right ms-2"></i>
+                            </button>
+                        </h5>
+                    </div>
+
+                    <div class="collapse" id="leaderboardCollapse">
+
+                    <!-- Sort Controls -->
+                    <div class="d-flex gap-2 mb-3 justify-content-end">
+                        <!-- Sort dropdown -->
+                        <select class="form-select form-select-sm" id="leaderboard-sort" style="width: auto; background-color: #000; color: #fff; border-color: #000;">
+                            <option value="support">Sort by Support</option>
+                            <option value="recent">Sort by Recent</option>
+                        </select>
+                    </div>
+
+                        <div id="leaderboard-content">
+                            <div class="text-center py-4">
+                                <div class="spinner-border spinner-border-sm text-muted" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="small text-muted mt-2">Loading leaderboard...</p>
+                            </div>
+                        </div>
+
+                    <!-- Pagination controls -->
+                    <div class="d-flex justify-content-between align-items-center mt-3" id="leaderboard-pagination" style="display: none !important;">
+                        <small class="text-muted">
+                            Showing <span id="leaderboard-range"></span> of <span id="leaderboard-total"></span>
+                        </small>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-secondary" id="leaderboard-prev" disabled>
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <button class="btn btn-outline-secondary" id="leaderboard-next">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Dynamic Modal Container for participant modals -->
+
+{% endblock %}
+
+{% block custom_head_content %}
+<style>
+    /* Override base template background - make everything white */
+    body {
+        background-color: #ffffff !important;
+    }
+
+    .layout-wrapper,
+    .layout-container,
+    .layout-page,
+    .layout-content-navbar,
+    .container-xxl,
+    .container-p-y,
+    .content-wrapper {
+        background-color: #ffffff !important;
+    }
+
+    /* Override any potential colored backgrounds from theme */
+    * {
+        background-color: transparent;
+    }
+
+    body,
+    .layout-wrapper,
+    .layout-container,
+    .layout-page {
+        background-color: #ffffff !important;
+    }
+
+    #recommendation-text {
+        border-radius: 0.75rem;
+        border: 2px solid #e9ecef;
+        transition: border-color 0.15s ease-in-out;
+    }
+    
+    #recommendation-text:focus {
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 0.2rem rgba(79, 70, 229, 0.25);
+    }
+    
+    .progress {
+        height: 8px;
+        border-radius: 4px;
+    }
+    
+    .table th {
+        border-top: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    /* Leaderboard table specific styles */
+    #leaderboard-content .table {
+        table-layout: auto !important;
+    }
+
+    #leaderboard-content .table td {
+        word-wrap: break-word !important;
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: none !important;
+        max-width: none !important;
+        vertical-align: top !important;
+        height: auto !important;
+        max-height: none !important;
+    }
+
+    #leaderboard-content .table-responsive {
+        overflow-y: visible !important;
+        overflow-x: auto;
+    }
+    
+    .badge {
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    
+    #status-indicator {
+        font-size: 0.75rem;
+        padding: 0.35rem 0.65rem;
+    }
+    
+    .btn-lg {
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+    }
+    
+    /* Karaoke Transcript Styles for Dynamic Modals */
+    .karaoke-transcript-sent {
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border-radius: 0.25rem;
+        padding: 0.25rem 0.5rem;
+        margin: 0.125rem 0;
+        line-height: 1.7;
+        font-size: 1.05em;
+        font-style: italic;
+        transition: background 0.25s, box-shadow 0.25s, transform 0.15s;
+    }
+
+    .karaoke-transcript-sent:hover {
+        background-color: rgba(13, 110, 253, 0.1);
+        background: #e3f2fd;
+        box-shadow: 0 2px 12px rgba(33, 150, 243, 0.10);
+        transform: scale(1.02);
+    }
+
+    .karaoke-transcript-sent b,
+    .karaoke-transcript-sent strong,
+    .karaoke-transcript-sent blockquote b,
+    .karaoke-transcript-sent blockquote strong {
+        color: #333 !important;
+        font-weight: bold !important;
+        background-color: #e0e0e0 !important;
+        padding: 1px 3px !important;
+        border-radius: 3px !important;
+        font-style: normal !important;
+    }
+
+    .karaoke-transcript-sent.active b,
+    .karaoke-transcript-sent.active strong,
+    .karaoke-transcript-sent.active blockquote b,
+    .karaoke-transcript-sent.active blockquote strong {
+        color: #fff;
+        font-weight: 700;
+        background-color: transparent !important;
+    }
+
+    .karaoke-sentence.highlight {
+        background: #000;
+        color: #fff;
+        font-weight: bold;
+        border-radius: 3px;
+        transition: background 0.1s;
+    }
+
+    /* Modal styling improvements */
+    .modal-xl {
+        max-width: 800px;
+    }
+    
+    .life-summary-section {
+        margin-bottom: 1rem;
+    }
+    
+    .policy-summary-section {
+        margin-bottom: 1rem;
+    }
+    
+    .summary-text {
+        font-size: 0.9rem;
+        line-height: 1.4;
+        background-color: rgba(13, 110, 253, 0.08);
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        color: #2c3e50;
+        white-space: normal;
+        word-wrap: break-word;
+        margin-bottom: 0;
+    }
+    
+    .section-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #212529;
+        margin-bottom: 0.75rem;
+    }
+    
+    .utterance-section {
+        margin-top: 1rem;
+    }
+    
+    .utterance-blockquote {
+        font-style: italic;
+        border-left: 3px solid #b3b3b3;
+        padding-left: 1rem;
+        margin-bottom: 1rem;
+        font-size: 0.8rem;
+        line-height: 1.4;
+        width: 90%;
+        margin-left: auto;
+        margin-right: auto;
+        display: block;
+    }
+    
+    .audio-player {
+        width: 60%;
+        margin-bottom: 1rem;
+        margin-left: auto;
+        margin-right: auto;
+        display: block;
+    }
+    
+    .connection-reflection {
+        background: #f8f9fa;
+        border-radius: 6px;
+        padding: 1rem;
+        margin: 1rem 0;
+    }
+    
+    .vote-prediction {
+        background: #f8f9fa;
+        border-radius: 6px;
+        padding: 1rem;
+        margin: 1rem 0;
+    }
+    
+    /* Custom radio button styles */
+    .radio-group-container {
+        margin: 1rem 0;
+    }
+    
+    .radio-group-title {
+        font-weight: 600;
+        color: #212529;
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .radio-options {
+        display: flex;
+        justify-content: space-between;
+        align-items: stretch;
+        gap: 0.4rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .radio-option {
+        flex: 1;
+        position: relative;
+    }
+    
+    .radio-option input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    
+    .radio-option label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 0.75rem 0.4rem;
+        background: #f8f9fa;
+        border: 2px solid #dee2e6;
+        border-radius: 0.4rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: center;
+        min-height: 60px;
+        font-size: 0.75rem;
+        line-height: 1.2;
+        color: #495057;
+    }
+    
+    .radio-option input[type="radio"]:checked + label {
+        background: #e3f2fd;
+        border-color: #2196f3;
+        color: #1976d2;
+        box-shadow: 0 2px 8px rgba(33, 150, 243, 0.2);
+    }
+    
+    .radio-option label:hover {
+        background: #e9ecef;
+        border-color: #adb5bd;
+    }
+    
+    .radio-option input[type="radio"]:focus + label {
+        box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.25);
+    }
+    
+    .radio-option input[type="radio"]:disabled + label {
+        background: #f8f9fa;
+        border-color: #dee2e6;
+        color: #6c757d;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+    
+    .radio-option input[type="radio"]:disabled:checked + label {
+        background: #e3f2fd;
+        border-color: #2196f3;
+        color: #1976d2;
+        opacity: 0.8;
+    }
+
+</style>
+
+<!-- Meta-Medley Panel Loading Indicator -->
+<div id="meta-medley-panel-loading" style="display: none;">
+    <div class="meta-medley-panel-loading-content">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="text-muted mt-3 mb-0">Loading medley...</p>
+    </div>
+</div>
+
+<script id="participant-data" type="application/json">
+    {{ participant_data|safe }}
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const recommendationText = document.getElementById('recommendation-text');
+    const recomputeBtn = document.getElementById('recompute-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const loadingState = document.getElementById('loading-state');
+    const resultsSection = document.getElementById('results-section');
+    const statusIndicator = document.getElementById('status-indicator');
+    const progressBar = document.getElementById('progress-bar');
+    const charCount = document.getElementById('char-count');
+    const originalText = `{{ original_text|escapejs }}`;
+
+    // Control/Treatment condition flag
+    // If false (control condition), avatars won't be displayed but predictions still work
+    window.SHOW_AVATARS = ("{{ show_avatars|escapejs }}" === "False") ? false : true;
+    console.log("AVATRS");
+    console.log(window.SHOW_AVATARS);
+
+    // Character count functionality
+    recommendationText.addEventListener('input', function() {
+        const currentLength = this.value.length;
+        charCount.textContent = currentLength;
+
+        // Change color when approaching limit
+        if (currentLength > 450) {
+            charCount.style.color = '#dc3545'; // Red
+        } else if (currentLength > 400) {
+            charCount.style.color = '#fd7e14'; // Orange
+        } else {
+            charCount.style.color = '#6c757d'; // Default gray
+        }
+    });
+
+    // Initialize the visualization immediately and ensure avatars load
+    // Add a small delay to ensure DOM is fully rendered and plot has dimensions
+    requestAnimationFrame(() => {
+        initializeFromTemplateData();
+        setupChartResizeListener();
+
+        // Initialize telemetry tracker
+        window.telemetry = new TelemetryTracker();
+    });
+    
+    // Character counter
+    recommendationText.addEventListener('input', function() {
+        charCount.textContent = this.value.length;
+        
+        if (this.value !== originalText) {
+            statusIndicator.textContent = 'Modified';
+            statusIndicator.className = 'badge bg-warning';
+        } else {
+            statusIndicator.textContent = 'Original';
+            statusIndicator.className = 'badge bg-secondary';
+        }
+    });
+    
+    // Reset button
+    resetBtn.addEventListener('click', function() {
+        recommendationText.value = originalText;
+        charCount.textContent = originalText.length;
+        statusIndicator.textContent = 'Original';
+        statusIndicator.className = 'badge bg-secondary';
+    });
+
+    // Simple function to use AI recommendation
+    window.useAIRecommendation = function() {
+        {% if ai_rec_text %}
+        document.getElementById('recommendation-text').value = `{{ ai_rec_text|escapejs }}`;
+        document.getElementById('char-count').textContent = {{ ai_rec_text|length }};
+        {% endif %}
+    };
+    
+    // Initialize global storage for current participants
+    window.currentParticipants = new Map();
+    window.metaMedleyGroups = { bottom: [], middle: [], top: [] };
+    window.activeMedleyGroup = null;
+    window.metaMedleyPanelOpen = false;
+    window.metaMedleyPanelLoading = false;
+    window.hoveredMedleyGroup = null;
+
+    // Track previous mean support for comparison alerts
+    window.previousMeanSupport = null;
+
+    // Store the base recommendation ID that never changes for leaderboard
+    window.baseRecommendationId = {{ recommendation.base_rec_id|default:recommendation.id }};
+    window.currentRecommendationId = {{ recommendation.id }};
+    console.log("DEBUG: Current recommendation ID: ", window.currentRecommendationId);
+
+    // Event delegation for meta-medley buttons
+    document.addEventListener('click', function(e) {
+        const button = e.target.closest('.medley-button');
+        if (button) {
+            // Ignore clicks on disabled buttons
+            if (button.classList.contains('disabled')) {
+                return;
+            }
+            const medleyType = button.dataset.medleyType;
+            console.log('Meta-medley button clicked:', medleyType, 'Using recommendation ID:', window.currentRecommendationId);
+
+            // Track telemetry for meta-medley click
+            if (window.telemetry) {
+                try {
+                    const recId = window.currentRecommendationId || {{ recommendation.id }};
+                    window.telemetry.trackMetaMedleyClick(
+                        parseInt(recId),
+                        medleyType
+                    );
+                } catch (error) {
+                    console.warn('Telemetry tracking failed:', error);
+                }
+            }
+
+            openMetaMedleyPanel(window.currentRecommendationId, medleyType, button);
+        }
+    });
+
+    // Recompute button
+    recomputeBtn.addEventListener('click', function() {
+        const newText = recommendationText.value.trim();
+
+        if (!newText) {
+            alert('Please enter recommendation text');
+            return;
+        }
+
+        if (newText.length > 500) {
+            alert('Recommendation text must be 300 characters or less');
+            return;
+        }
+        
+        // Keep chart visible, just update status
+        statusIndicator.textContent = 'Computing...';
+        statusIndicator.className = 'badge';
+        statusIndicator.style.backgroundColor = '#000';
+        statusIndicator.style.color = '#fff';
+        recomputeBtn.disabled = true;
+
+        // Disable medley buttons during recomputation
+        document.querySelectorAll('.medley-button').forEach(btn => {
+            btn.classList.add('disabled');
+        });
+
+        // Show progress bar within the existing chart area
+        progressBar.style.width = '0%';
+        progressBar.parentElement.style.display = 'block';
+        
+        // Clear existing avatars to make room for new ones
+        const container = document.getElementById('avatars-container');
+        if (container) {
+            container.innerHTML = '';
+        }
+        window.currentParticipants.clear();
+        
+        // Show progress indicator
+        const liveProgress = document.getElementById('live-progress');
+        const liveProgressBar = document.getElementById('live-progress-bar');
+        const progressText = document.getElementById('progress-text');
+        if (liveProgress) {
+            liveProgress.style.display = 'block';
+            liveProgressBar.style.width = '0%';
+            progressText.textContent = '0 / ? completed';
+        }
+        
+        // Use current recommendation ID or original for the API call
+        const recId = window.currentRecommendationId || {{ recommendation.id }};
+        
+        // Create EventSource for streaming updates
+        const eventSource = new EventSource(`/api/editor/${recId}/recompute-stream/?rec_text=${encodeURIComponent(newText)}`);
+        
+        let totalParticipants = 0;
+        let completedCount = 0;
+        const allResults = [];
+        
+        eventSource.onmessage = function(event) {
+            try {
+                const data = JSON.parse(event.data);
+
+                switch(data.type) {
+                    case 'started':
+                        console.log('EventSource: started message received');
+                        console.log('Old recommendation ID:', window.currentRecommendationId);
+                        console.log('New recommendation ID from server:', data.new_recommendation_id);
+                        window.currentRecommendationId = data.new_recommendation_id;
+                        console.log('Updated window.currentRecommendationId to:', window.currentRecommendationId);
+                        break;
+
+                    case 'total_count':
+                        totalParticipants = data.total;
+                        if (progressText) {
+                            progressText.textContent = `0 / ${totalParticipants} completed`;
+                        }
+                        break;
+
+                    case 'participant_update':
+                        completedCount = data.completed;
+                        const progressPercent = (completedCount / totalParticipants) * 100;
+                        progressBar.style.width = progressPercent + '%';
+
+                        if (liveProgressBar && progressText) {
+                            liveProgressBar.style.width = progressPercent + '%';
+                            progressText.textContent = `${completedCount} / ${totalParticipants} completed`;
+                        }
+
+                        allResults.push(data.participant);
+                        updateSingleParticipant(data.participant);
+                        break;
+
+                    case 'participant_error':
+                        completedCount = data.completed;
+                        const errorProgressPercent = (completedCount / totalParticipants) * 100;
+                        progressBar.style.width = errorProgressPercent + '%';
+
+                        if (liveProgressBar && progressText) {
+                            liveProgressBar.style.width = errorProgressPercent + '%';
+                            progressText.textContent = `${completedCount} / ${totalParticipants} completed`;
+                        }
+
+                        console.error(`Error processing participant ${data.username}:`, data.error);
+                        break;
+
+                    case 'completed':
+                        // Fallback: Ensure recommendation ID is updated (in case 'started' message was missed)
+                        if (data.new_recommendation_id) {
+                            console.log('EventSource: completed message - ensuring ID is updated');
+                            console.log('Current ID:', window.currentRecommendationId, 'ID from completed message:', data.new_recommendation_id);
+                            window.currentRecommendationId = data.new_recommendation_id;
+                        }
+
+                        progressBar.style.width = '100%';
+                        statusIndicator.textContent = 'Updated';
+                        statusIndicator.className = 'badge';
+                        statusIndicator.style.backgroundColor = '#007bff';
+                        statusIndicator.style.color = '#fff';
+
+                        updateSummaryStats(allResults);
+
+                        setTimeout(() => {
+                            reloadLeaderboard();
+                        }, 1000);
+
+                        // Calculate new mean support and compare with previous
+                        const newMeanSupport = calculateMeanSupport(allResults);
+                        const previousMean = window.previousMeanSupport;
+
+                        let alertClass, alertIcon, alertMessage;
+
+                        if (previousMean === null) {
+                            // First time - just show success
+                            alertClass = 'alert-success';
+                            alertIcon = '✓';
+                            alertMessage = `<strong>Success!</strong> Initial prediction completed with ${newMeanSupport}% average support.`;
+                        } else if (newMeanSupport > previousMean) {
+                            // Improvement
+                            alertClass = 'alert-success';
+                            alertIcon = '🎉';
+                            alertMessage = `<strong>Great job!</strong> You improved the predicted support from ${previousMean}% to ${newMeanSupport}%.`;
+                        } else if (newMeanSupport < previousMean) {
+                            // Decline
+                            alertClass = 'alert-danger';
+                            alertIcon = '😞';
+                            alertMessage = `<strong>Sorry!</strong> The predicted support went down from ${previousMean}% to ${newMeanSupport}%.`;
+                        } else {
+                            // No change
+                            alertClass = 'alert-info';
+                            alertIcon = '🔄';
+                            alertMessage = `<strong>No change.</strong> The predicted support stayed the same at ${newMeanSupport}%.`;
+                        }
+
+                        const alertDiv = document.createElement('div');
+                        alertDiv.className = `alert ${alertClass} alert-dismissible fade show mt-3`;
+                        alertDiv.style.color = alertClass === 'alert-danger' ? '#721c24' : '#155724';
+                        alertDiv.innerHTML = `
+                            ${alertIcon} ${alertMessage}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        `;
+                        resultsSection.insertBefore(alertDiv, resultsSection.firstChild);
+
+                        // Update previous mean support for next comparison
+                        window.previousMeanSupport = newMeanSupport;
+
+                        if (liveProgress) {
+                            liveProgress.style.display = 'none';
+                        }
+
+                        eventSource.close();
+                        recomputeBtn.disabled = false;
+
+                        // Re-enable medley buttons
+                        document.querySelectorAll('.medley-button').forEach(btn => {
+                            btn.classList.remove('disabled');
+                        });
+                        break;
+
+                    case 'error':
+                        console.error('Server error:', data.message);
+                        alert('Error: ' + data.message);
+                        statusIndicator.textContent = 'Error';
+                        statusIndicator.className = 'badge bg-danger';
+
+                        eventSource.close();
+                        recomputeBtn.disabled = false;
+
+                        // Re-enable medley buttons
+                        document.querySelectorAll('.medley-button').forEach(btn => {
+                            btn.classList.remove('disabled');
+                        });
+                        break;
+                }
+            } catch (e) {
+                console.error('Error parsing SSE data:', e, event.data);
+            }
+        };
+        
+        eventSource.onerror = function(event) {
+            console.error('EventSource error:', event);
+            eventSource.close();
+
+            recomputeBtn.disabled = false;
+            statusIndicator.textContent = 'Error';
+            statusIndicator.className = 'badge bg-danger';
+
+            // Re-enable medley buttons
+            document.querySelectorAll('.medley-button').forEach(btn => {
+                btn.classList.remove('disabled');
+            });
+
+            alert('Connection error while processing');
+        };
+    });
+});
+
+// Global tooltip management
+function createGlobalTooltip() {
+    let globalTooltip = document.getElementById('global-avatar-tooltip');
+    if (!globalTooltip) {
+        globalTooltip = document.createElement('div');
+        globalTooltip.id = 'global-avatar-tooltip';
+        globalTooltip.style.cssText = `
+            position: fixed;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            z-index: 99999;
+            pointer-events: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        `;
+        document.body.appendChild(globalTooltip);
+    }
+    return globalTooltip;
+}
+
+function showTooltip(element, participantData) {
+    const globalTooltip = createGlobalTooltip();
+    const rect = element.getBoundingClientRect();
+
+    globalTooltip.style.left = (rect.left + rect.width/2) + 'px';
+    globalTooltip.style.top = (rect.top - 10) + 'px';
+    globalTooltip.style.transform = 'translate(-50%, -100%)';
+
+    const displayName = participantData.display_name || 'Unknown';
+    const support = participantData.predicted_agreement || 0;
+    const relevance = participantData.quality_score || 0;
+
+    globalTooltip.innerHTML = `
+        <strong>${displayName}</strong><br>
+        Support: <span style="color:#ffe066;">${support}%</span><br>
+        Relevance: <span style="color:#6ee7b7;">${relevance}%</span>
+    `;
+
+    globalTooltip.style.opacity = '1';
+    element.style.transform = element.style.transform.replace(/scale\([^)]*\)/g, '').trim() + ' scale(1.1)';
+    element.style.zIndex = '100';
+}
+
+function hideTooltip(element) {
+    const globalTooltip = document.getElementById('global-avatar-tooltip');
+    if (globalTooltip) {
+        globalTooltip.style.opacity = '0';
+    }
+    element.style.transform = element.style.transform.replace(/scale\([^)]*\)/g, '').trim() + ' scale(1)';
+    element.style.zIndex = '10';
+}
+
+function calculateMeanSupport(results) {
+    if (!results || results.length === 0) return 0;
+
+    const totalAgreement = results.reduce((sum, participant) => {
+        return sum + (participant.predicted_agreement || 0);
+    }, 0);
+
+    return Math.round(totalAgreement / results.length);
+}
+
+function getSupportLevelColor(supportLevel) {
+    // Clamp support level between 0 and 100
+    const support = Math.max(0, Math.min(100, supportLevel || 0));
+
+    let r, g, b;
+
+    if (support <= 50) {
+        // Red (255,0,0) to Yellow (255,255,0) - increasing green
+        r = 255;
+        g = Math.round((support / 50) * 255);
+        b = 0;
+    } else {
+        // Yellow (255,255,0) to Dark Green (0,128,0) - decreasing red and green
+        r = Math.round(255 * (1 - (support - 50) / 50));
+        g = Math.round(255 - ((support - 50) / 50) * 127); // Fade from 255 to 128
+        b = 0;
+    }
+
+    // Return with higher alpha for more visibility
+    const color = `rgba(${r}, ${g}, ${b}, 0.6)`;
+    return color;
+}
+
+function updateSingleParticipant(participantData) {
+    // Store participant data (always needed for calculations)
+    window.currentParticipants.set(participantData.username, participantData);
+
+    const container = document.getElementById('avatars-container');
+    const plot = document.getElementById('editor-support-plot');
+
+    if (!container || !plot) {
+        console.error('Missing container or plot element');
+        return;
+    }
+
+    // Find existing avatar or create new one
+    let avatar = container.querySelector(`[data-participant-id="${participantData.username}"]`);
+
+    if (!avatar) {
+        // Create new avatar element
+        avatar = createAvatarElement(participantData);
+        container.appendChild(avatar);
+    } else {
+        // Update existing avatar with new data
+        updateExistingAvatar(avatar, participantData);
+    }
+
+    // Animate to new position
+    animateAvatarToPosition(avatar, participantData, plot);
+
+    updateMetaMedleyGroups(Array.from(window.currentParticipants.values()));
+}
+
+function updateExistingAvatar(avatar, participantData) {
+    // Update data attributes
+    avatar.setAttribute('data-support', participantData.predicted_agreement);
+    avatar.setAttribute('data-relevance', participantData.quality_score);
+
+    // Remove existing event listeners and add fresh ones
+    if (avatar._hoverEnter) avatar.removeEventListener('mouseenter', avatar._hoverEnter);
+    if (avatar._hoverLeave) avatar.removeEventListener('mouseleave', avatar._hoverLeave);
+
+    // Add simplified hover effects
+    avatar._hoverEnter = () => showTooltip(avatar, participantData);
+    avatar._hoverLeave = () => hideTooltip(avatar);
+
+    avatar.addEventListener('mouseenter', avatar._hoverEnter);
+    avatar.addEventListener('mouseleave', avatar._hoverLeave);
+
+    // Remove processing class and add updated visual feedback with support border color
+    avatar.classList.remove('processing');
+    const supportColor = getSupportLevelColor(participantData.predicted_agreement);
+    const borderColor = supportColor.replace('0.6)', '0.4)');
+    avatar.style.borderColor = borderColor;
+    avatar.style.opacity = '1';
+    avatar.style.transform = 'scale(1)';
+}
+
+function createAvatarElement(participantData) {
+    const avatarSize = 40;
+    const avatar = document.createElement('div');
+    avatar.className = 'participant-avatar processing';
+    avatar.setAttribute('data-participant-id', participantData.username);
+    avatar.setAttribute('data-support', participantData.predicted_agreement);
+    avatar.setAttribute('data-relevance', participantData.quality_score);
+
+    // Get the border color based on support level (but with softer opacity for border)
+    const supportColor = getSupportLevelColor(participantData.predicted_agreement);
+    // Convert rgba to a softer version for the border
+    const borderColor = supportColor.replace('0.6)', '0.4)');
+
+    // Set cursor based on SHOW_AVATARS flag
+    const cursorStyle = SHOW_AVATARS ? 'pointer' : 'default';
+
+    avatar.style.cssText = `
+        position: absolute;
+        width: ${avatarSize}px;
+        height: ${avatarSize}px;
+        border-radius: 50%;
+        border: 2px solid ${borderColor};
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        cursor: ${cursorStyle};
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 10;
+        overflow: hidden;
+        opacity: 0.8;
+        transform: scale(0.9);
+        background: #f5f5f5;
+    `;
+
+    // Add avatar image or initials fallback
+    // Use default avatar if SHOW_AVATARS is false (control condition)
+    const avatarUrl = SHOW_AVATARS ? participantData.avatar_url : 'https://ccc-sfulay.s3.us-east-1.amazonaws.com/media/GeneratedAvatars/default_avatar.png';
+
+    if (avatarUrl && avatarUrl !== '/static/assets/img/avatars/default.png') {
+        const avatarImg = document.createElement('img');
+        avatarImg.src = avatarUrl;
+        avatarImg.style.cssText = `
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            border-radius: 50%;
+        `;
+        avatarImg.onerror = function() {
+            setAvatarInitials(avatar, participantData.display_name);
+        };
+        avatar.appendChild(avatarImg);
+    } else {
+        setAvatarInitials(avatar, participantData.display_name);
+    }
+
+    // Only add hover and click interactions when SHOW_AVATARS is true
+    if (SHOW_AVATARS) {
+        // Add simplified hover effects
+        avatar.addEventListener('mouseenter', () => showTooltip(avatar, participantData));
+        avatar.addEventListener('mouseleave', () => hideTooltip(avatar));
+
+        // Add click handler for modal
+        avatar.addEventListener('click', (event) => {
+            // Track telemetry for avatar click
+            if (window.telemetry) {
+                try {
+                    const rect = avatar.getBoundingClientRect();
+                    const clickX = Math.round(event.clientX - rect.left);
+                    const clickY = Math.round(event.clientY - rect.top);
+                    const recId = window.currentRecommendationId || {{ recommendation.id }};
+
+                    // Fetch participant numeric ID and track click
+                    fetch(`/api/medley/${recId}/participant/${participantData.username}/`)
+                        .then(response => response.json())
+                        .then(data => {
+                            window.telemetry.trackAvatarClick(
+                                parseInt(recId),
+                                parseInt(data.participant_id),
+                                'other', // avatar_type (always 'other' in editor)
+                                clickX,
+                                clickY
+                            );
+                        })
+                        .catch(error => console.warn('Telemetry tracking failed:', error));
+                } catch (error) {
+                    console.warn('Failed to track avatar click:', error);
+                }
+            }
+
+            // Load modal (existing functionality)
+            loadParticipantModal(participantData.username);
+        });
+    }
+
+    return avatar;
+}
+
+function setAvatarInitials(avatar, displayName) {
+    avatar.innerHTML = '';
+    avatar.style.display = 'flex';
+    avatar.style.alignItems = 'center';
+    avatar.style.justifyContent = 'center';
+    avatar.style.color = 'white';
+    avatar.style.fontWeight = 'bold';
+    avatar.style.fontSize = '0.7rem';
+    const initials = (displayName || 'U').split(' ').map(n => n[0]).join('').substring(0, 2);
+    avatar.textContent = initials;
+}
+
+function animateAvatarToPosition(avatar, participantData, plot) {
+    const plotWidth = plot.offsetWidth;
+    const plotHeight = plot.offsetHeight;
+    const avatarSize = 40;
+    
+    // Round support to nearest 5
+    const roundedSupport = Math.round(participantData.predicted_agreement / 5) * 5;
+    
+    // Calculate x position based on rounded support
+    let x = (roundedSupport / 100) * plotWidth;
+    
+    // Ensure x stays within bounds
+    x = Math.max(avatarSize/2, Math.min(plotWidth - avatarSize/2, x));
+    
+    // Find vertical stacking position for this support level
+    const finalPosition = findStackingPosition(x, roundedSupport, participantData.username, plotWidth, plotHeight, avatarSize);
+    
+    // Start position: top of chart at the correct x position
+    const startX = finalPosition.x - avatarSize/2;
+    const startY = 30; // Start slightly below the top to avoid header overlap
+    const finalX = finalPosition.x - avatarSize/2;
+    const finalY = finalPosition.y - avatarSize/2;
+    
+    // Set initial position (top of chart)
+    avatar.style.left = startX + 'px';
+    avatar.style.top = startY + 'px';
+    avatar.style.transition = 'none'; // Disable transition for initial positioning
+    
+    // Force reflow
+    avatar.offsetHeight;
+    
+    // Enable smooth transition and animate to final position
+    setTimeout(() => {
+        avatar.style.transition = 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'; // Bouncy easing
+        avatar.style.left = finalX + 'px';
+        avatar.style.top = finalY + 'px';
+        
+        // Update visual state during animation with support-based border color
+        const supportColor = getSupportLevelColor(participantData.predicted_agreement);
+        const borderColor = supportColor.replace('0.6)', '0.4)');
+        avatar.style.borderColor = borderColor;
+        avatar.style.opacity = '1';
+        avatar.style.transform = 'scale(1)';
+        avatar.classList.remove('processing');
+    }, 50);
+}
+
+function findStackingPosition(targetX, roundedSupport, currentUsername, plotWidth, plotHeight, avatarSize) {
+    // Find all avatars at this support level (within small tolerance)
+    const tolerance = plotWidth * 0.02; // 2% of plot width tolerance for grouping
+    const existingAvatarsAtLevel = [];
+    
+    for (let [username, participant] of window.currentParticipants) {
+        if (username === currentUsername) continue;
+        
+        const existingAvatar = document.querySelector(`[data-participant-id="${username}"]`);
+        if (existingAvatar) {
+            const rect = existingAvatar.getBoundingClientRect();
+            const plotRect = document.getElementById('editor-support-plot').getBoundingClientRect();
+            
+            const existingX = rect.left - plotRect.left + avatarSize/2;
+            
+            // Check if this avatar is at the same support level
+            if (Math.abs(existingX - targetX) <= tolerance) {
+                const existingY = rect.top - plotRect.top + avatarSize/2;
+                existingAvatarsAtLevel.push(existingY);
+            }
+        }
+    }
+    
+    // Sort existing Y positions to find gaps
+    existingAvatarsAtLevel.sort((a, b) => a - b);
+
+    // Find the best Y position (stack from bottom up)
+    let stackY = plotHeight - avatarSize/2 - 25; // Start from bottom, leave space for x-axis
+
+    // Stack upward, checking for overlaps
+    for (let existingY of existingAvatarsAtLevel.reverse()) { // Start from bottom
+        if (Math.abs(stackY - existingY) < avatarSize) {
+            stackY = existingY - avatarSize; // Stack above with 0px gap
+        }
+    }
+
+    // Ensure we don't go above the plot area
+    stackY = Math.max(avatarSize/2, stackY);
+
+    return {
+        x: targetX,
+        y: stackY
+    };
+}
+
+function findStackingPositionStatic(targetX, roundedSupport, currentUsername, plotWidth, plotHeight, avatarSize, positionedAvatars) {
+    // Find all avatars at this support level (within small tolerance)
+    const tolerance = plotWidth * 0.02; // 2% of plot width tolerance for grouping
+    const existingAvatarsAtLevel = [];
+    
+    for (const positioned of positionedAvatars) {
+        if (Math.abs(positioned.x - targetX) <= tolerance) {
+            existingAvatarsAtLevel.push(positioned.y);
+        }
+    }
+    
+    // Sort existing Y positions
+    existingAvatarsAtLevel.sort((a, b) => a - b);
+
+    // Find the best Y position (stack from bottom up)
+    let stackY = plotHeight - avatarSize/2 - 25; // Start from bottom, leave space for x-axis
+
+    // Stack upward, checking for overlaps
+    for (let existingY of existingAvatarsAtLevel.reverse()) { // Start from bottom
+        if (Math.abs(stackY - existingY) < avatarSize) {
+            stackY = existingY - avatarSize; // Stack above with 0px gap
+        }
+    }
+
+    // Ensure we don't go above the plot area
+    stackY = Math.max(avatarSize/2, stackY);
+
+    return {
+        x: targetX,
+        y: stackY
+    };
+}
+
+function updateSummaryStats(results) {
+    if (results.length === 0) return;
+
+    let totalAgreement = 0;
+
+    results.forEach(participant => {
+        totalAgreement += participant.predicted_agreement;
+    });
+
+    const meanSupport = Math.round(totalAgreement / results.length);
+
+    // Update mean support line
+    updateMeanSupportLine(meanSupport);
+}
+
+function updateResults(results) {
+    let totalAgreement = 0;
+
+    // Calculate totals for stats
+    results.forEach(participant => {
+        totalAgreement += participant.predicted_agreement;
+    });
+
+    // Update summary stats
+    const meanSupport = Math.round(totalAgreement / results.length);
+
+    // Update mean support line
+    updateMeanSupportLine(meanSupport);
+
+    updateMetaMedleyGroups(results);
+
+    // Update avatars with animation (small delay to ensure plot is ready)
+    setTimeout(() => {
+        updateAvatars(results);
+    }, 50);
+}
+
+function updateMetaMedleyGroups(participants) {
+    if (!Array.isArray(participants) || participants.length === 0) {
+        window.metaMedleyGroups = { bottom: [], middle: [], top: [] };
+        return;
+    }
+
+    const sorted = [...participants].sort((a, b) => {
+        const aSupport = typeof a.predicted_agreement === 'number' ? a.predicted_agreement : 0;
+        const bSupport = typeof b.predicted_agreement === 'number' ? b.predicted_agreement : 0;
+        return aSupport - bSupport;
+    });
+
+    let bottom = [];
+    let middle = [];
+    let top = [];
+
+    if (sorted.length >= 90) {
+        bottom = sorted.slice(0, 30);
+        middle = sorted.slice(30, 60);
+        top = sorted.slice(60, 90);
+    } else {
+        const third = Math.floor(sorted.length / 3);
+        bottom = sorted.slice(0, third);
+        middle = sorted.slice(third, third * 2);
+        top = sorted.slice(third * 2);
+    }
+
+    window.metaMedleyGroups = {
+        bottom: bottom.map(p => p.username),
+        middle: middle.map(p => p.username),
+        top: top.map(p => p.username)
+    };
+
+    if (window.activeMedleyGroup) {
+        applyGroupAvatarFocus(window.activeMedleyGroup);
+    }
+}
+
+function getAllAvatarElements() {
+    return document.querySelectorAll('.participant-avatar, .avatar-circle');
+}
+
+function applyGroupAvatarFocus(groupKey) {
+    if (!groupKey || !window.metaMedleyGroups || !window.metaMedleyGroups[groupKey]) {
+        return;
+    }
+
+    const targetUsernames = new Set(window.metaMedleyGroups[groupKey] || []);
+
+    if (targetUsernames.size === 0) {
+        clearGroupAvatarFocus();
+        return;
+    }
+
+    getAllAvatarElements().forEach(avatar => {
+        const username = avatar.dataset.participantId || avatar.dataset.username;
+        if (username && targetUsernames.has(username)) {
+            avatar.classList.add('avatar-group-focus');
+            avatar.classList.remove('avatar-dimmed');
+        } else {
+            avatar.classList.add('avatar-dimmed');
+            avatar.classList.remove('avatar-group-focus');
+        }
+    });
+}
+
+function clearGroupAvatarFocus() {
+    getAllAvatarElements().forEach(avatar => {
+        avatar.classList.remove('avatar-dimmed', 'avatar-group-focus');
+    });
+}
+
+function handleMedleyButtonHover(groupKey) {
+    window.hoveredMedleyGroup = groupKey;
+    applyGroupAvatarFocus(groupKey);
+}
+
+function handleMedleyButtonLeave(groupKey) {
+    window.hoveredMedleyGroup = null;
+    if (window.metaMedleyPanelLoading || window.metaMedleyPanelOpen) {
+        if (window.activeMedleyGroup) {
+            applyGroupAvatarFocus(window.activeMedleyGroup);
+        }
+        return;
+    }
+    clearGroupAvatarFocus();
+}
+
+function updateMeanSupportLine(meanSupport) {
+    const meanLine = document.getElementById('mean-support-line');
+    const meanLabel = document.getElementById('mean-support-label');
+    const meanValue = document.getElementById('mean-support-value');
+
+    if (meanLine && meanLabel && meanValue) {
+        meanLine.style.left = `calc(${meanSupport}% - 1px)`;
+        meanLabel.style.left = `calc(${meanSupport}% - 75px)`;
+        meanValue.textContent = meanSupport;
+    }
+}
+
+function updateAvatars(results) {
+    console.log('Updating avatars');
+
+    const container = document.getElementById('avatars-container');
+    const plot = document.getElementById('editor-support-plot');
+
+    if (!container || !plot) {
+        console.error('Missing container or plot element');
+        return;
+    }
+
+    // Clear existing avatars
+    container.innerHTML = '';
+
+    // Force a reflow to ensure dimensions are correct
+    plot.offsetHeight;
+
+    const plotWidth = plot.offsetWidth;
+    const plotHeight = plot.offsetHeight;
+    console.log('Plot width:', plotWidth);
+    console.log('Plot height:', plotHeight);
+    const avatarSize = 40;
+
+    if (plotWidth === 0 || plotHeight === 0) {
+        setTimeout(() => updateAvatars(results), 100);
+        return;
+    }
+
+    const positionedAvatars = [];
+
+    results.forEach((participant, index) => {
+        // Create avatar using consolidated function
+        const avatar = createAvatarElement(participant);
+        avatar.className = 'participant-avatar'; // Remove processing class for static avatars
+
+        // Apply support-based border color (will override the color set in createAvatarElement)
+        const supportColor = getSupportLevelColor(participant.predicted_agreement);
+        const borderColor = supportColor.replace('0.6)', '0.4)');
+        avatar.style.borderColor = borderColor;
+
+        // Calculate stacking position based on support level
+        const roundedSupport = Math.round(participant.predicted_agreement / 5) * 5;
+        let x = (roundedSupport / 100) * plotWidth;
+        x = Math.max(avatarSize/2, Math.min(plotWidth - avatarSize/2, x));
+
+        // Find stacking position for this support level
+        const stackingPosition = findStackingPositionStatic(x, roundedSupport, participant.username, plotWidth, plotHeight, avatarSize, positionedAvatars);
+
+        // Set initial position (top of chart)
+        const startX = stackingPosition.x - avatarSize/2;
+        const startY = 30; // Start slightly below the top to avoid header overlap
+        avatar.style.left = startX + 'px';
+        avatar.style.top = startY + 'px';
+        avatar.style.transition = 'none';
+
+        container.appendChild(avatar);
+        positionedAvatars.push({x: stackingPosition.x, y: stackingPosition.y, element: avatar});
+    });
+
+    // Animate avatars dropping down with stagger effect
+    const avatars = container.querySelectorAll('.participant-avatar');
+    avatars.forEach((avatar, index) => {
+        avatar.offsetHeight; // Force reflow
+
+        setTimeout(() => {
+            const avatarData = positionedAvatars[index];
+            const finalX = avatarData.x - avatarSize/2;
+            const finalY = avatarData.y - avatarSize/2;
+
+            // Enable smooth transition and animate to final position
+            avatar.style.transition = 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
+            avatar.style.left = finalX + 'px';
+            avatar.style.top = finalY + 'px';
+            avatar.style.opacity = '1';
+            avatar.style.transform = 'scale(1)';
+        }, index * 75); // Stagger by 150ms
+    });
+}
+
+// Initialize avatars on page load from template data
+function initializeFromTemplateData() {
+    console.log('Initializing from template data');
+   // const initialData = JSON.parse(document.getElementById('participant-data').textContent);
+    
+    const initialData = [
+        {% for participant in participant_data %}
+        {
+            username: '{{ participant.username }}',
+            display_name: '{{ participant.display_name }}',
+            predicted_agreement: {{ participant.predicted_agreement }},
+            confidence_score: {{ participant.confidence_score|default:70 }},
+            quality_score: {{ participant.quality_score|default:65 }},
+            avatar_url: '{{ participant.avatar_url }}',
+            reasoning: 'Initial prediction based on interview data.'
+        },
+        {% endfor %}
+    ];
+    console.log('Initial data:', initialData);
+    window.currentParticipants.clear();
+    initialData.forEach(participant => {
+        window.currentParticipants.set(participant.username, participant);
+    });
+    console.log('Current participants:', window.currentParticipants);
+    if (initialData.length > 0) {
+        console.log('Initial data:', initialData);
+        const plot = document.getElementById('editor-support-plot');
+        if (plot && plot.offsetWidth > 0 && plot.offsetHeight > 0) {
+            updateResults(initialData);
+            setTimeout(() => {
+                updateSummaryStats(initialData);
+                // Initialize previous mean support with current data
+                window.previousMeanSupport = calculateMeanSupport(initialData);
+            }, 100);
+        } else {
+            setTimeout(() => initializeFromTemplateData(), 50);
+        }
+    } else {
+        updateSummaryStats([]);
+        window.previousMeanSupport = 0;
+    }
+}
+
+// Setup listener for chart resize to reposition avatars
+function setupChartResizeListener() {
+    const plot = document.getElementById('editor-support-plot');
+    if (!plot) return;
+
+    plot.addEventListener('transitionend', (e) => {
+        // Only trigger on max-width changes (not other properties)
+        if (e.propertyName === 'max-width') {
+            repositionAllAvatarsAfterResize();
+        }
+    });
+}
+
+// Reposition existing avatars without animation (for chart resize)
+function repositionExistingAvatars() {
+    const container = document.getElementById('avatars-container');
+    const plot = document.getElementById('editor-support-plot');
+
+    if (!container || !plot) return;
+
+    const plotWidth = plot.offsetWidth;
+    const plotHeight = plot.offsetHeight;
+
+    // Check if avatars are scaled down (participant modal open)
+    const avatarSize = document.body.classList.contains('participant-modal-open') ? 30 : 40;
+
+    // Get all existing avatars
+    const avatars = container.querySelectorAll('.participant-avatar');
+    if (avatars.length === 0) return;
+
+    const positionedAvatars = [];
+
+    // Recalculate positions for each avatar
+    avatars.forEach(avatar => {
+        const support = parseFloat(avatar.dataset.support);
+        const username = avatar.dataset.participantId;
+
+        if (isNaN(support)) return;
+
+        // Calculate new x position based on new chart width
+        const roundedSupport = Math.round(support / 5) * 5;
+        let x = (roundedSupport / 100) * plotWidth;
+        x = Math.max(avatarSize/2, Math.min(plotWidth - avatarSize/2, x));
+
+        // Find new stacking position
+        const stackingPosition = findStackingPositionStatic(x, roundedSupport, username, plotWidth, plotHeight, avatarSize, positionedAvatars);
+
+        // Update position directly (CSS transition will animate smoothly)
+        avatar.style.left = (stackingPosition.x - avatarSize/2) + 'px';
+        avatar.style.top = (stackingPosition.y - avatarSize/2) + 'px';
+
+        positionedAvatars.push({x: stackingPosition.x, y: stackingPosition.y, element: avatar});
+    });
+}
+
+// Reposition all avatars after chart width changes
+function repositionAllAvatarsAfterResize() {
+    // Use non-animated repositioning for smooth chart resize transitions
+    repositionExistingAvatars();
+}
+
+function setupKaraokeTranscript(modal) {
+    
+    // Add click-to-play/pause for transcript text
+    modal.querySelectorAll('.karaoke-transcript-sent').forEach(function(transcriptBlock) {
+        const audioId = transcriptBlock.dataset.audioId;
+        const audio = modal.querySelector(`#audio-${audioId}`);
+        if (!audio) return;
+
+        transcriptBlock.style.cursor = 'pointer';
+        transcriptBlock.addEventListener('click', function() {
+            if (audio.paused) {
+                audio.play();
+            } else {
+                audio.pause();
+            }
+        });
+    });
+
+    // Setup karaoke functionality for sentence-level highlighting
+    modal.querySelectorAll('.karaoke-transcript-sent').forEach(function(transcriptBlock) {
+        const audioId = transcriptBlock.dataset.audioId;
+        const audio = modal.querySelector(`#audio-${audioId}`);
+        if (!audio) return;
+
+        // Get the HTML (not just text)
+        const html = transcriptBlock.innerHTML;
+        
+        // Split the HTML into sentences (simple regex, can be improved)
+        const sentences = html.match(/[^.!?]+[.!?]+(\s|$)/g) || [html];
+        
+        // Clear the block and add each sentence in a span
+        transcriptBlock.innerHTML = '';
+        sentences.forEach((sentence, idx) => {
+            const span = document.createElement('span');
+            span.className = 'karaoke-sentence';
+            span.dataset.index = idx;
+            span.innerHTML = sentence.trim() + ' ';
+            transcriptBlock.appendChild(span);
+        });
+
+        const sentenceSpans = transcriptBlock.querySelectorAll('.karaoke-sentence');
+        const sentenceCount = sentenceSpans.length;
+
+        audio.addEventListener('timeupdate', function() {
+            if (!audio.duration || sentenceCount === 0) return;
+            
+            const secondsPerSentence = audio.duration / sentenceCount;
+            const currentSentenceIndex = Math.floor(audio.currentTime / secondsPerSentence);
+            
+            sentenceSpans.forEach((span, idx) => {
+                if (idx === currentSentenceIndex) {
+                    span.classList.add('highlight');
+                } else {
+                    span.classList.remove('highlight');
+                }
+            });
+        });
+
+        audio.addEventListener('pause', function() {
+            sentenceSpans.forEach(span => span.classList.remove('highlight'));
+            transcriptBlock.classList.remove('active');
+        });
+        
+        audio.addEventListener('play', function() {
+            transcriptBlock.classList.add('active');
+        });
+        
+        audio.addEventListener('ended', function() {
+            sentenceSpans.forEach(span => span.classList.remove('highlight'));
+            transcriptBlock.classList.remove('active');
+        });
+    });
+
+}
+
+function initializeMedleyModal(modal) {
+    console.log('=== Initializing Medley Modal ===');
+
+    // Sequential audio playback for medley
+    const segmentAudios = modal.querySelectorAll('.segment-audio');
+    const medleyPlayer = modal.querySelector('#medley-player');
+    const transcriptSegments = modal.querySelectorAll('.medley-segment');
+
+    console.log('Found segment audios:', segmentAudios.length);
+    console.log('Found transcript segments:', transcriptSegments.length);
+    console.log('Medley player:', medleyPlayer);
+
+    if (segmentAudios.length > 0 && medleyPlayer) {
+        let currentSegmentIndex = 0;
+
+        // Initialize: load first segment into medley player
+        const firstSegment = segmentAudios[0];
+        const firstSource = firstSegment.querySelector('source');
+        console.log('First segment source:', firstSource);
+
+        if (firstSource) {
+            console.log('First source URL:', firstSource.src);
+            const medleySource = modal.querySelector('#medley-source');
+            medleySource.src = firstSource.src;
+            medleyPlayer.load();
+            console.log('Loaded first segment into medley player');
+        } else {
+            console.error('No source found for first segment');
+        }
+
+        // Karaoke highlighting function
+        function highlightSegment(index) {
+            // Remove highlight from all segments
+            transcriptSegments.forEach(seg => seg.classList.remove('highlight'));
+            
+            // Add highlight to current segment
+            if (transcriptSegments[index]) {
+                transcriptSegments[index].classList.add('highlight');
+                
+                // Scroll segment into view if needed
+                transcriptSegments[index].scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'nearest',
+                    inline: 'nearest'
+                });
+            }
+        }
+
+        // Highlight first segment when play starts
+        medleyPlayer.addEventListener('play', function() {
+            console.log('Medley player started, highlighting segment:', currentSegmentIndex);
+            highlightSegment(currentSegmentIndex);
+            
+            // If user clicks play after it finished, start from beginning
+            if (medleyPlayer.currentTime === 0 && currentSegmentIndex >= segmentAudios.length) {
+                console.log('Restarting from beginning');
+                currentSegmentIndex = 0;
+                const firstSource = segmentAudios[0].querySelector('source');
+                if (firstSource) {
+                    const medleySource = modal.querySelector('#medley-source');
+                    medleySource.src = firstSource.src;
+                    medleyPlayer.load();
+                    medleyPlayer.play();
+                    highlightSegment(0);
+                }
+            }
+        });
+
+        // Remove highlight when paused
+        medleyPlayer.addEventListener('pause', function() {
+            // Keep highlight but reduce opacity slightly
+            const highlightedSegment = modal.querySelector('.medley-segment.highlight');
+            if (highlightedSegment) {
+                // Don't remove highlight, just indicate paused state visually
+                console.log('Playback paused on segment:', currentSegmentIndex);
+            }
+        });
+
+        // When medley player ends, play next segment
+        medleyPlayer.addEventListener('ended', function() {
+            console.log('Segment ended, moving to next. Current index:', currentSegmentIndex);
+            currentSegmentIndex++;
+            
+            if (currentSegmentIndex < segmentAudios.length) {
+                const nextSegment = segmentAudios[currentSegmentIndex];
+                const nextSource = nextSegment.querySelector('source');
+                if (nextSource) {
+                    console.log('Playing next segment:', currentSegmentIndex, nextSource.src);
+                    const medleySource = modal.querySelector('#medley-source');
+                    medleySource.src = nextSource.src;
+                    medleyPlayer.load();
+                    medleyPlayer.play();
+                    
+                    // Highlight the next segment
+                    highlightSegment(currentSegmentIndex);
+                }
+            } else {
+                // All segments completed - remove highlight
+                console.log('All segments played, resetting to beginning');
+                transcriptSegments.forEach(seg => seg.classList.remove('highlight'));
+                currentSegmentIndex = 0;
+                const firstSource = segmentAudios[0].querySelector('source');
+                if (firstSource) {
+                    const medleySource = modal.querySelector('#medley-source');
+                    medleySource.src = firstSource.src;
+                    medleyPlayer.load();
+                }
+            }
+        });
+    } else {
+        console.log('No segments or medley player found - this may be the old modal format');
+    }
+}
+
+function initializeModalJavaScript(modal) {
+    
+    try {
+        // Initialize sliders
+        const connectionSlider = modal.querySelector('input[name="connection_score"]');
+        const voteSlider = modal.querySelector('input[name="vote_prediction"]');
+        
+        let connectionTouched = false;
+        let voteTouched = false;
+        
+        function checkFormCompletion() {
+            const submitButton = modal.querySelector('#submit-reflection-close');
+            if (submitButton) {
+                if (connectionTouched && voteTouched) {
+                    submitButton.disabled = false;
+                    submitButton.classList.remove('btn-secondary');
+                    submitButton.classList.add('btn-success');
+                } else {
+                    submitButton.disabled = true;
+                    submitButton.classList.remove('btn-success');
+                    submitButton.classList.add('btn-secondary');
+                }
+            }
+        }
+        
+        // Add slider event listeners
+        if (connectionSlider) {
+            connectionSlider.addEventListener('input', function () {
+                connectionTouched = true;
+                checkFormCompletion();
+            });
+        }
+
+        if (voteSlider) {
+            voteSlider.addEventListener('input', function () {
+                voteTouched = true;
+                checkFormCompletion();
+            });
+        }
+        
+        // Initialize connection request button
+        const connectionRequestBtn = modal.querySelector('#send-connection-request');
+        if (connectionRequestBtn) {
+            connectionRequestBtn.addEventListener('click', function() {
+                // Change button to show "Connection sent"
+                this.innerHTML = '<span class="me-2">✓</span> Connection sent';
+                this.classList.remove('btn-primary');
+                this.classList.add('btn-outline-secondary');
+                this.disabled = true;
+                
+                // Get participant and recommendation IDs from modal attributes
+                const participantId = modal.getAttribute('data-participant-id');
+                const recId = window.currentRecommendationId || {{ recommendation.id }};
+                
+                // Send the connection request to the backend
+                fetch('/api/send_connection_request/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': (document.querySelector('[name=csrfmiddlewaretoken]') || {}).value || ''
+                    },
+                    body: JSON.stringify({
+                        target_participant_id: parseInt(participantId),
+                        recommendation_id: parseInt(recId)
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success) {
+                        console.error('Error sending connection request:', data.error);
+                        // Revert button state if there was an error
+                        this.innerHTML = '<span class="me-2">&#10148;</span> Send connection request';
+                        this.classList.remove('btn-outline-secondary');
+                        this.classList.add('btn-primary');
+                        this.disabled = false;
+                    }
+                })
+                .catch(err => {
+                    console.error('Error sending connection request:', err);
+                    // Revert button state if there was an error
+                    this.innerHTML = '<span class="me-2">&#10148;</span> Send connection request';
+                    this.classList.remove('btn-outline-secondary');
+                    this.classList.add('btn-primary');
+                    this.disabled = false;
+                });
+            });
+        }
+
+        // Initialize submit button
+        const submitButton = modal.querySelector('#submit-reflection-close');
+        if (submitButton) {
+            // Enable submit button by default
+            submitButton.disabled = false;
+            submitButton.classList.remove('btn-secondary');
+            submitButton.classList.add('btn-success');
+            
+            submitButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Get values with defensive checks
+                const connectionSlider = modal.querySelector('input[name="connection_score"]');
+                const connectionTextarea = modal.querySelector('textarea[name="connection_text"]');
+                const voteSlider = modal.querySelector('input[name="vote_prediction"]');
+                const voteTextarea = modal.querySelector('textarea[name="vote_explanation"]');
+                
+                if (!connectionSlider || !voteSlider) {
+                    console.error('Required form elements not found');
+                    return;
+                }
+                
+                const connection_score = connectionSlider.value;
+                const connection_text = connectionTextarea ? connectionTextarea.value : '';
+                const vote_prediction = voteSlider.value;
+                const vote_explanation = voteTextarea ? voteTextarea.value : '';
+                
+                // Get IDs from modal attributes
+                const participantId = modal.getAttribute('data-participant-id');
+                const recId = window.currentRecommendationId || {{ recommendation.id }};
+                
+
+                fetch('/api/submit_reflection/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': (document.querySelector('[name=csrfmiddlewaretoken]') || {}).value || ''
+                    },
+                    body: JSON.stringify({
+                        recommendation_id: parseInt(recId),
+                        target_participant_id: parseInt(participantId),
+                        connection_score: parseInt(connection_score),
+                        connection_text,
+                        vote_prediction: parseInt(vote_prediction),
+                        vote_explanation
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Close the modal
+                    const bsModal = bootstrap.Modal.getInstance(modal);
+                    if (bsModal) {
+                        bsModal.hide();
+                    }
+                })
+                .catch(err => {
+                    console.error('Error saving reflection:', err);
+                    alert('Error saving your reflection. Please try again.');
+                });
+            });
+        }
+        
+    } catch (error) {
+        console.error('Error initializing modal JavaScript:', error);
+    }
+}
+
+function loadParticipantModal(participantUsername) {
+    
+    // Create container if it doesn't exist
+    let container = document.getElementById('dynamic-modal-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'dynamic-modal-container';
+        document.body.appendChild(container);
+    }
+    
+    // Use current recommendation ID (updated after edits) or fallback to original
+    const recId = window.currentRecommendationId || {{ recommendation.id }};
+    
+    // Fetch modal content from the editor API
+    fetch(`/api/medley/${recId}/participant/${participantUsername}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error('Error loading modal:', data.error);
+                alert('Error loading participant details');
+                return;
+            }
+            
+            // Clear previous modal
+            container.innerHTML = '';
+            
+            // Create the actual modal
+            const modal = document.createElement('div');
+            modal.className = 'modal fade';
+            modal.id = `participantModal-${participantUsername}`;
+            modal.setAttribute('tabindex', '-1');
+            modal.setAttribute('aria-labelledby', `participantModalLabel-${participantUsername}`);
+            modal.setAttribute('aria-hidden', 'true');
+            modal.setAttribute('data-participant-id', data.participant_id);
+            modal.setAttribute('data-bs-backdrop', 'true');
+            modal.setAttribute('data-bs-keyboard', 'true');
+            
+            // Set modal content
+            modal.innerHTML = data.modal_html;
+            
+            // Add to container
+            container.appendChild(modal);
+            
+            // Re-initialize modal JavaScript after DOM insertion
+            setTimeout(() => {
+                initializeModalJavaScript(modal);
+                initializeMedleyModal(modal);
+                setupKaraokeTranscript(modal);
+            }, 100);
+            
+            // Show modal with clickable backdrop
+            const bsModal = new bootstrap.Modal(modal, {
+                backdrop: true,
+                keyboard: true
+            });
+            bsModal.show();
+
+            // Add body class to trigger chart resize
+            document.body.classList.add('participant-modal-open');
+
+            // Trigger avatar repositioning after CSS transition completes (300ms + buffer)
+            setTimeout(() => repositionAllAvatarsAfterResize(), 350);
+
+            // Clean up when modal is hidden
+            modal.addEventListener('hidden.bs.modal', function() {
+                // Remove body class to restore chart width
+                document.body.classList.remove('participant-modal-open');
+
+                // Trigger avatar repositioning after CSS transition completes (300ms + buffer)
+                setTimeout(() => repositionAllAvatarsAfterResize(), 350);
+
+                modal.remove();
+            });
+            
+        })
+        .catch(error => {
+            console.error('Error fetching modal:', error);
+            alert('Error loading participant details');
+        });
+}
+
+// Leaderboard functionality
+let currentLeaderboardData = [];
+let currentPage = 0;
+const itemsPerPage = 10;
+
+function updateLeaderboard(leaderboardData) {
+    currentLeaderboardData = leaderboardData;
+    currentPage = 0; // Reset to first page
+    
+    renderLeaderboard();
+}
+
+function renderLeaderboard() {
+    const currentUserId = {{ request.user.id }};
+    const sortBy = document.getElementById('leaderboard-sort').value;
+
+    // Filter data to show only current user's recommendations
+    let filteredData = currentLeaderboardData.filter(item => item.editor_id === currentUserId);
+
+    // Sort data
+    if (sortBy === 'support') {
+        filteredData.sort((a, b) => b.mean_support - a.mean_support);
+    } else if (sortBy === 'recent') {
+        filteredData.sort((a, b) => b.rec_id_for_sorting - a.rec_id_for_sorting);
+    }
+    
+    // Update pagination info
+    const totalItems = filteredData.length;
+    const startIndex = currentPage * itemsPerPage;
+    const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+    const paginatedData = filteredData.slice(startIndex, endIndex);
+    
+    // Update pagination controls
+    updatePaginationControls(totalItems, startIndex, endIndex);
+    
+    // Render table
+    renderLeaderboardTable(paginatedData);
+}
+
+function updatePaginationControls(totalItems, startIndex, endIndex) {
+    const paginationDiv = document.getElementById('leaderboard-pagination');
+    const rangeSpan = document.getElementById('leaderboard-range');
+    const totalSpan = document.getElementById('leaderboard-total');
+    const prevBtn = document.getElementById('leaderboard-prev');
+    const nextBtn = document.getElementById('leaderboard-next');
+    
+    if (totalItems > itemsPerPage) {
+        paginationDiv.style.display = 'flex';
+        rangeSpan.textContent = `${startIndex + 1}-${endIndex}`;
+        totalSpan.textContent = totalItems;
+        
+        prevBtn.disabled = currentPage === 0;
+        nextBtn.disabled = endIndex >= totalItems;
+    } else {
+        paginationDiv.style.display = 'none';
+    }
+}
+
+function renderLeaderboardTable(data) {
+    
+    const contentDiv = document.getElementById('leaderboard-content');
+    
+    if (data.length === 0) {
+        contentDiv.innerHTML = `
+            <div class="text-center py-4 text-muted">
+                <i class="fas fa-info-circle me-2"></i>
+                No recommendations found.
+            </div>
+        `;
+        return;
+    }
+    
+    let tableHTML = `
+        <div class="table-responsive" style="overflow: visible;">
+            <table class="table">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 60px;">#</th>
+                        <th>Recommendation</th>
+                        <th style="width: 120px;">Editor</th>
+                        <th style="width: 120px;">Support</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+    
+    data.forEach((item, index) => {
+        const globalRank = currentPage * itemsPerPage + index + 1;
+        const recommendationText = item.rec_text;
+        
+        // Determine row styling for latest recommendation
+        const rowClass = item.is_latest ? 'table-success' : '';
+        const latestBadge = item.is_latest ? '<i class="fas fa-star text-warning me-1" title="Latest"></i>' : '';
+        
+        tableHTML += `
+            <tr class="${rowClass}">
+                <td>
+                    <span class="badge ${index < 3 ? (index === 0 ? 'bg-warning' : index === 1 ? 'bg-secondary' : 'bg-dark') : 'bg-light text-dark'}">${globalRank}</span>
+                </td>
+                <td class="small">${latestBadge}${recommendationText}</td>
+                <td class="small">${item.editor_name}</td>
+                <td class="small">
+                    ${item.mean_support.toFixed(1)}%
+                </td>
+            </tr>
+        `;
+    });
+    
+    tableHTML += `
+                </tbody>
+            </table>
+        </div>
+    `;
+    
+    contentDiv.innerHTML = tableHTML;
+}
+
+function loadRecommendation(recommendationId) {
+    window.location.href = `/editor/${recommendationId}/`;
+}
+
+function getCurrentFilteredData() {
+    const currentUserId = {{ request.user.id }};
+    // Always return only current user's recommendations
+    return currentLeaderboardData.filter(item => item.editor_id === currentUserId);
+}
+
+// Function to reload leaderboard data from server
+function reloadLeaderboard() {
+    console.log("Reloading leaderboard");
+    fetch(`/api/editor/${window.baseRecommendationId}/leaderboard/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.leaderboard_data) {
+                console.log("Leaderboard data:", data.leaderboard_data);
+                updateLeaderboard(data.leaderboard_data);
+            } else {
+                console.log("No leaderboard data");
+                updateLeaderboard([]);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading leaderboard:', error);
+            document.getElementById('leaderboard-content').innerHTML = `
+                <div class="text-center py-4 text-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Error loading leaderboard
+                </div>
+            `;
+        });
+}
+
+// Initialize leaderboard on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle chevron icon when leaderboard collapse is toggled
+    const leaderboardCollapse = document.getElementById('leaderboardCollapse');
+    const chevronIcon = document.getElementById('leaderboard-chevron');
+
+    if (leaderboardCollapse && chevronIcon) {
+        leaderboardCollapse.addEventListener('show.bs.collapse', function() {
+            chevronIcon.classList.remove('fa-chevron-right');
+            chevronIcon.classList.add('fa-chevron-down');
+        });
+
+        leaderboardCollapse.addEventListener('hide.bs.collapse', function() {
+            chevronIcon.classList.remove('fa-chevron-down');
+            chevronIcon.classList.add('fa-chevron-right');
+        });
+    }
+
+    // Load initial leaderboard data
+    reloadLeaderboard();
+
+    // Add sort event listener
+    document.getElementById('leaderboard-sort').addEventListener('change', function() {
+        currentPage = 0;
+        renderLeaderboard();
+    });
+    
+    // Add pagination event listeners
+    document.getElementById('leaderboard-prev').addEventListener('click', function() {
+        if (currentPage > 0) {
+            currentPage--;
+            renderLeaderboard();
+        }
+    });
+    
+    document.getElementById('leaderboard-next').addEventListener('click', function() {
+        const totalItems = getCurrentFilteredData().length;
+        const maxPage = Math.ceil(totalItems / itemsPerPage) - 1;
+        if (currentPage < maxPage) {
+            currentPage++;
+            renderLeaderboard();
+        }
+    });
+});
+
+// ============================================================================
+// META-MEDLEY FUNCTIONALITY
+// ============================================================================
+
+function setMedleyButtonLoading(button, isLoading) {
+    if (!button) {
+        return;
+    }
+
+    if (isLoading) {
+        if (!button.dataset.originalHtml) {
+            button.dataset.originalHtml = button.innerHTML;
+        }
+        button.classList.add('disabled', 'loading');
+        button.innerHTML = `
+            <span class="medley-spinner"><i class="fas fa-circle-notch fa-spin"></i></span>
+            <span class="medley-label">Loading...</span>
+        `;
+    } else {
+        button.classList.remove('disabled', 'loading');
+        if (button.dataset.originalHtml) {
+            button.innerHTML = button.dataset.originalHtml;
+        }
+    }
+}
+
+function showMetaMedleyPanelLoading() {
+    const loading = document.getElementById('meta-medley-panel-loading');
+    if (loading) {
+        loading.style.display = 'flex';
+    }
+}
+
+function hideMetaMedleyPanelLoading() {
+    const loading = document.getElementById('meta-medley-panel-loading');
+    if (loading) {
+        loading.style.display = 'none';
+    }
+}
+
+// Open meta-medley panel
+function openMetaMedleyPanel(recommendationId, medleyType, sourceButton) {
+    console.log('=== BUTTON CLICKED ===');
+    console.log(`Opening meta-medley panel: ${medleyType}`, recommendationId);
+    
+    const url = `/api/meta-medley/${recommendationId}/${medleyType}/`;
+    console.log('Fetching from URL:', url);
+
+    // Add body class to trigger chart resize
+    document.body.classList.add('meta-panel-open');
+
+    // Trigger avatar repositioning after CSS transition completes (300ms + buffer)
+    setTimeout(() => repositionAllAvatarsAfterResize(), 350);
+
+    // Show alert to confirm function is called
+    console.log('Starting fetch request...');
+    const targetButton = sourceButton || document.querySelector(`.medley-button[data-medley-type="${medleyType}"]`);
+    setMedleyButtonLoading(targetButton, true);
+
+    // Show panel loading indicator
+    showMetaMedleyPanelLoading();
+
+    window.activeMedleyGroup = medleyType;
+    window.metaMedleyPanelLoading = true;
+    window.metaMedleyPanelOpen = false;
+    applyGroupAvatarFocus(medleyType);
+     
+    // Fetch panel content
+    fetch(url)
+        .then(response => {
+            console.log('Response received:', response.status);
+            return response.text();
+        })
+        .then(html => {
+            console.log('HTML received, length:', html.length);
+            // Remove existing panel if any
+            const existingPanel = document.getElementById('meta-medley-panel-container');
+            if (existingPanel) {
+                existingPanel.remove();
+            }
+            
+            // Create panel container
+            const panelContainer = document.createElement('div');
+            panelContainer.id = 'meta-medley-panel-container';
+            panelContainer.innerHTML = html;
+            document.body.appendChild(panelContainer);
+            
+            // Execute any script tags in the inserted HTML
+            const scripts = panelContainer.querySelectorAll('script');
+            scripts.forEach(script => {
+                const newScript = document.createElement('script');
+                if (script.src) {
+                    newScript.src = script.src;
+                } else {
+                    newScript.textContent = script.textContent;
+                }
+                document.body.appendChild(newScript);
+                document.body.removeChild(newScript); // Execute and remove
+            });
+            
+            console.log('Panel appended to body');
+            console.log('Segments data available:', !!window.metaMedleySegmentsData);
+            console.log('Participants data available:', !!window.metaMedleyParticipantsData);
+            
+            // Wait for scripts in the HTML to execute before initializing
+            setTimeout(() => {
+                console.log('Initializing panel after delay...');
+                console.log('Segments data NOW:', !!window.metaMedleySegmentsData);
+                console.log('Participants data NOW:', !!window.metaMedleyParticipantsData);
+                
+                window.metaMedleyPanelLoading = false;
+                window.metaMedleyPanelOpen = true;
+                applyGroupAvatarFocus(window.activeMedleyGroup);
+
+                // Hide panel loading indicator
+                hideMetaMedleyPanelLoading();
+
+                // Highlight corresponding avatars
+                highlightMetaMedleyAvatars(medleyType);
+
+                // Initialize panel functionality
+                initializeMetaMedleyPanel();
+            }, 200);
+        })
+        .catch(error => {
+            console.error('Failed to load meta-medley panel:', error);
+            window.metaMedleyPanelLoading = false;
+            window.metaMedleyPanelOpen = false;
+            window.activeMedleyGroup = null;
+            clearGroupAvatarFocus();
+
+            // Hide panel loading indicator on error
+            hideMetaMedleyPanelLoading();
+         })
+         .finally(() => {
+             setMedleyButtonLoading(targetButton, false);
+         });
+}
+
+// Close meta-medley panel
+function closeMetaMedleyPanel() {
+    cleanupMetaMedleyAudio();
+    document.removeEventListener('click', handleOutsideClick);
+    
+    const panel = document.getElementById('meta-medley-panel-container');
+    if (panel) {
+        panel.remove();
+    }
+    
+    // Remove avatar highlighting
+    getAllAvatarElements().forEach(avatar => {
+        avatar.classList.remove('meta-medley-highlight');
+    });
+    clearGroupAvatarFocus();
+    window.metaMedleyPanelOpen = false;
+    window.metaMedleyPanelLoading = false;
+    window.activeMedleyGroup = null;
+
+    // Remove body class to restore chart width
+    document.body.classList.remove('meta-panel-open');
+
+    // Trigger avatar repositioning after CSS transition completes (300ms + buffer)
+    setTimeout(() => repositionAllAvatarsAfterResize(), 350);
+
+    // Clean up
+    window.metaMedleySegments = null;
+    window.metaMedleyCurrentSegment = 0;
+}
+
+// Highlight avatars for a medley
+function highlightMetaMedleyAvatars(medleyType) {
+    // Wait a bit for the panel to fully load and set window variables
+    setTimeout(() => {
+        if (!window.metaMedleyParticipantsData) {
+            console.error('No participants data available');
+            return;
+        }
+
+        applyGroupAvatarFocus(window.activeMedleyGroup || medleyType);
+    }, 100);
+}
+
+// Initialize panel functionality
+function initializeMetaMedleyPanel() {
+    setupMetaMedleyAudio();
+    document.addEventListener('click', handleOutsideClick);
+}
+
+let metaMedleyAudioState = null;
+
+function formatTime(totalSeconds) {
+    const seconds = Math.max(totalSeconds, 0);
+    const minutes = Math.floor(seconds / 60);
+    const remainder = Math.floor(seconds % 60);
+    return `${minutes}:${remainder.toString().padStart(2, '0')}`;
+}
+
+function setupMetaMedleyAudio() {
+    const panel = document.querySelector('.meta-medley-panel');
+    if (!panel) {
+        console.error('Meta-medley panel not found');
+        return;
+    }
+
+    const audioElement = panel.querySelector('#meta-medley-audio');
+    const audioSource = panel.querySelector('#meta-medley-source');
+    const hiddenAudios = Array.from(panel.querySelectorAll('.meta-segment-audio'));
+    const transcriptSegments = Array.from(panel.querySelectorAll('#meta-medley-transcript .medley-segment'));
+    const playButton = panel.querySelector('#meta-medley-play-button');
+    const currentTimeEl = panel.querySelector('#meta-medley-current-time');
+    const totalTimeEl = panel.querySelector('#meta-medley-total-time');
+    const progressFill = panel.querySelector('#meta-medley-progress-fill');
+
+    if (!audioElement || !audioSource || hiddenAudios.length === 0) {
+        console.error('Meta-medley audio setup incomplete');
+        return;
+    }
+
+    cleanupMetaMedleyAudio();
+
+    const segmentDurations = hiddenAudios.map(audio => parseFloat(audio.dataset.duration || '0'));
+    let totalDuration = segmentDurations.reduce((sum, value) => sum + value, 0);
+    if (!totalDuration && window.metaMedleySegmentsData) {
+        totalDuration = window.metaMedleySegmentsData.reduce((sum, seg) => sum + (seg.duration || 0), 0);
+    }
+
+    const state = {
+        audio: audioElement,
+        source: audioSource,
+        hiddenAudios,
+        transcriptSegments,
+        playButton,
+        currentTimeEl,
+        totalTimeEl,
+        progressFill,
+        segmentDurations,
+        totalDuration,
+        currentIndex: 0,
+        isPlaying: false,
+        handlers: {}
+    };
+
+    if (state.totalTimeEl) {
+        state.totalTimeEl.textContent = formatTime(state.totalDuration);
+    }
+
+    const highlightSegment = (index) => {
+        state.transcriptSegments.forEach(seg => seg.classList.remove('highlight'));
+        if (index >= 0 && state.transcriptSegments[index]) {
+            const segmentEl = state.transcriptSegments[index];
+            segmentEl.classList.add('highlight');
+            segmentEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+        }
+    };
+
+    const updateProgress = () => {
+        const elapsedBefore = state.segmentDurations
+            .slice(0, state.currentIndex)
+            .reduce((sum, value) => sum + value, 0);
+        const elapsed = Math.min(state.totalDuration, elapsedBefore + (state.audio.currentTime || 0));
+        if (state.currentTimeEl) {
+            state.currentTimeEl.textContent = formatTime(elapsed);
+        }
+        if (state.progressFill) {
+            const progressPercent = state.totalDuration ? (elapsed / state.totalDuration) * 100 : 0;
+            state.progressFill.style.width = `${Math.min(100, progressPercent)}%`;
+        }
+    };
+
+    const updatePlayButton = () => {
+        if (!state.playButton) return;
+        if (state.isPlaying) {
+            state.playButton.classList.add('is-playing');
+        } else {
+            state.playButton.classList.remove('is-playing');
+        }
+    };
+
+    const loadSegment = (index, autoplay) => {
+        const segmentAudio = state.hiddenAudios[index];
+        if (!segmentAudio) {
+            console.error('Segment audio not found for index', index);
+            return;
+        }
+        const sourceEl = segmentAudio.querySelector('source');
+        if (!sourceEl) {
+            console.error('Source element missing for segment', index);
+            return;
+        }
+        state.currentIndex = index;
+        state.source.src = sourceEl.src;
+        state.audio.load();
+        highlightSegment(index);
+        updateProgress();
+        if (autoplay) {
+            state.audio.play().catch(err => {
+                console.error('Failed to autoplay segment:', err);
+            });
+        }
+    };
+
+    const onPlay = () => {
+        state.isPlaying = true;
+        updatePlayButton();
+        highlightSegment(state.currentIndex);
+    };
+
+    const onPause = () => {
+        state.isPlaying = false;
+        updatePlayButton();
+    };
+
+    const onEnded = () => {
+        updateProgress();
+        const nextIndex = state.currentIndex + 1;
+        if (nextIndex < state.hiddenAudios.length) {
+            loadSegment(nextIndex, true);
+        } else {
+            state.isPlaying = false;
+            updatePlayButton();
+            highlightSegment(-1);
+            state.currentIndex = 0;
+            const firstSource = state.hiddenAudios[0]?.querySelector('source');
+            if (firstSource) {
+                state.source.src = firstSource.src;
+                state.audio.load();
+            }
+            updateProgress();
+        }
+    };
+
+    const onTimeUpdate = () => {
+        updateProgress();
+    };
+
+    const togglePlayback = () => {
+        if (!state.audio) return;
+        if (state.isPlaying) {
+            state.audio.pause();
+        } else {
+            state.audio.play().catch(err => console.error('Play failed:', err));
+        }
+    };
+
+    state.handlers = { onPlay, onPause, onEnded, onTimeUpdate, togglePlayback };
+    state.loadSegment = loadSegment;
+    state.highlightSegment = highlightSegment;
+    state.updateProgress = updateProgress;
+
+    state.audio.addEventListener('play', onPlay);
+    state.audio.addEventListener('pause', onPause);
+    state.audio.addEventListener('ended', onEnded);
+    state.audio.addEventListener('timeupdate', onTimeUpdate);
+
+    if (state.playButton) {
+        state.playButton.addEventListener('click', togglePlayback);
+        updatePlayButton();
+    }
+
+    loadSegment(0, false);
+    highlightSegment(-1);
+    updateProgress();
+
+    metaMedleyAudioState = state;
+}
+
+function cleanupMetaMedleyAudio() {
+    if (!metaMedleyAudioState || !metaMedleyAudioState.audio) {
+        metaMedleyAudioState = null;
+        return;
+    }
+
+    const state = metaMedleyAudioState;
+    state.audio.pause();
+    state.audio.currentTime = 0;
+    if (state.handlers) {
+        state.audio.removeEventListener('play', state.handlers.onPlay);
+        state.audio.removeEventListener('pause', state.handlers.onPause);
+        state.audio.removeEventListener('ended', state.handlers.onEnded);
+        state.audio.removeEventListener('timeupdate', state.handlers.onTimeUpdate);
+        if (state.playButton) {
+            state.playButton.removeEventListener('click', state.handlers.togglePlayback);
+        }
+    }
+    if (state.source) {
+        state.source.src = '';
+        state.audio.load();
+    }
+    if (state.transcriptSegments) {
+        state.transcriptSegments.forEach(seg => seg.classList.remove('highlight'));
+    }
+    if (state.progressFill) {
+        state.progressFill.style.width = '0%';
+    }
+    if (state.currentTimeEl) {
+        state.currentTimeEl.textContent = '0:00';
+    }
+    if (state.playButton) {
+        state.playButton.classList.remove('is-playing');
+    }
+
+    metaMedleyAudioState = null;
+}
+
+function resetMetaMedleyAudio() {
+    if (!metaMedleyAudioState) return;
+    const state = metaMedleyAudioState;
+    state.audio.pause();
+    state.audio.currentTime = 0;
+    state.isPlaying = false;
+    if (state.transcriptSegments) {
+        state.transcriptSegments.forEach(seg => seg.classList.remove('highlight'));
+    }
+    if (state.loadSegment) {
+        state.loadSegment(0, false);
+    }
+    if (state.updateProgress) {
+        state.updateProgress();
+    }
+    if (state.playButton) {
+        state.playButton.classList.remove('is-playing');
+    }
+}
+
+// Initialize tab switching (Bootstrap handles the toggling)
+function initializeMetaMedleyTabs() {
+    return;
+}
+
+// Switch tabs
+function switchMetaMedleyTab(tabName) {
+    document.querySelectorAll('.panel-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.querySelector(`.panel-tab[data-tab="${tabName}"]`).classList.add('active');
+    
+    document.querySelectorAll('.panel-tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    document.getElementById(`${tabName}-tab`).classList.add('active');
+}
+
+// Handle outside clicks
+function handleOutsideClick(event) {
+    const panel = document.querySelector('.meta-medley-panel');
+    const medleyButtons = document.querySelectorAll('.medley-button');
+    
+    if (!panel) return;
+    
+    const isOutside = !panel.contains(event.target);
+    const isOnMedleyButton = Array.from(medleyButtons).some(btn => btn.contains(event.target));
+    const isPlaying = metaMedleyAudioState && metaMedleyAudioState.isPlaying;
+    
+    if (isOutside && !isOnMedleyButton && !isPlaying) {
+        closeMetaMedleyPanel();
+    }
+}
+
+// Open individual medley
+function openIndividualMedley(recommendationId, participantUsername) {
+    closeMetaMedleyPanel();
+    loadParticipantModal(participantUsername, recommendationId);
+}
+
+// Play individual medley (placeholder)
+function playIndividualMedley(event, participantUsername) {
+    event.stopPropagation();
+    console.log(`Play individual medley for: ${participantUsername}`);
+}
+
+// ============================================================================
+// TELEMETRY TRACKING
+// ============================================================================
+
+class TelemetryTracker {
+    constructor(options = {}) {
+        this.sessionId = this.generateSessionId();
+        this.currentRecommendationId = null;
+        this.currentProfileId = null;
+        this.currentAudioId = null;
+        this.startTimes = {};
+        this.options = {
+            endpoint: '/api/telemetry/',
+            debug: true,
+            ...options
+        };
+        this.init();
+    }
+
+    init() {
+        console.log('TelemetryTracker initialized with session ID:', this.sessionId);
+    }
+
+    generateSessionId() {
+        return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    }
+
+    getCSRFToken() {
+        const token = document.querySelector('[name=csrfmiddlewaretoken]');
+        return token ? token.value : '';
+    }
+
+    async makeRequest(endpoint, data) {
+        try {
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.getCSRFToken(),
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Telemetry request failed:', error);
+            throw error;
+        }
+    }
+
+    trackAvatarClick(recommendationId, clickedParticipantId, avatarType, clickX, clickY) {
+        console.log('Avatar click tracked:', { recommendationId, clickedParticipantId, avatarType, clickX, clickY });
+
+        return this.makeRequest('/api/telemetry/avatar/click/', {
+            recommendation_id: recommendationId,
+            participant_id: clickedParticipantId,
+            avatar_type: avatarType,
+            click_x: clickX,
+            click_y: clickY,
+            session_id: this.sessionId
+        });
+    }
+
+    trackMetaMedleyClick(recommendationId, metaMedleyType) {
+        console.log('Meta-medley click tracked:', { recommendationId, metaMedleyType });
+
+        return this.makeRequest('/api/telemetry/meta-medley/click/', {
+            recommendation_id: recommendationId,
+            meta_medley_type: metaMedleyType,
+            session_id: this.sessionId
+        });
+    }
+}
+
+</script>
+
+<style>
+/* Meta-Medley Button Styles */
+.medley-button {
+    background: white;
+    border: 2px solid;
+    border-radius: 20px;
+    padding: 8px 16px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 0;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    height: 40px;
+    min-height: 40px;
+    width: 135px;
+    min-width: 135px;
+    line-height: 1;
+    white-space: nowrap;
+    transition: none;
+    transform: none;
+    z-index: 100;
+}
+
+.medley-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.medley-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    transform: none !important;
+}
+
+.medley-icon i {
+    font-size: 16px;
+    line-height: 1;
+}
+
+.medley-button:hover,
+.medley-button:focus,
+.medley-button:active {
+    background: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transform: none;
+    outline: none;
+}
+
+.medley-button-against {
+    border-color: #ff6b6b;
+    color: #ff6b6b;
+}
+
+.medley-button-against:hover {
+    background: #fff5f5;
+}
+
+.medley-button-fence {
+    border-color: #ffa726;
+    color: #ffa726;
+}
+
+.medley-button-fence:hover {
+    background: #fff8f0;
+}
+
+.medley-button-for {
+    border-color: #66bb6a;
+    color: #66bb6a;
+}
+
+.medley-button-for:hover {
+    background: #f0fff0;
+}
+
+/* Disabled state for medley buttons */
+.medley-button.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Avatar Highlighting */
+.avatar-circle.meta-medley-highlight {
+    box-shadow: 0 0 0 3px #ffa726, 0 0 20px 5px rgba(255, 167, 38, 0.5) !important;
+    z-index: 999 !important;
+    transform: scale(1.15) !important;
+    transition: all 0.3s ease;
+}
+
+.participant-avatar.meta-medley-highlight {
+    box-shadow: 0 0 0 3px #ffa726, 0 0 20px 5px rgba(255, 167, 38, 0.5) !important;
+    z-index: 999 !important;
+    transform: scale(1.15) !important;
+    transition: all 0.3s ease;
+}
+
+.participant-avatar.avatar-dimmed,
+.avatar-circle.avatar-dimmed {
+    opacity: 0.25 !important;
+    filter: grayscale(0.4);
+    transition: opacity 0.2s ease;
+}
+
+.participant-avatar.avatar-group-focus,
+.avatar-circle.avatar-group-focus {
+    opacity: 1 !important;
+    filter: none;
+}
+
+/* Panel Container */
+#meta-medley-panel-container {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+}
+
+.medley-button.loading {
+    cursor: progress;
+}
+
+.medley-spinner {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+}
+
+.medley-spinner i {
+    font-size: 16px;
+    line-height: 1;
+}
+
+/* Meta-Medley Panel Loading Indicator */
+#meta-medley-panel-loading {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 450px;
+    height: 100vh;
+    background: #ffffff;
+    box-shadow: -4px 0 20px rgba(0,0,0,0.12);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.meta-medley-panel-loading-content {
+    text-align: center;
+}
+
+.support-column-content {
+    padding-left: 2rem;
+    max-width: calc(100vw - 18% - 4rem);
+    transition: max-width 0.3s ease-out;
+}
+
+.support-header-row,
+.support-section-block {
+    width: 100%;
+    max-width: calc(100vw - 18% - 4rem);
+    transition: max-width 0.3s ease-out;
+}
+
+/* Dynamic chart resizing when panels are open */
+body.meta-panel-open .support-column-content,
+body.meta-panel-open #editor-support-plot,
+body.meta-panel-open .support-section-block {
+    max-width: calc(100vw - 18% - 450px - 6rem);
+}
+
+body.participant-modal-open .support-column-content,
+body.participant-modal-open #editor-support-plot,
+body.participant-modal-open .support-section-block {
+    max-width: calc(100vw - 18% - 450px - 6rem);
+}
+
+/* Scale avatars smaller when chart is narrow */
+body.meta-panel-open .participant-avatar,
+body.participant-modal-open .participant-avatar {
+    width: 30px !important;
+    height: 30px !important;
+}
+</style>
+
+{% endblock %}

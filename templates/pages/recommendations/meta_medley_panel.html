@@ -1,0 +1,452 @@
+<!-- Meta-Medley Side Panel -->
+<div class="meta-medley-panel">
+    <button class="close-panel-btn" onclick="closeMetaMedleyPanel()">×</button>
+    
+    <div class="meta-medley-content">
+        <div class="meta-medley-header meta-medley-header-{{ medley_type }}">
+            <div class="meta-medley-title">
+                <span class="medley-icon"><i class="fas {{ medley_info.icon }}"></i></span>
+                <div>
+                    <h2 class="medley-title">{{ medley_info.title }}</h2>
+                    <div class="medley-stats">
+                        <span class="stat">30 people in this group</span>
+                        <!-- <span class="stat">{{ segment_count }} selected segments</span> -->
+                        <!-- <span class="stat">{{ meta_medley.total_duration|floatformat:0 }}s total duration</span> -->
+                        <span class="stat">{{ support_range }} predicted support</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="meta-medley-body">
+            <ul class="nav nav-tabs" id="metaMedleyTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="meta-summary-tab" data-bs-toggle="tab" data-bs-target="#meta-summary" type="button" role="tab">
+                        Summary
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="meta-quotes-tab" data-bs-toggle="tab" data-bs-target="#meta-quotes" type="button" role="tab">
+                        Quotes
+                    </button>
+                </li>
+            </ul>
+            
+            <div class="tab-content" id="metaMedleyTabContent">
+                <div class="tab-pane fade show active" id="meta-summary" role="tabpanel">
+                    <audio id="meta-medley-audio" class="meta-medley-audio">
+                        <source id="meta-medley-source" src="" type="audio/wav">
+                        Your browser does not support the audio element.
+                    </audio>
+                    
+                    <div class="meta-medley-controls">
+                        <button id="meta-medley-play-button" class="meta-medley-play-btn" type="button">
+                            <span class="meta-play-icon">▶</span>
+                            <span class="meta-pause-icon">❚❚</span>
+                        </button>
+                        <span class="meta-medley-label">Highlights from this group</span>
+                    </div>
+                    
+                    <div class="meta-medley-progress">
+                        <div class="meta-medley-time">
+                            <span id="meta-medley-current-time">0:00</span>
+                            <span class="meta-medley-divider">/</span>
+                            <span id="meta-medley-total-time">{{ meta_medley.total_duration|floatformat:0 }}s</span>
+                        </div>
+                        <div class="meta-medley-progress-bar">
+                            <div id="meta-medley-progress-fill"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-none" id="meta-medley-hidden-audio">
+                        {% for segment in segments_data %}
+                        <audio class="meta-segment-audio" data-order="{{ forloop.counter0 }}" data-duration="{{ segment.duration|floatformat:3 }}">
+                            <source src="{{ MEDIA_URL }}{{ segment.audio_url }}" type="audio/wav">
+                        </audio>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="medley-transcript-box">
+                        {% if segments_data %}
+                        <p id="meta-medley-transcript">
+                            "{% for segment in segments_data %}<span class="medley-segment" data-segment-order="{{ segment.order }}">{{ segment.participant_display_name }}: {{ segment.text }}</span>{% if not forloop.last %} ... {% endif %}{% endfor %}"
+                        </p>
+                        {% else %}
+                        <p class="text-muted">No transcript available for this meta-medley.</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="summary-box">
+                        {% if meta_medley.gpt_reasoning %}
+                        <p>{{ meta_medley.gpt_reasoning }}</p>
+                        {% else %}
+                        <p class="text-muted">No narrative summary available.</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="tab-pane fade" id="meta-quotes" role="tabpanel">
+                    {% if participants_data %}
+                        {% for participant in participants_data %}
+                            {% if participant.segments %}
+                            <div class="utterance-card">
+                                <div class="participant-header">
+                                    <img src="{{ participant.avatar_url }}" class="rounded-circle me-3" width="40" height="40" alt="Avatar">
+                                    <div>
+                                        <h4 class="participant-name">{{ participant.display_name }}</h4>
+                                        {% if participant.support is not None %}
+                                        <span class="support-badge">{{ participant.support|floatformat:0 }}% support</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% for segment in participant.segments %}
+                                <div class="utterance-text">
+                                    “{{ segment.expanded_text }}”
+                                </div>
+                                {% if segment.audio_url %}
+                                <audio class="utterance-audio" controls>
+                                    <source src="{{ MEDIA_URL }}{{ segment.audio_url }}" type="audio/wav">
+                                </audio>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        {% empty %}
+                            <p class="text-muted">No quotes available for this meta-medley.</p>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">No quotes available for this meta-medley.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden data for JavaScript -->
+<script>
+window.metaMedleySegmentsData = JSON.parse('{{ segments_data_json|escapejs }}');
+window.metaMedleyParticipantsData = JSON.parse('{{ participants_data_json|escapejs }}');
+window.MEDIA_URL = "{{ MEDIA_URL }}";
+</script>
+
+<style>
+.meta-medley-panel {
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 450px;
+    max-width: 100%;
+    height: 100vh;
+    background: #ffffff;
+    box-shadow: -4px 0 20px rgba(0,0,0,0.12);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+}
+
+.close-panel-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: #ffffff;
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    font-size: 28px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+
+.close-panel-btn:hover {
+    background: #f1f3f5;
+}
+
+.meta-medley-content {
+    padding: 60px 24px 24px 24px;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.meta-medley-header {
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.meta-medley-header-bottom {
+    background-color: rgba(255, 107, 107, 0.12);
+}
+
+.meta-medley-header-middle {
+    background-color: rgba(255, 167, 38, 0.12);
+}
+
+.meta-medley-header-top {
+    background-color: rgba(102, 187, 106, 0.12);
+}
+
+.meta-medley-title {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.medley-icon {
+    font-size: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    margin-right: 8px;
+}
+
+.medley-icon i {
+    font-size: 18px;
+    line-height: 1;
+}
+
+.medley-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.medley-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 8px;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.medley-stats .stat {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.meta-medley-body {
+    background: #ffffff;
+}
+
+.nav-tabs {
+    border-bottom: none !important;
+    margin-bottom: 0.75rem;
+    gap: 0.5rem;
+}
+
+.nav-tabs .nav-link {
+    color: #6c757d !important;
+    border: 1px solid #dee2e6 !important;
+    border-radius: 12px !important;
+    padding: 0.5rem 0.85rem;
+    font-weight: 500;
+    font-size: 0.85rem;
+    background: transparent !important;
+}
+
+.nav-tabs .nav-link.active {
+    color: #000000 !important;
+    border-color: #0d6efd !important;
+}
+
+.medley-audio-player {
+    width: 100%;
+    margin-bottom: 1.5rem;
+    border-radius: 8px;
+}
+
+.medley-transcript-box {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    background: transparent;
+}
+
+.medley-segment {
+    display: inline;
+    padding: 2px 0;
+    font-size: 14px;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.medley-segment.highlight {
+    background: linear-gradient(120deg, rgba(37, 99, 235, 0.15), rgba(191, 219, 254, 0.4));
+    color: #1f2937;
+    font-weight: 600;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+
+.summary-box {
+    padding: 1rem;
+    border-radius: 8px;
+    background: #e3f2fd;
+    font-size: 14px;
+}
+
+.summary-box p {
+    margin: 0;
+    color: #1f2937;
+    line-height: 1.6;
+}
+
+.meta-medley-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.meta-medley-time {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9rem;
+    color: #374151;
+}
+
+.meta-medley-divider {
+    color: #9ca3af;
+}
+
+.meta-medley-progress-bar {
+    position: relative;
+    width: 100%;
+    height: 6px;
+    background: #e5e7eb;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+#meta-medley-progress-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0%;
+    background: #2563eb;
+    border-radius: 999px;
+    transition: width 0.15s ease-out;
+}
+
+.utterance-card {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.participant-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.participant-name {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+    color: #1f2937;
+}
+
+.support-badge {
+    display: inline-block;
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-top: 4px;
+}
+
+.utterance-text {
+    font-size: 13px;
+    line-height: 1.6;
+    color: #374151;
+    margin-bottom: 0.75rem;
+}
+
+.utterance-audio {
+    width: 100%;
+    height: 36px;
+    margin-bottom: 0.75rem;
+}
+
+.meta-medley-audio {
+    display: none;
+}
+
+.meta-medley-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.meta-medley-play-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: none;
+    background: #2563eb;
+    color: #ffffff;
+    font-size: 1.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.meta-medley-play-btn:hover {
+    background: #1d4ed8;
+}
+
+.meta-medley-play-btn.is-playing {
+    background: #ef4444;
+}
+
+.meta-play-icon,
+.meta-pause-icon {
+    display: none;
+}
+
+.meta-medley-play-btn.is-playing .meta-pause-icon {
+    display: block;
+}
+
+.meta-medley-play-btn.is-playing .meta-play-icon {
+    display: none;
+}
+
+.meta-medley-play-btn .meta-play-icon {
+    display: block;
+    position: relative;
+    left: 1px;
+}
+
+.meta-medley-label {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #1f2937;
+}
+
+@media (max-width: 768px) {
+    .meta-medley-panel {
+        width: 100%;
+    }
+
+    .meta-medley-content {
+        padding: 60px 16px 16px 16px;
+    }
+}
+</style>
+

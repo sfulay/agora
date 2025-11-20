@@ -1,0 +1,62 @@
+<!-- Modal template -->
+<div class="modal modal-transparent fade" id="modals-pause" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-body">
+        <a style="box-shadow: none;"
+          href="javascript:void(0);"
+          class="btn-close text-white"
+          data-bs-dismiss="modal"
+          aria-label="Close"></a>
+        <div class="input-group input-group-lg mb-3" style="background-color: white; border-radius:1.5em; box-shadow: 0 0 15px rgba(255, 255, 255, 0.3), 0 0 25px rgba(255, 255, 255, 0.3), 0 0 35px rgba(255, 255, 255, 0.3); padding:3em">
+          This interview is designed to be completed in one sitting, and we do not recommend pausing it. However, we understand that unexpected circumstances may arise, prompting you to pause and restart the interview.
+          <br>
+          <br>
+          If you pause, we will ask you to resume your interview from your last saved checkpoint, which is indicated by a "green light" flashing around the circle.
+          <div style="width:100%; text-align: center; display: block; margin-top:2em">
+            <a href="{% url 'home' %}" id="test" class="btn rounded-pill btn-instagram"><strong><i class="fa-solid fa-pause"></i> &nbsp;&nbsp;|&nbsp;&nbsp; Pause the interview</strong></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal template -->
+<div class="modal modal-transparent fade" id="modals-info" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-body">
+        <a style="box-shadow: none;"
+          href="javascript:void(0);"
+          class="btn-close text-white"
+          data-bs-dismiss="modal"
+          aria-label="Close"></a>
+        <div class="input-group input-group-lg mb-3" style="background-color: white; border-radius:1.5em; box-shadow: 0 0 15px rgba(255, 255, 255, 0.3), 0 0 25px rgba(255, 255, 255, 0.3), 0 0 35px rgba(255, 255, 255, 0.3); padding:3em">
+          If you have any questions about the study, or if anything breaks, please email the admin at sfulay@mit.edu
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal template -->
+<div class="modal modal-transparent fade" id="modals-refresh" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-body">
+        <a style="box-shadow: none;"
+          href="javascript:void(0);"
+          class="btn-close text-white"
+          data-bs-dismiss="modal"
+          aria-label="Close"></a>
+        <div class="input-group input-group-lg mb-3" style="background-color: white; border-radius:1.5em; box-shadow: 0 0 15px rgba(255, 255, 255, 0.3), 0 0 25px rgba(255, 255, 255, 0.3), 0 0 35px rgba(255, 255, 255, 0.3); padding:2.4em">
+          If Isabella has not responded for over a minute, you may need to refresh the page. This will let you resume from the last saved check point. 
+          <div style="width:100%; text-align: center; display: block; margin-top:2em;">
+            <a href="{% url 'interview' script_v %}" id="test" class="btn rounded-pill btn-info"><strong><i class="fa-solid fa-arrows-rotate"></i> &nbsp;&nbsp;|&nbsp;&nbsp; Refresh the page</strong></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

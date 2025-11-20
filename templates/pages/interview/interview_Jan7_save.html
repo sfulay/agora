@@ -1,0 +1,509 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Interviewer Agent</title>
+    <!-- This is the main css for defining the visualizer -->
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: linear-gradient(45deg, #6e45e2, #88d3ce);
+        font-family: 'Arial', sans-serif;
+      }
+
+      button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        background-color: #fff;
+        color: #333;
+        font-size: 16px;
+        cursor: pointer;
+        margin: 10px;
+        transition: background-color 0.3s, transform 0.2s;
+      }
+
+      button:hover {
+        background-color: #f8f9fa;
+        transform: scale(1.05);
+      }
+
+      button:active {
+        transform: scale(0.95);
+      }
+
+      #visualizer {
+        width: 150px;
+        height: 150px;
+        background-color: #fff;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%) scale(1);
+        transition: transform 0.1s ease;
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.6), 0 0 25px rgba(255, 255, 255, 0.6), 0 0 35px rgba(255, 255, 255, 0.6);
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      #visualizer>i {
+        position: absolute;
+        font-size: 2em;
+        color: rgb(110, 129, 255);
+      }
+
+      #controls {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+    </style>
+
+    <!-- This is CSS specifically for audio play animation when the agent is 
+         thinking about its next lines -->
+    <style>
+      #thinkingIcon {
+        display: none;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+
+        opacity: 0; /* Make it invisible initially */
+        transition: opacity 2s; /* Adjust time as needed */
+      }
+
+      .circle {
+        width: 24px;
+        height: 24px;
+        margin: 0 10px;
+        background-color: white; /* You can change the color */
+        border-radius: 50%;
+        animation: wave 1.5s ease-in-out infinite;
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.6), 0 0 25px rgba(255, 255, 255, 0.6), 0 0 35px rgba(255, 255, 255, 0.6);
+      }
+
+      .circle:nth-child(2) {
+        animation-delay: 0.1s;
+      }
+
+      .circle:nth-child(3) {
+        animation-delay: 0.2s;
+      }
+
+      @keyframes wave {
+        0%, 100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-20px);
+        }
+      }
+    </style>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" />
+  </head>
+
+  <body>
+    <div id="controls">
+      <button id="startButton">Click here to start the interview</button>
+    </div>
+    <div id="visualizer">
+      <i id="micIcon" class="fa fa-microphone" style="display: none"></i>
+      <img id="speakerIcon" src="{% static 'gabm/img/Isabella_Rodriguez.png' %}" style="display: none" />
+      <span id="thinkingIcon">
+        <div class="circle"></div>
+        <div class="circle"></div>
+        <div class="circle"></div>
+      </span>
+    </div>
+
+    <script>
+      // #####################################################################
+      // [SECTION 1: SETTING VARIABLES]
+      // Handles for HTML elements:
+      let visualizerElement = document.getElementById('visualizer');
+      let micIcon = document.getElementById('micIcon');
+      let speakerIcon = document.getElementById('speakerIcon');
+
+      // Web Audio API objects. 
+      // These are the main Audio API objects that will be used throughout the
+      // page. These are defined when the user clicks on the "Start" button. 
+      let audioContext;
+      let agentAnalyser, userAnalyser; 
+
+      // Settings and parameters: 
+      // let speechThreshold = {{ curr_user.audio_calibration_float }};
+      const speechThreshold = 20;
+      const maxSilenceDuration = 6;
+      const fade_exponent = 3;
+      const recentAveragesSize = 15;
+      const RPTStartThreshold = 5;
+      const RPTEndThreshold = 5; 
+
+      // State variables: 
+      let silenceStarted;
+      let silenceStartTime;
+      let isUserTurn = false;
+      let userHasSpoken = false;
+
+      let recentAverages = []
+
+      // For recording:
+      let mediaRecorder;
+      let isLoading = false;
+
+      // Setting up the csrftoken for ajax calls. 
+      function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+          const cookies = document.cookie.split(';');
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+      const csrftoken = getCookie('csrftoken');
+
+
+      // #####################################################################
+      // [SECTION 2: DECORATION]
+      // Changing the icon visuals to fit the current stage. 
+      function updateIcons() {
+        if (isLoading) {
+          // <Part 1. Icon when the agent is thinking of the next line>
+          visualizer.style.backgroundColor = "transparent";
+          visualizer.style.borderColor = "transparent";
+          visualizer.style.boxShadow = "none";
+
+          micIcon.style.display = 'none';
+          speakerIcon.style.display = 'none';
+          thinkingIcon.style.display = 'flex';
+
+          // We implement a fade in for the thinking animation. 
+          // Grab your container
+          var loadingContainer = document.querySelector('#thinkingIcon');
+          // Initially hide the container
+          loadingContainer.style.display = 'none';
+          // Function to fade in
+          function fadeInLoading() {
+            loadingContainer.style.display = 'flex'; // Set display to flex
+            setTimeout(() => {
+              loadingContainer.style.opacity = 1; // Start the fade in
+            }, 15); // Timeout allows CSS to recognize the display change
+          }
+          // Trigger the fade in
+          fadeInLoading();
+
+        } else if (isUserTurn) {
+          // <Part 2. Icon for when the user is speaking>
+          visualizer.style.backgroundColor = "white";
+          visualizer.style.borderColor = "white";
+          visualizer.style.boxShadow = "0 0 15px rgba(255, 255, 255, 0.6), 0 0 25px rgba(255, 255, 255, 0.6), 0 0 35px rgba(255, 255, 255, 0.6)";
+
+          micIcon.style.display = 'block';
+          speakerIcon.style.display = 'none';
+          thinkingIcon.style.display = 'none';
+          
+        } else {
+          // <Part 3. Icon for when the agent is speaking>
+          visualizer.style.backgroundColor = "white";
+          visualizer.style.borderColor = "white";
+          visualizer.style.boxShadow = "0 0 15px rgba(255, 255, 255, 0.6), 0 0 25px rgba(255, 255, 255, 0.6), 0 0 35px rgba(255, 255, 255, 0.6)";
+
+          micIcon.style.display = 'none';
+          speakerIcon.style.display = 'block';
+          thinkingIcon.style.display = 'none';
+        }
+      }
+
+
+      function getRecentPassedThreshold(average) {
+        let passedThreshold = 0;
+        if (average > speechThreshold) {
+          passedThreshold += 1
+        }
+        recentAverages.push(passedThreshold)
+        // Remove the oldest entry if there are more than 20 items
+        if (recentAverages.length > recentAveragesSize) {
+          recentAverages.shift(); 
+        }
+        // Use the reduce method to sum all numbers
+        const recentPassedThreshold = recentAverages.reduce((accumulator, currentValue) => {
+          return accumulator + currentValue;
+        }, 0); // 0 is the initial value of the accumulator
+
+        return recentPassedThreshold
+      }
+
+
+      function animateAndRecord() {
+        window.requestAnimationFrame(animateAndRecord);
+        let analyser = isUserTurn ? userAnalyser : agentAnalyser;
+        // Create a new Uint8Array to store the frequency data
+        let dataArray = new Uint8Array(analyser.frequencyBinCount);
+        // Get the frequency data and fill the Uint8Array
+        analyser.getByteFrequencyData(dataArray);
+
+        // Calculate the sum and average of the frequency data
+        let sum = dataArray.reduce((a, b) => a + b, 0);
+        let average = sum / dataArray.length;
+
+        // console.log(average);
+
+        // Calculate the scale based on the average frequency
+        let scale = 1 + (average / 64);
+        // Apply the scale transformation to the visualizer element. But this
+        // is only if the agent is speaking, or if we have determined that the
+        // user started speaking. 
+        if (!isUserTurn || userHasSpoken) {
+          visualizerElement.style.transform = `translate(-50%, -50%) scale(${scale})`;
+        }
+        
+
+        // <User's turn handler>
+        // If this is the user's turn, we do a couple of things here: 
+        // 1) Make the visualizer circle gradually fade away as the user stops
+        //    speaking
+        // 2) Start recording if we detect that the user started to talk, and 
+        //    end the recording if we determine that they are done. 
+        if (isUserTurn) {
+          const recentPassedThreshold = getRecentPassedThreshold(average);
+          // console.log(recentPassedThreshold);
+
+          // <Speech begins>
+          // Determining when the speech began, and then start recording.
+          if (recentPassedThreshold > RPTStartThreshold && !userHasSpoken) {
+            userHasSpoken = true;　// <state change>
+            mediaRecorder.start();
+          }
+          // </Speech begins>
+
+          // <Speech ends>
+          // Determining when the speech ended
+          if (userHasSpoken) {
+            let secSilence;
+
+            // If the silence started for the first time, we set the timer for
+            // detecting the length of the silence. 
+            if (silenceStarted) {
+              let currTime = new Date();
+              secSilence = (currTime - silenceStartTime) / 1000; 
+            }
+            if (average <= speechThreshold) {
+              // If the silence seemingly continues... 
+              if (silenceStarted == false) {
+                silenceStarted = true; 
+                silenceStartTime = new Date();
+              };
+              if (secSilence > maxSilenceDuration) {
+                isLoading = true;　// <state change>
+                secSilence = 0;　// <state change>
+                isUserTurn = false;　// <state change>
+                userHasSpoken = false;　// <state change>
+                silenceStarted = false; // <state change>
+                mediaRecorder.stop();
+              };
+            } else {
+              // If we think the silence ended... 
+              if (recentPassedThreshold < RPTEndThreshold) { 
+                secSilence = 0;　// <state change>
+                silenceStarted = false; // <state change>
+              }
+            }
+            // Implementing the "fade away". It is based on an exponential 
+            // function to make it so that it slowly fades at first, but then
+            // quickens as it approaches the end. 
+            let opacity = Math.max((1 - (secSilence / maxSilenceDuration) ** fade_exponent), 0);
+            if (opacity < 0.01) {
+              opacity = 0;
+            }
+            visualizerElement.style.opacity = opacity;
+          }
+          // </Speech ends>
+        }
+        // </User's turn handler>
+
+        // Update any icons or graphics you might have
+        updateIcons();
+      } 
+
+
+      // Given an audioElement, plays the audio sound. 
+      function playAudio(currAudioElement) {
+        let agentSource = audioContext.createMediaElementSource(currAudioElement);
+        agentSource.connect(agentAnalyser);
+        agentAnalyser.connect(audioContext.destination);
+        currAudioElement.play();
+      }
+
+
+      // #####################################################################
+      // [SECTION 3: MAIN]
+      // This is the main recursive loop for the interviewer agent. 
+      function take_one_step(data) {
+        console.log("Data sent: " + data);
+
+        // Instantiating the POST call to send the data from frontend to the 
+        // backend server. 
+        fetch('{% url "handler_take_one_step" %}', {
+          method: 'POST',
+          body: JSON.stringify(data),
+          headers:{
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          console.log("Data received: " + data);
+
+          if (data["interview_completed"] == true) {
+            console.log("Finished");
+            audioContext.close(); 
+          } else {
+            // <If interview is not completed>
+            // Everything below happens if the current interview is not 
+            // completed according to the backend's response. 
+
+            // <Part 1. Playing the interviewer agent's voice audio.>
+            // audio_path assumes a path that looks like: "sounds/myAudio.mp3"
+            let audio_path = "{% static 'gabm/interview/audio/' %}" + data["audio_fname"]; 
+            let audioElement = new Audio(audio_path);
+            playAudio(audioElement);
+            isLoading = false;　// <state change>
+            animateAndRecord();
+            // </Part 1.>
+
+            // <Part 2. Record the user response.>
+            if (data["skip_user_utt"] == false) {
+              // If skip_user_utt is false, we want to allow users to speak
+              // once the audioElement finishes playing. 
+              audioElement.onended = function() {
+                isUserTurn = true; // <state change>
+                userHasSpoken = false;　// <state change>
+
+                let audioChunks = [];
+                // Opening up the mediaDevices and making sure that it is
+                // supported. 
+                if (navigator.mediaDevices.getUserMedia) {
+                  navigator.mediaDevices.getUserMedia ({audio: true})
+                  .then(function(stream) {
+                    const userSource = audioContext.createMediaStreamSource(stream);
+                    const userProcessor = audioContext.createScriptProcessor(4096, 1, 1);
+                    userSource.connect(userAnalyser);
+                    userSource.connect(userProcessor);
+                    userProcessor.connect(audioContext.destination);
+
+                    // We are initializing MediaRecorder here. Ideally, we 
+                    // would receive audio/wav, but it is no longer supported
+                    // by the browsers so we will be sending it in webm.
+                    mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+                    // Push audio data into chunks array when data is available
+                    mediaRecorder.ondataavailable = event => {
+                      audioChunks.push(event.data);
+                    };
+                    // Here, we define the behavior of mediaRecorder once we finish. 
+                    mediaRecorder.onstop = () => {
+                      // Do something with audio data here, like sending it to 
+                      // the server
+                      const audioBlob = new Blob(audioChunks, { 'type' : 'audio/webm' });
+                      const audioUrl = URL.createObjectURL(audioBlob);
+                      const audio = new Audio(audioUrl);
+
+                      // Convert Blob to base64 or binary data and include in newData
+                      const reader = new FileReader();
+                      reader.readAsDataURL(audioBlob); 
+                      reader.onloadend = function() {
+                        const base64data = reader.result;
+                        // Here you can send the base64data to the server as 
+                        // part of newData
+                        var newData = {started: false, user_utt: base64data};
+                        // Recursively call with new or modified data. 
+                        // Importantly, this sends the data to the server. 
+                        take_one_step(newData); 
+                      }
+                    };
+                  })
+                  .catch(function(err) {
+                    console.log('The following gUM error occurred: ' + err);
+                  }); 
+                } else {
+                  console.log('getUserMedia not supported on your browser!');
+                }
+              }
+            } else {
+              var newData = {started: false, user_utt: null};
+              take_one_step(newData); 
+            }
+            // </Part 2.>
+          };
+          // </If interview is not completed>
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
+      }
+
+
+      // #####################################################################
+      // [SECTION 4: DEFINING THE START BUTTON]
+      // Defining the start button's behavior. 
+      document.getElementById('startButton').addEventListener('click', function() {
+        // Once the start button is clicked, it disappears.  
+        this.style.display = "none";
+        // And we set up the Web Audio API variables. 
+        if (!audioContext && navigator.mediaDevices.getUserMedia) {
+          audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          agentAnalyser = audioContext.createAnalyser();
+          agentAnalyser.fftSize=2048
+          userAnalyser = audioContext.createAnalyser();
+          userAnalyser.fftSize=2048
+        }
+
+        // data variable is the json that we will be sending to the backend 
+        // for this first interaction. 
+        let data = {started: true, user_utt: null};
+        // Start the recursive calls
+        take_one_step(data); 
+      });
+
+
+    </script>
+
+  </body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

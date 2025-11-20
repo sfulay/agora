@@ -1,0 +1,85 @@
+{
+  "interview_id": 207,
+  "recommendation_id": null,
+  "participant": "5c39849b19ceb400010c62a1",
+  "created_at": "2025-10-28T03:57:04.374320",
+  "total_duration": 104.22000026702881,
+  "gpt_estimated_duration": 58.25999984741211,
+  "segment_count": 5,
+  "segments": [
+    {
+      "segment_id": 1884,
+      "audio_id": 8174,
+      "text": "Yes, I grew up in the south, a southern state, pretty country area.",
+      "duration": 5.539999961853027,
+      "start_time": 0.0,
+      "end_time": 5.539999961853027,
+      "sequence_number": 1,
+      "question_id": 5123,
+      "global_question_id": 11,
+      "medley_order": 1,
+      "original_order": 1
+    },
+    {
+      "segment_id": 1914,
+      "audio_id": 8360,
+      "text": "personally I am a college graduate so I normally do not have jobs that are according to the minimum wage however I could see if the minimum wage were to be raised other people it would affect the economy of course the housing market and everything else would have to shift with it so the jobs that I have would also increase more than likely as well and just generally retail food service jobs everything would see an increase in traffic and they would have to also alter their prices so it would be a big shift for everybody the economy as a whole which is why I feel like it would be in a negative way because communities that have not had access to such money $30 an hour would be a huge jump in difference in their way of life and on the economic ladder",
+      "duration": 68.68000030517578,
+      "start_time": 0.0,
+      "end_time": 68.68000030517578,
+      "sequence_number": 1,
+      "question_id": 5190,
+      "global_question_id": 17,
+      "medley_order": 2,
+      "original_order": 31
+    },
+    {
+      "segment_id": 1927,
+      "audio_id": 8588,
+      "text": "Yes, my concerns go back to the prior question of the economy and everything switching and shifting with it.",
+      "duration": 8.0,
+      "start_time": 0.0,
+      "end_time": 8.0,
+      "sequence_number": 1,
+      "question_id": 5343,
+      "global_question_id": 20,
+      "medley_order": 3,
+      "original_order": 44
+    },
+    {
+      "segment_id": 1928,
+      "audio_id": 8588,
+      "text": "As in, if people are being paid $30 an hour, they might be expected to pay more for groceries and gas, as well as just basic necessities.",
+      "duration": 8.0,
+      "start_time": 8.0,
+      "end_time": 16.0,
+      "sequence_number": 2,
+      "question_id": 5343,
+      "global_question_id": 20,
+      "medley_order": 4,
+      "original_order": 45
+    },
+    {
+      "segment_id": 1929,
+      "audio_id": 8588,
+      "text": "Energy prices will go up, homes, rent, all things of the sort, I feel like we'll have to shift with it in order for the companies to be able to afford it.",
+      "duration": 14.0,
+      "start_time": 16.0,
+      "end_time": 30.0,
+      "sequence_number": 3,
+      "question_id": 5343,
+      "global_question_id": 20,
+      "medley_order": 5,
+      "original_order": 46
+    }
+  ],
+  "gpt_reasoning": "This medley introduces the speaker's background and family life, which sets the context for her perspective on the economic impacts of raising the minimum wage to $30 per hour. The selected segments explore her concerns about the broader economic shifts that such a change could cause. This narrative flows logically from personal introduction to detailed insights into socioeconomic implications, creating a coherent and relevant story that aligns with the topic.",
+  "reordered": true,
+  "recommendation_text": "The federal minimum wage should be raised to $30 per hour.",
+  "quality_analysis": {
+    "opinion_vs_experiences": 85,
+    "relevance_score": 95,
+    "depth_score": 90,
+    "explanation": "The medley is grounded in personal experiences and observations (85) and is highly relevant as it directly addresses the topic (95). It provides detailed insights into the potential economic consequences, showing depth in understanding beyond a superficial level (90)."
+  }
+}

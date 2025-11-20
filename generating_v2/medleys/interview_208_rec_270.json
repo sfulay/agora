@@ -1,0 +1,85 @@
+{
+  "interview_id": 208,
+  "recommendation_id": 270,
+  "participant": "65031f68de6e940396216f8a",
+  "created_at": "2025-10-28T04:01:18.512719",
+  "total_duration": 36.599998474121094,
+  "gpt_estimated_duration": 38.83999824523926,
+  "segment_count": 5,
+  "segments": [
+    {
+      "segment_id": 1961,
+      "audio_id": 8239,
+      "text": "I grew up in the suburbs of Minneapolis, Minnesota.",
+      "duration": 5.0,
+      "start_time": 9.600000381469727,
+      "end_time": 14.600000381469727,
+      "sequence_number": 3,
+      "question_id": 5140,
+      "global_question_id": 11,
+      "medley_order": 1,
+      "original_order": 3
+    },
+    {
+      "segment_id": 1984,
+      "audio_id": 8409,
+      "text": "So that's pretty discouraging.",
+      "duration": 3.3599987030029297,
+      "start_time": 27.040000915527344,
+      "end_time": 30.399999618530273,
+      "sequence_number": 4,
+      "question_id": 5202,
+      "global_question_id": 14,
+      "medley_order": 2,
+      "original_order": 26
+    },
+    {
+      "segment_id": 1981,
+      "audio_id": 8409,
+      "text": "Well, content marketing writing, it's been my dream career for 14 years, but unfortunately AI has all but ruined it.",
+      "duration": 12.800000190734863,
+      "start_time": 0.0,
+      "end_time": 12.800000190734863,
+      "sequence_number": 1,
+      "question_id": 5202,
+      "global_question_id": 14,
+      "medley_order": 3,
+      "original_order": 23
+    },
+    {
+      "segment_id": 1982,
+      "audio_id": 8409,
+      "text": "Our clients used to pay me an average of $40 to $45 an hour.",
+      "duration": 8.519999504089355,
+      "start_time": 12.800000190734863,
+      "end_time": 21.31999969482422,
+      "sequence_number": 2,
+      "question_id": 5202,
+      "global_question_id": 14,
+      "medley_order": 4,
+      "original_order": 24
+    },
+    {
+      "segment_id": 2024,
+      "audio_id": 8991,
+      "text": "I was doing very skilled work with content writing, and I was averaging 40 to 45. So in a way, it'd be a little insulting.",
+      "duration": 6.920000076293945,
+      "start_time": 8.399999618530273,
+      "end_time": 15.319999694824219,
+      "sequence_number": 2,
+      "question_id": 5533,
+      "global_question_id": 20,
+      "medley_order": 5,
+      "original_order": 66
+    }
+  ],
+  "gpt_reasoning": "This selection introduces the person, highlights their struggles with AI impacting their content writing career, and connects it with the discussion on the $30 minimum wage. It illustrates a personal journey followed by relevant economic arguments, offering both experiences and opinion.",
+  "reordered": true,
+  "recommendation_text": "The federal minimum wage should be raised to $30 per hour.",
+  "quality_analysis": {
+    "opinion_vs_experiences": 85,
+    "relevance_score": 90,
+    "depth_score": 75,
+    "explanation": "The narrative begins with personal background, moves to specific career impacts reflecting deep experiences, and links to broader economic concerns, offering significant relevance and depth of insight into the effects of changes in wages."
+  }
+}

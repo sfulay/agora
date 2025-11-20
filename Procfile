@@ -1,0 +1,1 @@
+web: gunicorn gabm_infra.wsgi:application --bind 0.0.0.0:8000 --workers 2 --timeout 120 --max-requests 1000 --max-requests-jitter 50 --worker-class gthread --threads 4 --worker-tmp-dir /dev/shm --log-level debug --capture-output --enable-stdio-inheritance --access-logfile - --error-logfile -
