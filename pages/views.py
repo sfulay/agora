@@ -195,13 +195,14 @@ def home(request, det=None):
   else: 
     curr_timer = None
 
-  context = {"consent_form": ConsentForm(),  
-             "completed_modules": completed_modules, 
+  context = {"consent_form": ConsentForm(),
+             "completed_modules": completed_modules,
              "curr_module": curr_module,
              "started_interviews_scripts": started_interviews_scripts,
              "curr_timer": curr_timer,
              "pilot": settings.PILOT,
-             "phase_2_only": settings.PHASE_2_ONLY}
+             "phase_2_only": settings.PHASE_2_ONLY,
+             "show_avatars": settings.SHOW_AVATARS}
   
   template = "pages/home/home.html"
   return render(request, template, context)
