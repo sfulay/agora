@@ -1,3 +1,5 @@
 branch-defaults:
   main:
     environment: agora-prolific
+  prolific:
+    environment: agoraenv2

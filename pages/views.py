@@ -280,32 +280,6 @@ def interview(request, script_v):
   return render(request, template, context)
 
 
-def summary(request):
-  if not request.user.is_authenticated:
-    context = {}
-    template = "pages/home/landing.html"
-    return render(request, template, context)
-
-  all_interviews = Interview.objects.all().order_by("-created")
-
-  context = {"curr_user": request.user, 
-             "all_interviews": all_interviews}
-  template = "pages/summary/summary.html"
-  return render(request, template, context)
-
-
-def summary_unprocessed_v1(request):
-  if not request.user.is_authenticated:
-    context = {}
-    template = "pages/home/landing.html"
-    return render(request, template, context)
-
-  all_interviews = Interview.objects.filter(completed_sec=2709).filter(zipped_main=False).order_by("-created")
-
-  context = {"curr_user": request.user, 
-             "all_interviews": all_interviews}
-  template = "pages/summary/summary.html"
-  return render(request, template, context)
 
 
 def download_p_data(request, participant_username, script_v): 
@@ -382,7 +356,7 @@ def download_p_audio_data(request, participant_username, script_v):
       curr_interview = None
 
   if not curr_interview:
-      return summary(request)
+      return redirect('home')
 
   qs = InterviewQuestion.objects.filter(interview=curr_interview).order_by('global_question_id')
   audio_file_names = []
@@ -422,45 +396,6 @@ def cleanup_interview(interview):
       new_interview += module.strip() + "\n\n"
 
   return new_interview
-
-
-def transcript(request, participant_username, script_v):
-    if not request.user.is_authenticated:
-        context = {}
-        template = "pages/home/landing.html"
-        return render(request, template, context)
-
-    # Loading the current user and preparing the context to return.
-    curr_user = Participant.objects.get(username=participant_username)
-    try: 
-        curr_interview = Interview.objects.get(participant=curr_user,
-                                            script_v=script_v)
-    except: 
-        curr_interview = None
-
-    if not curr_interview:
-        context = {}
-        template = "pages/home/content.html"
-        return render(request, template, context)
-
-    # Get all questions for this interview, ordered by global_question_id
-    questions = (InterviewQuestion.objects.filter(interview=curr_interview)
-                                    .order_by('global_question_id'))
-    # Debug output
-    for question in questions:
-        print(f"Question {question.global_question_id}:")
-        for utterance in question.utterances.all():
-            print(f"  - is_interviewer: {utterance.is_interviewer}, text: {utterance.utterance_text[:50]}...")
-# views.py
-    for question in questions:
-        question.has_non_interviewer = any(not u.is_interviewer for u in question.utterances.all())
-
-    context = {"curr_user": curr_user,
-             "curr_interview": curr_interview, 
-             "questions": questions,
-             "script_v": script_v}
-    template = "pages/transcript/transcript_edit.html"
-    return render(request, template, context)
 
 
 def login(request):
@@ -749,22 +684,10 @@ def zipped_reset_check(request, participant_username, script_v):
       curr_interview.zipped_audio = False
       curr_interview.zipped_main = False
       curr_interview.save()
-  except: 
+  except:
       curr_interview = None
-  
-  return summary(request)
 
-
-def survey_visualization(request):
-    if not request.user.is_authenticated:
-        return redirect('home')
-        
-    context = {
-        "user": request.user,
-        # Add any other context data needed for visualization
-    }
-    template = "pages/survey/visualization.html"
-    return render(request, template, context)
+  return redirect('home')
 
 
 def view_recommendations(request):
@@ -802,65 +725,6 @@ def check_participant(request, interview_id):
     else:
         return JsonResponse({'error': 'Method not allowed'}, status=405)
 
-
-def edit_transcript(request, participant_username, script_v):
-    if not request.user.is_authenticated:
-        context = {}
-        template = "pages/home/landing.html"
-        return render(request, template, context)
-
-    # Loading the current user and preparing the context to return.
-    curr_user = Participant.objects.get(username=participant_username)
-    try: 
-        curr_interview = Interview.objects.get(participant=curr_user,
-                                            script_v=script_v)
-    except: 
-        curr_interview = None
-
-    if not curr_interview:
-        context = {}
-        template = "pages/home/content.html"
-        return render(request, template, context)
-
-    if request.method == 'POST':
-        try:
-            # Parse the JSON data from the request
-            data = json.loads(request.body)
-            question_id = data.get('question_id')
-            utterances = data.get('utterances', {})
-            redactions = data.get('redactions', {})
-
-            # Get the question
-            question = InterviewQuestion.objects.get(id=question_id, interview=curr_interview)
-            
-            # Update each utterance
-            for utterance_name, new_text in utterances.items():
-                utterance_id = utterance_name.split('_')[1]
-                utterance = InterviewUtterance.objects.get(id=utterance_id, question=question)
-                if not utterance.is_interviewer:  # Only update interviewee utterances
-                    utterance.utterance_text = new_text.strip()
-                    # Update redaction status
-                    redact_name = f"redact_{utterance_id}"
-                    if redact_name in redactions:
-                        utterance.is_redacted = redactions[redact_name]
-                    utterance.save()
-
-            # Update the question's convo field
-            utterances = question.utterances.all().order_by('sequence_number')
-            new_convo = ""
-            for utt in utterances:
-                speaker = "Interviewer" if utt.is_interviewer else "Interviewee"
-                text = "[REDACTED]" if (not utt.is_interviewer and utt.is_redacted) else utt.utterance_text
-                new_convo += f"{speaker}: {text}\n"
-            question.convo = new_convo
-            question.save()
-
-            return JsonResponse({'success': True})
-        except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)}, status=400)
-
-    # If not POST, redirect to transcript view
-    return redirect('transcript', participant_username=participant_username, script_v=script_v)
 
 def get_completion_details(request):
     """API endpoint to get completion code and link for the study"""
