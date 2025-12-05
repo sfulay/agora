@@ -1,548 +1,80 @@
-{% extends "base.html" %}
 {% load static %}
-{% load crispy_forms_tags %}
-
-{% block custom_head_content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agora</title>
   <style>
-    .module-title {
-      font-weight:800;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
 
-    #consent_form input {
-      margin-bottom:1.2em
-    }
-
-    .active_module {
-      border-width:3px !important;
-      border-color: #F72C25 !important;
-    }
-
-    /* Background image for home dashboard */
     body {
-      background-image: url("{% static 'gabm/img/agora_building.png' %}") !important;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-image: url("{% static 'gabm/img/agora_building.png' %}");
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
       background-attachment: fixed;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    /* Ensure content is visible over background */
-    .layout-page {
-      background-color: transparent !important;
+    .sign-out-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 10px 20px;
+      background-color: rgba(0, 0, 0, 0.9);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s;
     }
 
-    .content-wrapper {
-      background-color: rgba(255, 255, 255, 0.95) !important;
-      backdrop-filter: blur(10px);
+    .sign-out-btn:hover {
+      background-color: rgba(0, 0, 0, 1);
+    }
+
+    .center-button {
+      padding: 20px 40px;
+      background-color: rgba(0, 0, 0, 0.95);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 24px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: background-color 0.3s, transform 0.2s;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .center-button:hover {
+      background-color: rgba(0, 0, 0, 1);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 8px rgba(0, 0, 0, 0.4);
     }
   </style>
-
-  <link rel="stylesheet" href="{% static 'gabm/sneat/assets/vendor/libs/select2/select2.css' %}" />
-  <link rel="stylesheet" href="{% static 'gabm/sneat/assets/vendor/libs/@form-validation/umd/styles/index.min.css' %}" />
-  <link rel="stylesheet" href="{% static 'gabm/sneat/assets/vendor/libs/bs-stepper/bs-stepper.css' %}" />
-{% endblock custom_head_content %}
-
-{% block content %}
-  <!-- Logout button in top-right -->
-  <div style="position: fixed; top: 20px; right: 20px; z-index: 1000;">
-    {% if request.user.is_authenticated %}
-      <form method="post" action="{% url 'account_logout' %}" style="display: inline;">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-outline-danger btn-sm">Sign Out</button>
-      </form>
-    {% endif %}
-  </div>
-
-  <div class="content-wrapper">
-
-    <div class="container-xxl flex-grow-1 container-p-y">
-      <h4 class="py-3 mb-4">Study Components and Instructions</h4>
-
-      <div class="card g-3 mt-5" style="margin-top:0em !important">
-        <div class="card-body row g-3">
-          
-          <div class="col-lg-8">
-
-            <div class="card-body">
-              <div class="added-cards">
-
-                {% if not phase_2_only %}
-                <div class="cardMaster border p-3 rounded mb-3 {% if curr_module == 'Consent' %}active_module{% endif %}">
-                  <div class="d-flex justify-content-between flex-sm-row flex-column">
-                    <div class="card-information" style="width: 75%">
-                      <p>
-                        <i class="menu-icon tf-icons bx bx-file"></i>
-                        Preparation Pt. 1
-                      </p>
-                      <div class="d-flex align-items-center mb-1">
-                        <h6 class="mb-0 me-3 module-title">Review the Consent Form</h6>
-                        {% if curr_module == "Consent" %}
-                          <span class="badge bg-label-primary me-1">Do this next!</span>
-                        {% endif %}
-                      </div>
-                      <span>
-                        In this module, you will be providing consent to participating this study. As a reminder, your voice will be recorded and shared with other participants in the study.
-                        (For your record, you can find the consent form <a href="https://docs.google.com/document/d/11LOfUHdbwyUN2Xkg3tLVLZoUOsNCWZbB/edit?usp=sharing&ouid=110548053960700182733&rtpof=true&sd=true" target="_blank" rel="noopener">here</a>.)
-
-                      </span>
-                    </div>
-                    <div class="d-flex flex-column text-start text-lg-end">
-                      <div class="d-flex order-sm-0 order-1">
-                        {% if curr_module == "Consent" %}
-                          <button type="button" class="btn btn-label-primary" data-bs-toggle="modal" data-bs-target="#consentForm">Start the Module</button>
-                        {% elif "Consent" in completed_modules %}
-                          <button class="btn btn-label-secondary" disabled>Done</button>
-                        {% else %}
-                          <button class="btn btn-label-secondary" disabled>Start the Module</button>
-                        {% endif %}
-                      </div>
-                      <small class="mt-sm-auto mt-2 order-sm-1 order-0">Est. 2 minutes</small>
-                    </div>
-                  </div>
-                </div>
-                {% endif %}
-
-                {% if not pilot and not phase_2_only %}
-                <div class="cardMaster border p-3 rounded mb-3 {% if curr_module == 'Avatar' %}active_module{% endif %}">
-                  <div class="d-flex justify-content-between flex-sm-row flex-column">
-                    <div class="card-information" style="width: 75%">
-                      <p>
-                        <i class="menu-icon tf-icons bx bx-file"></i>
-                        Preparation Pt. 2
-                      </p>
-                      <div class="d-flex align-items-center mb-1">
-                        <h6 class="mb-0 me-3 module-title">Create Your Avatar</h6>
-                        {% if curr_module == "Avatar" %}
-                          <span class="badge bg-label-primary me-1">Do this next!</span>
-                        {% endif %}
-                      </div>
-                      <span>
-                        In this module, you will be creating an avatar that will represent you in our interview.
-                      </span>
-                    </div>
-                    <div class="d-flex flex-column text-start text-lg-end">
-                      <div class="d-flex order-sm-0 order-1">
-                        {% if curr_module == "Avatar" %}
-                          <a href="{% url 'create_avatar' %}" class="btn btn-label-primary" >Start the Module</a>
-                        {% elif "Avatar" in completed_modules %}
-                          <button class="btn btn-label-secondary" disabled>Done</button>
-                        {% else %}
-                          <button class="btn btn-label-secondary" disabled>Start the Module</button>
-                        {% endif %}
-                      </div>
-                      <small class="mt-sm-auto mt-2 order-sm-1 order-0">Est. 2 minutes</small>
-                    </div>
-                  </div>
-                </div>
-                {% endif %}
-                {% if not pilot and not phase_2_only %}
-                <div class="cardMaster border p-3 rounded mb-3 {% if curr_module == 'Interview (minwage_script_v2)' %}active_module{% endif %}">
-                  <div class="d-flex justify-content-between flex-sm-row flex-column">
-                    <div class="card-information" style="width: 75%">
-                      <p>
-                        <i class="menu-icon tf-icons bx bx-chat"></i>
-                        Step 1
-                      </p>
-                      <div class="d-flex align-items-center mb-1">
-                        <h6 class="mb-0 me-3 module-title">Join the Interview</h6>
-                        {% if curr_module == "Interview (minwage_script_v2)" %}
-                          <span class="badge bg-label-primary me-1">Do this next!</span>
-                        {% endif %}
-                      </div>
-                      <p>
-                        <strong>(Required component)</strong> <br>In this module, you will be participating in an interview in which our interviewer agent will ask you about yourself and your experiences with work.
-                      </p>
-                      <p>
-                        <strong style="color:#9C1212">IMPORTANT:</strong> <br>Ensure the followings before starting the interview. 
-
-                        <ul>
-                          <li>
-                            Please find a quiet place where you can talk comfortably during this interview. Background noise can make it difficult to record and pick up your voice, hindering the interview process.
-                          </li>
-                          <li>
-                            Your computer will need a microphone, like the one you might have used for online calls (e.g., Zoom, Google Hangouts). If you are an AirPod user, we recommend <em>against</em> using its microphone for this interview.  
-                          </li>
-                          <li>
-                            Please only use one of the following browsers: Chrome, Safari, Firefox, Opera, Edge
-                          </li>
-                        </ul>
-
-                        <strong style="color:#9C1212">Please note (if the interview is stalling):</strong> <br><em>During the interview, three dots (loading sign) should only last on average 5 seconds, and maximum 2 minutes, and will proceed to the next question without you having to do anything. If the interviewer is not responding/stalling for longer than a minute, please <strong>refresh </strong>the page. Finally, we strongly recommend that you use a <strong>desktop/laptop</strong> for this part of the study (instead of a mobile/tablet device).</em> 
-                      </p>
-                      <p>
-                        <!-- For demonstration only: <a href="% url 'transcript' 'script_v1' %">view interview transcript</a> -->
-                      </p>
-                    </div>
-                    <div class="d-flex flex-column text-start text-lg-end">
-                      <div class="d-flex order-sm-0 order-1">
-                        {% if curr_module == "Interview (minwage_script_v2)" %}
-                          <button type="button" class="btn btn-label-primary" data-bs-toggle="modal" data-bs-target="#createApp">
-                            {% if "minwage_script_v2" in started_interviews_scripts %}
-                              Resume the Module
-                            {% else %}
-                              Start the Module
-                            {% endif %}
-                          </button>
-                        {% elif "Interview (minwage_script_v2)" in completed_modules %}
-                          <button class="btn btn-label-secondary" disabled>Done</button>
-                        {% else %}
-                          <button class="btn btn-label-secondary" disabled>Start the Module</button>
-                        {% endif %}
-                      </div>
-                      <!-- <small class="mt-sm-auto mt-2 order-sm-1 order-0">Est. 2 hours</small> -->
-                      <small class="mt-sm-auto mt-2 order-sm-1 order-0">Est. 45 minutes</small>
-                    </div>
-                  </div>
-                </div>
-                {% endif %}
-
-
-{% if not request.user.behavioral_activated %}
-
-{% else %}
-
-
-
-
-
-
-
-
-
-
-{% endif %}
-
-{% if not request.user.behavioral_activated %}
-
-                {% if not pilot and not phase_2_only %}
-                <div class="cardMaster border p-3 rounded mb-3">
-                  <div class="d-flex justify-content-between flex-sm-row flex-column">
-                    <div class="card-information" style="width: 75%">
-                      <p>
-                        <i class="menu-icon tf-icons bx bx-check-circle"></i>
-                        Interview Completion
-                      </p>
-                      <div class="d-flex align-items-center mb-1">
-                          <h6 class="mb-0 me-3 module-title">Complete Phase One</h6>
-   
-                      </div>
-                      <span>
-                        Thank you for completing the first phase of the study! Please click Complete to be routed back to Prolific. You will return to this page in two weeks to view the recommendations and complete phase two.
-                      </span>
-                    </div>
-                    <div class="d-flex flex-column text-start text-lg-end">
-                      <div class="d-flex order-sm-0 order-1">
-                        <form action="{% url 'handler_phase_one_complete' %}" method="post" style="display: inline;">
-                          {% csrf_token %}
-                          {% if "phase_one" in completed_modules or not "Interview (minwage_script_v2)" in completed_modules %}
-                            <button class="btn btn-label-secondary" disabled>
-                              Complete
-                            </button>
-                          {% else %}
-                            <a href="https://app.prolific.com/submissions/complete?cc=C1HCEBJT" class="btn btn-label-primary" target="_blank" rel="noopener" onclick="this.closest('form').submit();">
-                              Complete
-                            </a>
-                          {% endif %}
-                        </form>
-                      </div>
-                      <small class="mt-sm-auto mt-2 order-sm-1 order-0">Est. 1 minutes</small>
-                    </div>
-                  </div>
-                </div>
-                {% endif %}
-
-                <!-- Recommendation Editor Section -->
-                <div class="cardMaster border p-3 rounded mb-3">
-                  <div class="d-flex justify-content-between flex-sm-row flex-column">
-                    <div class="card-information" style="width: 75%">
-                      <p>
-                        <i class="menu-icon tf-icons bx bx-edit"></i>
-                        Admin Tools
-                      </p>
-                      <div class="d-flex align-items-center mb-1">
-                        <h6 class="mb-0 me-3 module-title">Habermas Game</h6>
-                      </div>
-                      <span>
-                        Play the Habermas Game and see how much support you can get for your recommendation!
-                      </span>
-                    </div>
-                    <div class="d-flex flex-column text-start text-lg-end">
-                      <div class="d-flex order-sm-0 order-1">
-                        <a href="{% url 'recommendation_editor' 273 %}" class="btn btn-label-primary">Open Editor</a>
-                      </div>
-                      <small class="mt-sm-auto mt-2 order-sm-1 order-0">Admin Access</small>
-                    </div>
-                  </div>
-                </div>
-{% endif %}
-
-
-
-
-
-{% endblock content %}
-
-{% block modal_block %}
-
-<!-- Join the interview Modal -->
-<div class="modal fade" id="createApp" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered modal-simple modal-upgrade-plan">
-    <div class="modal-content p-3 p-md-5">
-      <div class="modal-body p-2">
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        <div class="text-center">
-          <h3 class="mb-2">Are you ready to start the interview?</h3><br>
-        </div>
-        <!-- App Wizard -->
-        <div id="wizard-create-app" class="bs-stepper vertical mt-2 shadow-none border-0">
-          <div class="bs-stepper-header border-0 p-1">
-            
-            <div class="step" data-target="#details">
-              <button type="button" class="step-trigger" disabled>
-                <span class="bs-stepper-circle"><i class="bx bx-file fs-5"></i></span>
-                <span class="bs-stepper-label">
-                  <span class="bs-stepper-title text-uppercase">Test Audio</span>
-                </span>
-              </button>
-            </div>
-
-            <div class="line"></div>
-            <div class="step" data-target="#calibrationSubmit">
-              <button type="button" class="step-trigger" disabled>
-                <span class="bs-stepper-circle"><i class="bx bx-check fs-5"></i></span>
-                <span class="bs-stepper-label">
-                  <span class="bs-stepper-title text-uppercase">Start</span>
-                </span>
-              </button>
-            </div>
-
-          </div>
-          <div class="bs-stepper-content p-1">
-            <div id="details" class="content pt-3 pt-lg-0">
-              <p>Before we start, we want to make sure that your audio is working properly! Please find a quiet place with a microphone. When you are ready, 1) press the "Start calibration" button below, and 2) read out loud the lines below.</p>
-
-              <div class="mb-3" style="border:solid; border-radius: 1.2em; padding:1.2em">
-                <div style="margin-bottom:1.2em; margin-top:0.8em">
-                  <button id="calibrateButton" class="btn btn-outline-dark">
-                    Start calibration
-                  </button>
-                </div>
-                <p>
-                  <em>Please read out loud (repeat if needed)</em>: In my younger and more vulnerable years my father gave me some advice that I've been turning over in my mind ever since. Whenever you feel like criticizing anyone, he told me, just remember that all the people in this world haven't had the advantages that you've had.
-                </p>
-                <p style="margin-bottom:1.2em; ">
-                  <!-- <em>(Progress: <span id="calibrationProgress">0</span>% completed)</em> -->
-                  <div class="d-flex justify-content-between align-items-center gap-3">
-                    <div class="progress w-100" style="height: 10px">
-                      <div
-                        id="calibrationProgressBar"
-                        class="progress-bar bg-success"
-                        role="progressbar"
-                        style="width: 0%"
-                        aria-valuenow="0"
-                        aria-valuemin="0"
-                        aria-valuemax="100"></div>
-                    </div>
-                    <small class="fw-medium"  style="width: 60px; text-align: right;"><span id="calibrationProgress">0</span>%</small>
-                  </div>
-                </p>
-              </div>
-              
-              <p><br>Please press the next button below when you have completed the calibration step. </p>
-
-              <div class="col-12 d-flex justify-content-between mt-4">
-                <button id="interviewPrepStepOneDoneButton" class="btn btn-primary btn-next" style="width:100%" disabled>
-                  <span class="align-middle d-sm-inline-block d-none me-sm-1">Next</span>
-                  <i class="bx bx-right-arrow-alt bx-xs"></i>
-                </button>
-              </div>
-
-            </div>
-
-            <!-- submit -->
-            <div id="calibrationSubmit" class="content text-center pt-3 pt-lg-0">
-              <h5 class="mb-2 mt-3">Before you start... </h5>
-              <p>Please be sure to find a quiet place.</p>
-              <!-- image -->
-              <img
-                src="{% static 'gabm/sneat/assets/img/illustrations/man-with-laptop-light.png' %}"
-                alt="Create App img"
-                width="200"
-                class="img-fluid"
-                data-app-light-img="gabm/sneat/assets/img/illustrations/man-with-laptop-light.png"
-                data-app-dark-img="gabm/sneat/assets/img/illustrations/man-with-laptop-dark.png" />
-              <div class="col-12 d-flex justify-content-between mt-4 pt-2">
-                <form method="post" action="{% url 'handler_calibration' %}" style="width: 100%;">
-                  {% csrf_token %}
-                  <input type="hidden" name="audioCalibrationFloat" value="hiddenValue-testetest">
-                  <input type="hidden" name="script_v" value="minwage_script_v2">
-                  <button type="submit" class="btn btn-success" style="width:100%">I am ready to start the interview</button>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!--/ App Wizard -->
-    </div>
-  </div>
-</div>
-
-  <!-- Consent Form Modal -->
-  <div class="modal fade" id="consentForm" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-md modal-simple modal-edit-user">
-      <div class="modal-content p-3 p-md-5">
-        <div class="modal-body">
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          
-          <div class="text-center mb-4">
-            <h3>Consent Form</h3>
-            <p style="text-align: left;">
-              Please review and agree to the <a href="https://docs.google.com/document/d/11LOfUHdbwyUN2Xkg3tLVLZoUOsNCWZbB/edit?usp=sharing&ouid=110548053960700182733&rtpof=true&sd=true" target="_blank" rel="noopener">consent form</a> before proceeding with the study.
-            </p>
-          </div>
-
-          <hr>
-          
-          <form id="consent_form" action="{% url 'handler_consent' %}" method="post">
-            {% csrf_token %}
-            {{ consent_form|crispy }}
-            <br>
-            <button type="submit" class="btn btn-primary me-sm-3 me-1" style="width:100%">I Agree</button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-  <!--/ Consent Form Modal -->
-
-{% endblock modal_block %}
-
-
-
-{% block js_content %}
-
-  <script src="{% static 'gabm/sneat/assets/vendor/libs/cleavejs/cleave.js' %}"></script>
-  <script src="{% static 'gabm/sneat/assets/vendor/libs/cleavejs/cleave-phone.js' %}"></script>
-  <script src="{% static 'gabm/sneat/assets/vendor/libs/select2/select2.js' %}"></script>
-  <script src="{% static 'gabm/sneat/assets/vendor/libs/@form-validation/umd/bundle/popular.min.js' %}"></script>
-  <script src="{% static 'gabm/sneat/assets/vendor/libs/@form-validation/umd/plugin-bootstrap5/index.min.js' %}"></script>
-  <script src="{% static 'gabm/sneat/assets/vendor/libs/@form-validation/umd/plugin-auto-focus/index.min.js' %}"></script>
-  <script src="{% static 'gabm/sneat/assets/vendor/libs/bs-stepper/bs-stepper.js' %}"></script>
-  <script src="{% static 'gabm/sneat/assets/js/modal-create-app.js' %}"></script>
-
-
-  <script>
-    let audioContext = new (window.AudioContext || window.webkitAudioContext)();
-
-    // Settings and parameters: 
-    let calibrationBufferDuration = 50; 
-    let calibrationSlackRate = 0.75;
-    let silenceGuaranteeThreshold = 0.01;
-    let speechThreshold = 0.02;
-    let speechThresholdCalibrated = false;
-
-    function updateProgressBar(currentNumber) {
-        var progressBar = document.getElementById("calibrationProgressBar");
-        progressBar.style.width = currentNumber + '%';
-        progressBar.setAttribute('aria-valuenow', currentNumber);
-    }
-
-    document.getElementById('calibrateButton').addEventListener('click', function() {
-      document.getElementById("calibrateButton").innerText = "Calibrating the audio";
-      document.getElementById("calibrateButton").disabled = true;
-
-      let list_buffer_rms = [];
-
-      // Check for non-null
-      if (navigator.mediaDevices.getUserMedia) {
-          navigator.mediaDevices.getUserMedia ({audio: true})
-          .then(function(stream) {
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const source = audioContext.createMediaStreamSource(stream);
-            const processor = audioContext.createScriptProcessor(4096, 1, 1);
-
-            source.connect(processor);
-            processor.connect(audioContext.destination);
-
-            processor.onaudioprocess = function(e) {
-              // Get the buffer of audio data
-              const buffer = e.inputBuffer.getChannelData(0);
-
-              // Root Mean Square (RMS) is a statistical measure of the 
-              // magnitude of a varying quantity. It's commonly used in 
-              // physics, engineering, and signal processing to represent 
-              // the average power or amplitude of a signal, especially 
-              // when it varies over time.
-              let sum = 0;
-              for(let i = 0; i < buffer.length; i++) {
-                  sum += buffer[i] * buffer[i]; // sum of squares
-              }
-              let rms = Math.sqrt(sum / buffer.length);
-              // Update the average noise level display/processing
-              console.log("Current RMS: " + rms);
-
-              if (rms > silenceGuaranteeThreshold) {
-                list_buffer_rms.push(rms);
-
-                var element = document.getElementById('calibrationProgress');
-                var currentNumber = parseInt(element.innerText);
-                currentNumber += 100/calibrationBufferDuration; 
-                element.innerText = currentNumber;
-
-                updateProgressBar(currentNumber);
-              }; 
-
-              if (list_buffer_rms.length >= calibrationBufferDuration) {
-                // Disconnecting the processor and source for now. 
-                processor.disconnect();
-                source.disconnect();
-                // Calibrating the threshold. 
-                let sum = list_buffer_rms.reduce(function (accumulator, currentValue) {
-                    return accumulator + currentValue;
-                }, 0);
-
-                let rms_average = sum / list_buffer_rms.length;
-                speechThreshold = rms_average * calibrationSlackRate;
-                speechThresholdCalibrated = true;
-                // Removing the event listener.
-                processor.onaudioprocess = null;
-                console.log("Stopping the calibration process");
-                console.log("New speechThreshold" + speechThreshold);
-                document.getElementById("interviewPrepStepOneDoneButton").disabled = false;
-                document.getElementsByName("audioCalibrationFloat")[0].value = speechThreshold;
-                document.getElementById("calibrateButton").innerText = "Finished calibrating the audio";
-
-                processor.disconnect();
-                source.disconnect();
-                audioContext.close(); // Optionally close the context if it's no longer needed
-              };
-            };
-          })
-          .catch(function(err) {
-            console.log('The following gUM error occurred: ' + err);
-          });
-      } else {
-         console.log('getUserMedia not supported on your browser!');
-      }
-    });
-    
-  </script>
-{% endblock js_content %}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+</head>
+<body>
+  <!-- Sign Out Button -->
+  {% if request.user.is_authenticated %}
+    <form method="post" action="{% url 'account_logout' %}" style="display: inline;">
+      {% csrf_token %}
+      <button type="submit" class="sign-out-btn">Sign Out</button>
+    </form>
+  {% endif %}
+
+  <!-- Center Button -->
+  <a href="{% url 'recommendation_editor' 273 %}" class="center-button">Enter the Agora</a>
+</body>
+</html>
