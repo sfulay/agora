@@ -48,6 +48,28 @@
     <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="{% static 'gabm/sneat/assets/js/config.js'%}"></script>
 
+    <style type="text/css">
+      /* Default background for all auth pages */
+      body {
+        background-color: #fefdf6 !important;
+      }
+
+      /* Link styling to match black/white theme */
+      a {
+        color: #000000;
+        text-decoration: underline;
+      }
+
+      a:hover {
+        color: #333333;
+        text-decoration: underline;
+      }
+
+      a:visited {
+        color: #000000;
+      }
+    </style>
+
     {% block extra_head %}
     {% endblock %}
   </head>

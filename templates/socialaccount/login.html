@@ -3,6 +3,52 @@
 
 {% block head_title %}{% trans "Sign In" %}{% endblock %}
 
+{% block extra_head %}
+  <style type="text/css">
+    body {background-color: #fefdf6}
+
+    .btn-black {
+      background-color: rgba(0, 0, 0, 0.95);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+
+    .btn-black:hover {
+      background-color: rgba(0, 0, 0, 1);
+      color: white;
+    }
+
+    button[type="submit"]:not(.btn-black) {
+      background-color: rgba(0, 0, 0, 0.95);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+
+    button[type="submit"]:not(.btn-black):hover {
+      background-color: rgba(0, 0, 0, 1);
+    }
+
+    a {
+      color: #000000;
+      text-decoration: underline;
+    }
+
+    a:hover {
+      color: #333333;
+    }
+
+    a:visited {
+      color: #000000;
+    }
+  </style>
+{% endblock %}
+
 {% block content %}
 {% if process == "connect" %}
 <h1>{% blocktrans with provider.name as provider %}Connect {{ provider }}{% endblocktrans %}</h1>

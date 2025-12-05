@@ -11,7 +11,36 @@
 
 {% block extra_head %}
   <style type="text/css">
-    body {background-color: white}
+    body {background-color: #fefdf6}
+
+    .btn-black {
+      background-color: rgba(0, 0, 0, 0.95);
+      color: white;
+      border: none;
+      transition: background-color 0.3s;
+    }
+
+    .btn-black:hover {
+      background-color: rgba(0, 0, 0, 1);
+      color: white;
+    }
+
+    .card {
+      background-color: #fefdf6 !important;
+    }
+
+    a {
+      color: #000000;
+      text-decoration: underline;
+    }
+
+    a:hover {
+      color: #333333;
+    }
+
+    a:visited {
+      color: #000000;
+    }
   </style>
 {% endblock %}
 
@@ -55,7 +84,7 @@
               {% endif %}
               
               <br>
-              <button class="primaryAction btn btn-outline-primary" type="submit" style="width: 100%; ">{% trans "Sign In" %}</button>
+              <button class="primaryAction btn btn-black" type="submit" style="width: 100%; ">{% trans "Sign In" %}</button>
             </form>
 
           </div>
