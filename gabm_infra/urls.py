@@ -48,22 +48,8 @@ pages_urlpatterns = [
   re_path(r'^handler_phase_one_complete/$', pages_views.handler_phase_one_complete, name='handler_phase_one_complete'),
 
   re_path(r'^zipped_reset_check/(?P<participant_username>[^/]+)/(?P<script_v>[^/]+)/$', pages_views.zipped_reset_check, name='zipped_reset_check'),
-  re_path(r'^recommendations/(?P<recommendation_id>\d+)/$', pages_views.view_recommendation_voting, name='recommendation_voting'),
 
-  re_path(r'^recommendations/(?P<recommendation_id>\d+)/vote/$', pages_views.submit_recommendation_vote, name='submit_recommendation_vote'),
-  re_path(r'^api/submit_decision_feedback/$', pages_views.submit_decision_feedback, name='submit_decision_feedback'),
-  re_path(r'^api/interview/(?P<interview_id>\d+)/participant-check/$', pages_views.check_participant, name='check_participant'),
-  re_path(r'^get_completion_details/$', pages_views.get_completion_details, name='get_completion_details'),
-  re_path(r'^habermas_game/(?P<recommendation_id>\d+)/$', pages_views.habermas_game, name='habermas_game'),
-  re_path(r'^editable_recommendation/(?P<recommendation_id>\d+)/edit/$', pages_views.edit_editable_recommendation, name='edit_editable_recommendation'),
-  re_path(r'^api/prediction/(?P<recommendation_id>\d+)/(?P<participant_username>[^/]+)/$', pages_views.get_participant_prediction, name='get_participant_prediction'),
-  re_path(r'^api/participant/(?P<recommendation_id>\d+)/(?P<participant_id>\d+)/modal/$', pages_views.get_participant_modal_content, name='get_participant_modal_content'),
-
-  re_path(r'^api/submit_reflection/$', pages_views.submit_reflection, name='submit_reflection'),
-  re_path(r'^api/submit_feedback/$', pages_views.submit_feedback, name='submit_feedback'),
-  re_path(r'^api/send_connection_request/$', pages_views.send_connection_request, name='send_connection_request'),
-
-    # Telemetry endpoints
+  # Telemetry endpoints
   re_path(r'^api/telemetry/recommendation/start/$', pages_views.start_recommendation_tracking, name='start_recommendation_tracking'),
   re_path(r'^api/telemetry/recommendation/end/$', pages_views.end_recommendation_tracking, name='end_recommendation_tracking'),
   re_path(r'^api/telemetry/avatar/click/$', pages_views.track_avatar_click, name='track_avatar_click'),

@@ -20,153 +20,111 @@
       href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
       rel="stylesheet" />
 
-    <!-- Icons -->
-    <link rel="stylesheet" href="{% static 'gabm/sneat/assets/vendor/fonts/boxicons.css'%}" />
-    <link rel="stylesheet" href="{% static 'gabm/sneat/assets/vendor/fonts/fontawesome.css'%}" />
-    <link rel="stylesheet" href="{% static 'gabm/sneat/assets/vendor/fonts/flag-icons.css'%}" />
-
     <!-- Core CSS -->
-    <link rel="stylesheet" href="{% static 'gabm/sneat/assets/vendor/css/rtl/core.css' %}" class="template-customizer-core-css" />
-    <link rel="stylesheet" href="{% static 'gabm/sneat/assets/vendor/css/rtl/theme-default.css' %}" class="template-customizer-theme-css" />
-    <link rel="stylesheet" href="{% static 'gabm/sneat/assets/css/demo.css' %}" />
-    <link rel="stylesheet" href="{% static 'gabm/sneat/assets/vendor/css/pages/front-page.css' %}" />
-
-    <!-- Page CSS -->
-    <link rel="stylesheet" href="{% static 'gabm/sneat/assets/vendor/css/pages/front-page-landing.css' %}" />
-
-    <!-- Helpers -->
-    <script src="{% static 'gabm/sneat/assets/js/front-config.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'gabm/sneat/assets/vendor/css/rtl/core.css' %}" />
+    <link rel="stylesheet" href="{% static 'gabm/sneat/assets/vendor/css/rtl/theme-default.css' %}" />
 
     <style>
+      .light-style body,
+      .dark-style body,
       body {
-        background-color:#FCF6B1;
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+        background-color: transparent !important;
+        background-image: url("{% static 'gabm/img/agora.png' %}") !important;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
       }
+
       #landing_wrapper {
-        padding:0; 
-        margin:0; 
-        height: 100vh; 
+        padding: 0;
+        margin: 0;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
       }
 
-      /* Column One */
-      #col_one {
-        position: relative; 
-        display: flex; 
-        flex-direction: column;
+      /* Logo in top left */
+      #top_nav {
+        position: absolute;
+        top: 2em;
+        left: 2em;
+        z-index: 10;
       }
-      #col_one nav {
-        position: absolute; 
-        top: 2em; 
-        left: 2em
-      }
+
       #logo {
-        color:#F77F00
+        color: #F77F00;
+        font-size: 1.5em;
       }
-      #col_one div {
-        flex: 1; 
-        display: flex; 
-        justify-content: center; 
-        align-items: center; 
-        flex-direction: column;
-      }
-      #col_one div h1 {
-        color:#F77F00
-      } 
-      #col_one div p {
-        color:#F7B32B;
-        font-weight:600
-      } 
 
-      /* Column Two */
-      #col_two {
-        display: flex; 
-        justify-content: center; 
-        align-items: center; 
-        flex-direction: column; 
-        height:100%; 
-        background-color:white;
+      /* Centered button container */
+      #button_container {
+        display: flex;
+        gap: 1.5em;
+        align-items: center;
+        justify-content: center;
+        z-index: 5;
       }
-      #signup {
-        flex: 1; 
-        display: flex; 
-        flex-direction: column; 
-        align-items: center; 
-        justify-content: center
+
+      #button_container .btn {
+        width: 10em;
+        height: 3em;
+        font-size: 1.1em;
+        font-weight: 600;
       }
-      #signup h1 {
-        color:#F77F00;
-      }
-      #contact {
-        text-align: center; 
+
+      /* Contact footer */
+      #contact_footer {
+        position: absolute;
+        bottom: 2em;
         width: 100%;
+        text-align: center;
+        z-index: 10;
       }
-      #contact p {
-        margin-top: auto;
+
+      #contact_footer a {
+        color: #697A8D;
+        text-decoration: none;
       }
 
     </style>
 
     <style>
       @media screen and (max-width: 768px) {
-        #col_one div{
-          margin-top:10em;
+        #button_container {
+          flex-direction: column;
+          gap: 1em;
         }
-        #col_two {
-          margin-top:5em;
-          background-color: #FCF6B1;
-          display: block; 
-          justify-content: flex-start;
-          align-items: stretch;
-          flex-direction: row;
-          height: 20%;
-        }
-        #TOS {
-          text-align: center;
+
+        #button_container .btn {
+          width: 12em;
         }
       }
     </style>
   </head>
   <body>
-    <div id="landing_wrapper" class="row">
+    <div id="landing_wrapper">
+      <!-- Logo in top left -->
+      <nav id="top_nav">
+        <a href="{% url 'home' %}" class="app-brand-link">
+          <span id="logo" class="app-brand-text demo menu-text fw-bold ms-2 ps-1">Agora</span>
+        </a>
+      </nav>
 
-      <!-- First Column with Content -->
-      <div id="col_one" class="col-md-7">
-        <!-- Navigation at the top -->
-        <nav>
-          <a href="{% url 'home' %}" class="app-brand-link">
-            <span id="logo" class="app-brand-text demo menu-text fw-bold ms-2 ps-1">Agora</span>
-          </a>
-        </nav>
-        
-        <!-- Content that should align with the second column -->
-        <div style="padding-left:2em; padding-right:3em;">
-          <h1 style="text-align:left !important; width:100%; font-weight:800; color: #F77F00">Thank you for participating in our study!</h1>
-          <h3 style="text-align:left !important; width:100%; color: #F77F00; margin-top:0.5em">You are invited to participate in an academic research study aimed at enhancing our understanding of individual behavior and preferences through modeling.</h3>
-          <h3 style="text-align:left !important; width:100%; color: #F77F00">Please sign up to start.</h3>
-        </div>
-        
+      <!-- Centered buttons -->
+      <div id="button_container">
+        <a href="{% url 'account_login' %}" class="btn btn-outline-primary">Log in</a>
+        <a href="{% url 'account_signup' %}" class="btn btn-primary">Sign up</a>
       </div>
-      
-      <!-- Second Column with Content -->
-      <div id="col_two" class="col-md-5">
-        <div id="signup">
-          <h1 style="line-height: 2em; text-align: center;">
-            <a href="{% url 'account_login' %}" class="btn btn-outline-primary" style="width:10em; font-size:0.5em">Log in</a> &nbsp;
-            <a href="{% url 'account_signup' %}" class="btn btn-primary" style="width:10em; font-size:0.5em">Sign up</a>
-          </h1>
-        </div>
 
-
-        {% if request.user.is_authenticated%}
-        <a href="{% url 'account_logout' %}">Log out</a>
-        {% else %}
-
-        {% endif %}
-
-
-        <div>
-          <p id="TOS"><a href="mailto:sfulay@mit.edu" style="color: #697A8D">Contact us</a></p>
-        </div>
-
+      <!-- Contact footer -->
+      <div id="contact_footer">
+        <p><a href="mailto:sfulay@mit.edu">Contact us</a></p>
       </div>
     </div>
   </body>
