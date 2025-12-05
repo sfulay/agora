@@ -1,6 +1,14 @@
 {% extends 'base_recs.html' %}
 
 {% block content %}
+<!-- Sign Out Button -->
+{% if request.user.is_authenticated %}
+  <form method="post" action="{% url 'account_logout' %}" style="display: inline;">
+    {% csrf_token %}
+    <button type="submit" class="sign-out-btn">Sign Out</button>
+  </form>
+{% endif %}
+
 <div class="container-fluid flex-grow-1 container-p-y px-0">
     {% csrf_token %}
     
@@ -15,7 +23,7 @@
                     <!-- Original Recommendation -->
                     <div class="mb-4">
                         <label class="form-label fw-semibold text-muted">Original</label>
-                        <div class="p-3 rounded" style="border: 1px solid #e8e8e8; background: #ffffff;">
+                        <div class="p-3 rounded" style="border: 1px solid #e8e8e8; background: #fefdf6;">
                             <small>{{ original_text }}</small>
                         </div>
                     </div>
@@ -136,7 +144,7 @@
                         <!-- Support-Relevance Plot -->
                         <div id="editor-support-plot" class="support-relevance-plot position-relative"
                              style="width: 100%; max-width: calc(100vw - 18% - 4rem); height: 600px; margin: 0;
-                                     background: #ffffff;
+                                     background: #fefdf6;
                                      border-radius: 0.5rem; overflow: visible; transition: max-width 0.3s ease-out;">
                             
                             <!-- Axis Labels -->
@@ -274,9 +282,9 @@
 
 {% block custom_head_content %}
 <style>
-    /* Override base template background - make everything white */
+    /* Override base template background - make everything #fefdf6 */
     body {
-        background-color: #ffffff !important;
+        background-color: #fefdf6 !important;
     }
 
     .layout-wrapper,
@@ -286,7 +294,7 @@
     .container-xxl,
     .container-p-y,
     .content-wrapper {
-        background-color: #ffffff !important;
+        background-color: #fefdf6 !important;
     }
 
     /* Override any potential colored backgrounds from theme */
@@ -298,7 +306,7 @@
     .layout-wrapper,
     .layout-container,
     .layout-page {
-        background-color: #ffffff !important;
+        background-color: #fefdf6 !important;
     }
 
     #recommendation-text {
@@ -558,6 +566,26 @@
         border-color: #2196f3;
         color: #1976d2;
         opacity: 0.8;
+    }
+
+    /* Sign Out Button */
+    .sign-out-btn {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 10px 20px;
+        background-color: rgba(0, 0, 0, 0.9);
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        z-index: 1000;
+    }
+
+    .sign-out-btn:hover {
+        background-color: rgba(0, 0, 0, 1);
     }
 
 </style>
@@ -2780,7 +2808,7 @@ class TelemetryTracker {
 <style>
 /* Meta-Medley Button Styles */
 .medley-button {
-    background: white;
+    background: #fefdf6;
     border: 2px solid;
     border-radius: 20px;
     padding: 8px 16px;
@@ -2825,7 +2853,7 @@ class TelemetryTracker {
 .medley-button:hover,
 .medley-button:focus,
 .medley-button:active {
-    background: white;
+    background: #fefdf6;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     transform: none;
     outline: none;
@@ -2926,7 +2954,7 @@ class TelemetryTracker {
     right: 0;
     width: 450px;
     height: 100vh;
-    background: #ffffff;
+    background: #fefdf6;
     box-shadow: -4px 0 20px rgba(0,0,0,0.12);
     z-index: 9999;
     display: flex;
@@ -2949,6 +2977,11 @@ class TelemetryTracker {
     width: 100%;
     max-width: calc(100vw - 18% - 4rem);
     transition: max-width 0.3s ease-out;
+    background-color: #fefdf6 !important;
+}
+
+.support-relevance-plot {
+    background-color: #fefdf6 !important;
 }
 
 /* Dynamic chart resizing when panels are open */
