@@ -31,7 +31,7 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.files.storage import default_storage
-from django.db import transaction
+from django.db import transaction, close_old_connections
 from django.db.models import Avg, Case, Count, F, IntegerField, OuterRef, Q, Subquery, Value, When
 from django.dispatch import receiver
 from django.http import (
@@ -858,6 +858,56 @@ def calculate_leaderboard_for_base_rec(base_rec_id, participant_username=None):
         return []
 
 
+def process_participant_with_db_cleanup(username, new_rec_text, base_recommendation):
+    """
+    Thread-safe wrapper for process_single_participant that manages Django DB connections.
+
+    Django's ORM uses thread-local connections. In ThreadPoolExecutor contexts, each worker
+    thread gets its own connection that persists for the thread's lifetime. This wrapper
+    ensures proper connection lifecycle management:
+
+    1. Cleans up any stale connections at the start (close_old_connections)
+    2. Executes the participant processing
+    3. Always closes connections when done (even on exception)
+
+    This prevents:
+    - Connection leaks (threads holding idle connections)
+    - Stale connection reuse across tasks
+    - Transaction isolation issues
+    - Database connection pool exhaustion
+
+    Args:
+        username: Participant username to process
+        new_rec_text: New recommendation text
+        base_recommendation: Base recommendation object
+
+    Returns:
+        Dict with processing result (same as process_single_participant)
+    """
+    try:
+        # Close any existing connections that are past their max age
+        # This ensures we start with a fresh connection for this task
+        close_old_connections()
+
+        # Process the participant (makes DB queries)
+        result = process_single_participant(username, new_rec_text, base_recommendation)
+
+        return result
+
+    except Exception as e:
+        # Ensure we return error in expected format
+        return {
+            "status": "error",
+            "username": username,
+            "error": str(e)
+        }
+    finally:
+        # CRITICAL: Always close DB connections when thread task completes
+        # This ensures connections are returned to the pool and don't leak
+        # Even if an exception occurred, we clean up properly
+        close_old_connections()
+
+
 def process_single_participant(username, new_rec_text, base_recommendation):
     """
     Process a single participant with new recommendation text
@@ -1045,7 +1095,7 @@ def recompute_recommendation_stream(request, recommendation_id):
             with ThreadPoolExecutor(max_workers=min(16, total_participants)) as executor:
                 # Submit all tasks
                 future_to_participant = {
-                    executor.submit(process_single_participant, username, new_rec_text, base_recommendation): username
+                    executor.submit(process_participant_with_db_cleanup, username, new_rec_text, base_recommendation): username
                     for username in participant_usernames
                 }
 
@@ -1123,14 +1173,6 @@ def recompute_recommendation_stream(request, recommendation_id):
                     except Exception as e:
                         completed_count += 1
                         yield f"data: {json.dumps({'type': 'participant_error', 'username': participant_username, 'error': str(e), 'completed': completed_count, 'total': total_participants})}\n\n"
-
-            # Ensure all database transactions are committed before calculating leaderboard
-            from django.db import connection
-            connection.close()  # Force close connection to ensure all commits are processed
-
-            # Small delay to ensure database consistency
-            import time
-            time.sleep(0.1)
 
             # Get leaderboard data for completion message using the true base recommendation
             leaderboard_data = calculate_leaderboard_for_base_rec(true_base_recommendation.id)
