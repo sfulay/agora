@@ -21,8 +21,11 @@ import {
     setupChartResizeListener
 } from './components/avatars.js';
 import { initializeLeaderboard, reloadLeaderboard } from './components/leaderboard.js';
-import { openMetaMedleyPanel } from './components/metaMedley.js';
+import { openMetaMedleyPanel, closeMetaMedleyPanel } from './components/metaMedley.js';
 import { loadParticipantModal } from './components/modals.js';
+
+// Expose functions globally for inline onclick handlers in templates
+window.closeMetaMedleyPanel = closeMetaMedleyPanel;
 
 // Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', function() {
