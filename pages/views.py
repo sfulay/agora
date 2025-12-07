@@ -1072,9 +1072,11 @@ def recompute_recommendation_stream(request, recommendation_id):
 
             # Send initial status
             yield f"data: {json.dumps({'type': 'started', 'new_recommendation_id': new_recommendation.id})}\n\n"
-            participant_data = pd.read_csv("data/all_df_clean_pass_concept_measures_joined.csv")
-            participant_data = participant_data[participant_data["assignment"].isin(["treatment", "control"])]
-            participant_data = participant_data["PROLIFIC_PID"].tolist()
+
+            with open("data/agora_members.txt", "r") as f:
+                participant_data = f.readlines()
+                participant_data = [line.strip() for line in participant_data]
+            
             participants_with_data = Participant.objects.filter(
                 username__in=participant_data
             ).distinct()
