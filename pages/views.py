@@ -1013,6 +1013,7 @@ def recommendation_editor(request, recommendation_id):
             print(summary.predicted_agreement)
             print(summary.confidence_score)
             participant_data.append({
+                "participant_id": participant.id,  # Add participant ID for telemetry
                 "username": participant.username,
                 "display_name": participant.display_name,
                 "predicted_agreement": summary.predicted_agreement,

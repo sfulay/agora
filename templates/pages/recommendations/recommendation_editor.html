@@ -625,6 +625,7 @@
     window.PARTICIPANT_DATA_FROM_TEMPLATE = [
         {% for participant in participant_data %}
         {
+            participant_id: {{ participant.participant_id }},
             username: '{{ participant.username }}',
             display_name: '{{ participant.display_name }}',
             predicted_agreement: {{ participant.predicted_agreement }},

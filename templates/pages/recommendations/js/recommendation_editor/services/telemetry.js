@@ -64,6 +64,8 @@ export class TelemetryTracker {
             click_x: clickX,
             click_y: clickY,
             session_id: this.sessionId
+        }).catch(err => {
+            Logger.warn('Avatar click telemetry failed (non-critical):', err);
         });
     }
 
@@ -74,6 +76,8 @@ export class TelemetryTracker {
             recommendation_id: recommendationId,
             meta_medley_type: metaMedleyType,
             session_id: this.sessionId
+        }).catch(err => {
+            Logger.warn('Meta-medley click telemetry failed (non-critical):', err);
         });
     }
 }
