@@ -1,4 +1,6 @@
 branch-defaults:
+  cleanup:
+    environment: agoraenv2
   main:
     environment: agora-prolific
   prolific:

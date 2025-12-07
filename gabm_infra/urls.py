@@ -67,7 +67,6 @@ pages_urlpatterns = [
   # Dynamic recommendation editor - standalone
   re_path(r'^editor/(?P<recommendation_id>\d+)/$', pages_views.recommendation_editor, name='recommendation_editor'),
   re_path(r'^api/editor/(?P<recommendation_id>\d+)/recompute-stream/$', pages_views.recompute_recommendation_stream, name='recompute_recommendation_stream'),
-  re_path(r'^api/editor/(?P<recommendation_id>\d+)/participant/(?P<participant_username>[^/]+)/$', pages_views.get_editor_participant_modal, name='get_editor_participant_modal'),
   re_path(r'^api/medley/(?P<recommendation_id>\d+)/participant/(?P<participant_username>[^/]+)/$', pages_views.get_medley_participant_modal, name='get_medley_participant_modal'),
   re_path(r'^api/meta-medley/(?P<recommendation_id>\d+)/(?P<medley_type>bottom|middle|top)/$', pages_views.get_meta_medley_panel, name='get_meta_medley_panel'),
   re_path(r'^api/editor/(?P<recommendation_id>\d+)/leaderboard/$', pages_views.get_leaderboard, name='get_leaderboard'),
