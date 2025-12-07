@@ -98,6 +98,14 @@
                                 </ul>
                             </div>
                         </div>
+
+                        <!-- Confidence Filter -->
+                        <div class="mt-3">
+                            <label for="confidenceSlider" class="form-label text-muted small mb-1">
+                                <i class="fas fa-filter me-1"></i>Min Confidence: <span id="confidenceValue">0</span>
+                            </label>
+                            <input type="range" class="form-range" id="confidenceSlider" min="0" max="100" value="0" step="1">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -645,8 +653,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Initialize telemetry tracker
         window.telemetry = new TelemetryTracker();
+
+        // Initialize confidence filter
+        initializeConfidenceFilter();
     });
-    
+
     // Character counter
     recommendationText.addEventListener('input', function() {
         charCount.textContent = this.value.length;
@@ -1059,7 +1070,7 @@ function updateExistingAvatar(avatar, participantData) {
     // Update data attributes
     avatar.setAttribute('data-support', participantData.predicted_agreement);
     avatar.setAttribute('data-relevance', participantData.quality_score);
-
+    avatar.setAttribute('data-confidence', participantData.confidence_score);
     // Remove existing event listeners and add fresh ones
     if (avatar._hoverEnter) avatar.removeEventListener('mouseenter', avatar._hoverEnter);
     if (avatar._hoverLeave) avatar.removeEventListener('mouseleave', avatar._hoverLeave);
@@ -1087,6 +1098,7 @@ function createAvatarElement(participantData) {
     avatar.setAttribute('data-participant-id', participantData.username);
     avatar.setAttribute('data-support', participantData.predicted_agreement);
     avatar.setAttribute('data-relevance', participantData.quality_score);
+    avatar.setAttribute('data-confidence', participantData.confidence_score);
 
     // Get the border color based on support level (but with softer opacity for border)
     const supportColor = getSupportLevelColor(participantData.predicted_agreement);
@@ -1419,6 +1431,156 @@ function applyGroupAvatarFocus(groupKey) {
 function clearGroupAvatarFocus() {
     getAllAvatarElements().forEach(avatar => {
         avatar.classList.remove('avatar-dimmed', 'avatar-group-focus');
+    });
+}
+
+// =============================================================================
+// CONFIDENCE FILTER
+// =============================================================================
+
+function initializeConfidenceFilter() {
+    const slider = document.getElementById('confidenceSlider');
+    const valueDisplay = document.getElementById('confidenceValue');
+
+    if (!slider || !valueDisplay) {
+        console.warn('Confidence filter elements not found');
+        return;
+    }
+
+    console.log('Confidence filter initialized');
+
+    // Update display value and hide/show avatars in real-time as slider moves
+    slider.addEventListener('input', function() {
+        const value = parseInt(this.value);
+        valueDisplay.textContent = value;
+        console.log('Slider value changed to:', value);
+        applyConfidenceFilter(value, false); // false = don't reposition yet
+    });
+
+    // Reposition avatars when user releases the slider
+    slider.addEventListener('change', function() {
+        const value = parseInt(this.value);
+        console.log('Slider released at:', value);
+        applyConfidenceFilter(value, true); // true = reposition avatars
+    });
+}
+
+function applyConfidenceFilter(minConfidence, shouldReposition = false) {
+    const plot = document.getElementById('editor-support-plot');
+    if (!plot) {
+        console.warn('Support plot not found');
+        return;
+    }
+
+    const plotWidth = plot.offsetWidth;
+    const plotHeight = plot.offsetHeight;
+    const avatarSize = 40;
+
+    // Get all avatars
+    const avatars = Array.from(getAllAvatarElements());
+    console.log(`Found ${avatars.length} avatars to filter`);
+
+    if (avatars.length === 0) {
+        console.warn('No avatars found to filter');
+        return;
+    }
+
+    // Separate visible and hidden avatars based on confidence threshold
+    const visibleAvatars = [];
+    const hiddenAvatars = [];
+
+    avatars.forEach(avatar => {
+        const confidence = parseFloat(avatar.getAttribute('data-confidence')) || 0;
+
+        if (confidence >= minConfidence) {
+            visibleAvatars.push(avatar);
+            avatar.classList.remove('confidence-filtered');
+        } else {
+            hiddenAvatars.push(avatar);
+            avatar.classList.add('confidence-filtered');
+        }
+    });
+
+    console.log(`Visible: ${visibleAvatars.length}, Hidden: ${hiddenAvatars.length}, Reposition: ${shouldReposition}`);
+
+    // Hide filtered avatars with animation
+    hiddenAvatars.forEach(avatar => {
+        avatar.style.opacity = '0';
+        avatar.style.transform = 'scale(0)';
+        avatar.style.pointerEvents = 'none';
+    });
+
+    // Show visible avatars (but don't reposition yet if slider is still being dragged)
+    visibleAvatars.forEach(avatar => {
+        avatar.style.opacity = '1';
+        avatar.style.transform = 'scale(1)';
+        avatar.style.pointerEvents = 'auto';
+    });
+
+    // Only reposition when user releases the slider
+    if (shouldReposition) {
+        repositionVisibleAvatars(visibleAvatars, plotWidth, plotHeight, avatarSize);
+    }
+}
+
+function repositionVisibleAvatars(avatars, plotWidth, plotHeight, avatarSize) {
+    console.log('Repositioning', avatars.length, 'visible avatars');
+
+    // Group avatars by their support level for repositioning
+    const positionedAvatars = [];
+
+    // Sort avatars by support level first, then by a consistent order (e.g., username)
+    // This ensures deterministic stacking
+    avatars.sort((a, b) => {
+        const supportA = parseFloat(a.getAttribute('data-support')) || 0;
+        const supportB = parseFloat(b.getAttribute('data-support')) || 0;
+
+        if (Math.abs(supportA - supportB) < 2.5) { // Same support bucket (within rounding)
+            // Maintain consistent ordering within same support level
+            const usernameA = a.getAttribute('data-participant-id') || '';
+            const usernameB = b.getAttribute('data-participant-id') || '';
+            return usernameA.localeCompare(usernameB);
+        }
+        return supportA - supportB;
+    });
+
+    // Reposition each avatar from bottom to top
+    avatars.forEach((avatar, index) => {
+        const support = parseFloat(avatar.getAttribute('data-support')) || 0;
+        const username = avatar.getAttribute('data-participant-id');
+
+        // Round support to nearest 5 (same as original logic)
+        const roundedSupport = Math.round(support / 5) * 5;
+
+        // Calculate x position (0-100 maps to plot width)
+        const targetX = (roundedSupport / 100) * (plotWidth - avatarSize);
+
+        // Find stacking position
+        const position = findStackingPositionStatic(
+            targetX,
+            roundedSupport,
+            username,
+            plotWidth,
+            plotHeight,
+            avatarSize,
+            positionedAvatars
+        );
+
+        positionedAvatars.push(position);
+
+        // position.x and position.y are already in the correct coordinate system (top-based)
+        // Just need to adjust for avatar size offset
+        const leftPosition = position.x - avatarSize/2;
+        const topPosition = position.y - avatarSize/2;
+
+        console.log(`Avatar ${index} (${username}): support=${support}, left=${leftPosition}, top=${topPosition}`);
+
+        // Animate to new position
+        avatar.style.left = `${leftPosition}px`;
+        avatar.style.top = `${topPosition}px`;
+        avatar.style.opacity = '1';
+        avatar.style.transform = 'scale(1)';
+        avatar.style.pointerEvents = 'auto';
     });
 }
 
@@ -2919,6 +3081,21 @@ class TelemetryTracker {
 .avatar-circle.avatar-group-focus {
     opacity: 1 !important;
     filter: none;
+}
+
+/* Confidence Filter Styles */
+.participant-avatar.confidence-filtered,
+.avatar-circle.confidence-filtered {
+    opacity: 0 !important;
+    transform: scale(0) !important;
+    pointer-events: none !important;
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.participant-avatar,
+.avatar-circle {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Panel Container */
