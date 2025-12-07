@@ -19,11 +19,12 @@ from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import TemplateView
-from django.http import HttpResponse
+from django.http import HttpResponse, FileResponse
 from django.shortcuts import render
 import logging
 import sys
 import traceback
+import os
 
 from pages import views as pages_views
 from pages.views import jsp_log
@@ -72,6 +73,14 @@ pages_urlpatterns = [
   re_path(r'^api/editor/(?P<recommendation_id>\d+)/leaderboard/$', pages_views.get_leaderboard, name='get_leaderboard'),
 ]
 
+# Serve JavaScript files from templates directory
+def serve_template_js(request, path):
+    """Serve JavaScript files from templates/pages/recommendations/js/"""
+    file_path = os.path.join(settings.BASE_DIR, 'templates', 'pages', 'recommendations', 'js', path)
+    if os.path.exists(file_path) and os.path.isfile(file_path):
+        return FileResponse(open(file_path, 'rb'), content_type='application/javascript')
+    return HttpResponse('File not found', status=404)
+
 # Add this temporary debug view
 def debug_view(request):
     jsp_log("Debug view hit!")
@@ -109,6 +118,8 @@ urlpatterns = [
   path('accounts/', include('allauth.urls')),
   path('debug/', debug_view, name='debug'),
   path('debug-signup/', debug_signup),
+  # Serve JS files from templates/pages/recommendations/js/
+  re_path(r'^js/(?P<path>.+)$', serve_template_js, name='serve_template_js'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 urlpatterns += pages_urlpatterns

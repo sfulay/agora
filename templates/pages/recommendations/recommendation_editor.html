@@ -1,5 +1,4 @@
 {% extends 'base_recs.html' %}
-{% load static %}
 
 {% block content %}
 <!-- Sign Out Button -->
@@ -609,10 +608,6 @@
     </div>
 </div>
 
-<script id="participant-data" type="application/json">
-    {{ participant_data|safe }}
-</script>
-
 <!-- ============================================================================ -->
 <!-- NEW MODULAR JAVASCRIPT - Refactored from embedded script below -->
 <!-- ============================================================================ -->
@@ -625,10 +620,25 @@
     window.CURRENT_REC_ID_FROM_TEMPLATE = {{ recommendation.id }};
     window.CURRENT_USER_ID_FROM_TEMPLATE = {{ request.user.id }};
     window.ORIGINAL_TEXT_FROM_TEMPLATE = `{{ original_text|escapejs }}`;
+
+    // Participant data built from Django template
+    window.PARTICIPANT_DATA_FROM_TEMPLATE = [
+        {% for participant in participant_data %}
+        {
+            username: '{{ participant.username }}',
+            display_name: '{{ participant.display_name }}',
+            predicted_agreement: {{ participant.predicted_agreement }},
+            confidence_score: {{ participant.confidence_score|default:70 }},
+            quality_score: {{ participant.quality_score|default:65 }},
+            avatar_url: '{{ participant.avatar_url }}',
+            reasoning: 'Initial prediction based on interview data.'
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
 </script>
 
-<!-- Load modular JavaScript -->
-<script type="module" src="{% static 'js/recommendation_editor/main.js' %}"></script>
+<!-- Load modular JavaScript (absolute path) -->
+<script type="module" src="/js/recommendation_editor/main.js"></script>
 
 <!-- ============================================================================ -->
 <!-- OLD EMBEDDED JAVASCRIPT - COMMENTED OUT (replaced by modular code above) -->
