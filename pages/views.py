@@ -1088,6 +1088,50 @@ def recompute_recommendation_stream(request, recommendation_id):
 
             yield f"data: {json.dumps({'type': 'total_count', 'total': total_participants})}\n\n"
 
+            # ============================================================================
+            # PRE-FETCH DATABASE DATA TO ELIMINATE N+1 QUERIES
+            # ============================================================================
+            # Get all interview IDs for eligible participants (1 query)
+            participant_interviews = Interview.objects.filter(
+                participant__username__in=participant_usernames,
+                completed=True
+            ).values('id', 'participant__username')
+
+            # Build username -> interview_id mapping
+            username_to_interview_id = {
+                pi['participant__username']: pi['id']
+                for pi in participant_interviews
+            }
+
+            # Get all interview IDs
+            all_interview_ids = list(username_to_interview_id.values())
+
+            # PRE-FETCH: Get all segments for all interviews (1 query with prefetch)
+            # This fetches segments and their related audio objects in one optimized query
+            all_segments_queryset = InterviewSegment.objects.filter(
+                audio__question__interview_id__in=all_interview_ids
+            ).select_related('audio')
+
+            # Build segment_id -> segment lookup dictionary
+            segment_lookup = {seg.id: seg for seg in all_segments_queryset}
+
+            # PRE-FETCH: Get all utterances for all interviews (1 query)
+            # Build audio_id -> utterances lookup dictionary
+            all_utterances = InterviewUtterance.objects.filter(
+                question__interview__id__in=all_interview_ids
+            )
+
+            # Build audio_id -> utterances list lookup
+            audio_id_to_utterances = {}
+            for utterance in all_utterances:
+                audio_id = utterance.audio_id
+                if audio_id not in audio_id_to_utterances:
+                    audio_id_to_utterances[audio_id] = []
+                audio_id_to_utterances[audio_id].append(utterance)
+
+            print(f"Pre-fetched {len(segment_lookup)} segments and {len(all_utterances)} utterances for {len(participant_usernames)} participants")
+            # ============================================================================
+
             completed_count = 0
             successful_results = []
 
@@ -1133,23 +1177,31 @@ def recompute_recommendation_stream(request, recommendation_id):
                                     quality_score=quality_score
                                 )
 
-                                # Add segments to ManyToMany relationship
+                                # ================================================================
+                                # USE PRE-FETCHED DATA: No database queries here!
+                                # ================================================================
+
+                                # Get segment IDs from medley result
                                 segment_ids = [seg['segment_id'] for seg in medley_data['segments']]
-                                segments = InterviewSegment.objects.filter(id__in=segment_ids)
-                                medley.segments.set(segments)
 
-                                # Find corresponding utterances for each segment
+                                # Look up segments from pre-fetched dictionary (NO QUERY)
+                                segments_to_add = [segment_lookup[seg_id] for seg_id in segment_ids if seg_id in segment_lookup]
+
+                                # Add segments to ManyToMany relationship (1 bulk query)
+                                medley.segments.set(segments_to_add)
+
+                                # Collect utterances from pre-fetched dictionary (NO QUERIES)
                                 utterance_list = []
-                                for segment in segments:
-                                    # Get the audio_id from the segment's audio
-                                    audio_id = segment.audio.id
-                                    # Find InterviewUtterances that match this audio_id
-                                    utterances = InterviewUtterance.objects.filter(audio_id=audio_id)
-                                    utterance_list.extend(utterances)
+                                for segment in segments_to_add:
+                                    audio_id = segment.audio.id  # Already prefetched via select_related
+                                    # Look up utterances from pre-fetched dictionary (NO QUERY)
+                                    if audio_id in audio_id_to_utterances:
+                                        utterance_list.extend(audio_id_to_utterances[audio_id])
 
-                                # Add utterances to ManyToMany relationship
+                                # Add utterances to ManyToMany relationship (1 bulk query)
                                 if utterance_list:
                                     medley.utterances.set(utterance_list)
+                                # ================================================================
 
                                 # Create LivePrediction object
                                 live_prediction = LivePrediction.objects.create(
