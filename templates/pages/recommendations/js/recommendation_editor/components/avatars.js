@@ -575,27 +575,32 @@ export function initializeConfidenceFilter() {
 
     Logger.debug('Confidence filter initialized');
 
-    // Update display value and hide/show avatars in real-time
+    // Update display value and hide/show avatars in real-time (while dragging)
+    // Don't reposition or update mean line yet - just hide/show
     slider.addEventListener('input', function() {
         const value = parseInt(this.value);
         valueDisplay.textContent = value;
         Logger.debug('Slider value changed to:', value);
-        applyConfidenceFilter(value, false);
+        applyConfidenceFilter(value, false, false);
     });
 
-    // Reposition avatars when user releases the slider
+    // Reposition avatars AND update mean line when user releases the slider
     slider.addEventListener('change', function() {
         const value = parseInt(this.value);
         Logger.debug('Slider released at:', value);
-        applyConfidenceFilter(value, true);
+        applyConfidenceFilter(value, true, true);
     });
 }
 
 /**
  * Apply confidence filter
  * Extracted from lines 1468-1524
+ *
+ * @param {number} minConfidence - Minimum confidence score to show
+ * @param {boolean} shouldReposition - Whether to reposition avatars after filtering
+ * @param {boolean} shouldUpdateMean - Whether to update mean support line for visible avatars
  */
-function applyConfidenceFilter(minConfidence, shouldReposition = false) {
+function applyConfidenceFilter(minConfidence, shouldReposition = false, shouldUpdateMean = false) {
     const plot = getElement('editor-support-plot');
     if (!plot) {
         Logger.warn('Support plot not found');
@@ -629,7 +634,7 @@ function applyConfidenceFilter(minConfidence, shouldReposition = false) {
         }
     });
 
-    Logger.debug(`Visible: ${visibleAvatars.length}, Hidden: ${hiddenAvatars.length}, Reposition: ${shouldReposition}`);
+    Logger.debug(`Visible: ${visibleAvatars.length}, Hidden: ${hiddenAvatars.length}, Reposition: ${shouldReposition}, UpdateMean: ${shouldUpdateMean}`);
 
     // Hide filtered avatars
     hiddenAvatars.forEach(avatar => {
@@ -648,6 +653,11 @@ function applyConfidenceFilter(minConfidence, shouldReposition = false) {
     // Reposition when user releases slider
     if (shouldReposition) {
         repositionVisibleAvatars(visibleAvatars, plotWidth, plotHeight, avatarSize);
+    }
+
+    // Update mean support line for visible avatars only when user releases slider
+    if (shouldUpdateMean) {
+        updateMeanForVisibleAvatars();
     }
 }
 
@@ -822,6 +832,38 @@ export function updateSummaryStats(results) {
     });
 
     const meanSupport = Math.round(totalAgreement / results.length);
+    updateMeanSupportLine(meanSupport);
+}
+
+/**
+ * Update mean support line based on visible (non-filtered) avatars only
+ * Used when confidence filter is applied to show accurate mean of visible participants
+ */
+function updateMeanForVisibleAvatars() {
+    Logger.debug('Updating mean support line for visible avatars');
+
+    // Get all avatars that are NOT filtered out
+    const visibleAvatars = Array.from(getAllAvatarElements()).filter(avatar =>
+        !avatar.classList.contains('confidence-filtered')
+    );
+
+    if (visibleAvatars.length === 0) {
+        Logger.warn('No visible avatars to calculate mean');
+        return;
+    }
+
+    // Calculate total support from data-support attributes on visible avatars
+    let totalSupport = 0;
+    visibleAvatars.forEach(avatar => {
+        const support = parseFloat(avatar.getAttribute('data-support')) || 0;
+        totalSupport += support;
+    });
+
+    const meanSupport = Math.round(totalSupport / visibleAvatars.length);
+
+    Logger.debug(`Calculating mean for ${visibleAvatars.length} visible participants: ${meanSupport}%`);
+
+    // Update mean support line
     updateMeanSupportLine(meanSupport);
 }
 
