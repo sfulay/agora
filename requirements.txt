@@ -252,3 +252,7 @@ xxhash==3.5.0
 yarl==1.9.4
 zipp==3.21.0
 zstandard==0.25.0
+
+# AgoraChat dependencies
+sentence-transformers==2.7.0
+faiss-cpu==1.7.4

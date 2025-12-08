@@ -2149,3 +2149,67 @@ def start_voting_screen_session(participant, recommendation, session_id=None):
         recommendation=recommendation,
         session_id=session_id
     )
+
+
+# =============================================================================
+# AGORACHAT MODELS
+# =============================================================================
+
+class ChatConversation(models.Model):
+    """A chat conversation session with the agora"""
+    participant = models.ForeignKey(Participant, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Chat {self.id} - {self.participant.username} - {self.created_at}"
+
+
+class ChatMessage(models.Model):
+    """A single message in a chat conversation"""
+    conversation = models.ForeignKey(ChatConversation, on_delete=models.CASCADE, related_name='messages')
+    query_text = models.TextField()
+    is_user = models.BooleanField(default=True)  # True for user query, False for agora response
+    created_at = models.DateTimeField(auto_now_add=True)
+    sequence_number = models.IntegerField()  # Order in conversation
+
+    class Meta:
+        ordering = ['conversation', 'sequence_number']
+        indexes = [
+            models.Index(fields=['conversation', 'sequence_number']),
+        ]
+
+    def __str__(self):
+        return f"Message {self.id} - Conv {self.conversation_id} - #{self.sequence_number}"
+
+
+class ChatMedley(models.Model):
+    """A medley generated in response to a chat query"""
+    chat_message = models.OneToOneField(ChatMessage, on_delete=models.CASCADE, related_name='medley')
+    selected_segments = models.JSONField()  # List of segment data with IDs, timestamps, etc.
+    total_duration = models.FloatField()  # Total duration in seconds
+    gpt_reasoning = models.TextField()  # GPT's explanation for segment selection
+    relevance_score = models.FloatField()  # 0-100 score for query relevance
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"ChatMedley {self.id} - Message {self.chat_message_id} - {self.relevance_score}% relevant"
+
+
+class SegmentEmbedding(models.Model):
+    """Vector embeddings for interview segments for semantic search"""
+    segment = models.OneToOneField(InterviewSegment, on_delete=models.CASCADE, related_name='embedding')
+    embedding_vector = models.BinaryField()  # Serialized numpy array
+    model_version = models.CharField(max_length=100, default='all-MiniLM-L6-v2')  # Embedding model used
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['segment']),
+        ]
+
+    def __str__(self):
+        return f"Embedding for Segment {self.segment_id} - {self.model_version}"

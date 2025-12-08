@@ -71,15 +71,31 @@ pages_urlpatterns = [
   re_path(r'^api/medley/(?P<recommendation_id>\d+)/participant/(?P<participant_username>[^/]+)/$', pages_views.get_medley_participant_modal, name='get_medley_participant_modal'),
   re_path(r'^api/meta-medley/(?P<recommendation_id>\d+)/(?P<medley_type>bottom|middle|top)/$', pages_views.get_meta_medley_panel, name='get_meta_medley_panel'),
   re_path(r'^api/editor/(?P<recommendation_id>\d+)/leaderboard/$', pages_views.get_leaderboard, name='get_leaderboard'),
+
+  # AgoraChat
+  re_path(r'^chat/$', pages_views.chat_interface, name='chat_interface'),
+  re_path(r'^api/chat/query/$', pages_views.api_chat_query, name='api_chat_query'),
+  re_path(r'^api/chat/medley/(?P<message_id>\d+)/$', pages_views.api_chat_medley, name='api_chat_medley'),
 ]
 
 # Serve JavaScript files from templates directory
 def serve_template_js(request, path):
-    """Serve JavaScript files from templates/pages/recommendations/js/"""
+    """Serve JavaScript files from templates/pages/"""
+    # Try recommendation_editor path first (for /js/recommendation_editor/...)
     file_path = os.path.join(settings.BASE_DIR, 'templates', 'pages', 'recommendations', 'js', path)
     if os.path.exists(file_path) and os.path.isfile(file_path):
         return FileResponse(open(file_path, 'rb'), content_type='application/javascript')
-    return HttpResponse('File not found', status=404)
+
+    # Try under templates/pages/js/ directly (for /js/chat/chat.js -> templates/pages/chat/js/chat.js)
+    # The pattern is: /js/MODULE/FILE.js -> templates/pages/MODULE/js/FILE.js
+    parts = path.split('/', 1)  # Split into [module, rest]
+    if len(parts) == 2:
+        module, filename = parts
+        file_path = os.path.join(settings.BASE_DIR, 'templates', 'pages', module, 'js', filename)
+        if os.path.exists(file_path) and os.path.isfile(file_path):
+            return FileResponse(open(file_path, 'rb'), content_type='application/javascript')
+
+    return HttpResponse(f'File not found: {path}', status=404)
 
 # Add this temporary debug view
 def debug_view(request):

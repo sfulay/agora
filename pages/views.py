@@ -2297,3 +2297,173 @@ def export_telemetry_data(request):
     response = HttpResponse(output.getvalue(), content_type='text/csv')
     response['Content-Disposition'] = f'attachment; filename="telemetry_data_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv"'
     return response
+
+
+# =============================================================================
+# AGORACHAT VIEWS
+# =============================================================================
+
+def chat_interface(request):
+    """Main chat interface page"""
+    # Create new conversation for this session
+    conversation = ChatConversation.objects.create(
+        participant=request.user
+    )
+
+    context = {
+        'conversation_id': conversation.id,
+        'participant': request.user
+    }
+
+    return render(request, 'pages/chat/chat_interface.html', context)
+
+
+@csrf_exempt
+def api_chat_query(request):
+    """
+    API endpoint to handle chat queries and generate medleys
+
+    POST body:
+    {
+        "query": "what concerns do people have about minimum wage?",
+        "conversation_id": 123
+    }
+    """
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        query = data.get('query', '').strip()
+        conversation_id = data.get('conversation_id')
+
+        if not query:
+            return JsonResponse({'error': 'Query is required'}, status=400)
+
+        if not conversation_id:
+            return JsonResponse({'error': 'Conversation ID is required'}, status=400)
+
+        # Get conversation
+        conversation = ChatConversation.objects.get(id=conversation_id)
+
+        # Get conversation history
+        previous_messages = list(conversation.messages.order_by('sequence_number').values(
+            'query_text', 'is_user'
+        ))
+
+        # Determine sequence number
+        next_sequence = conversation.messages.count() + 1
+
+        # Create user message
+        user_message = ChatMessage.objects.create(
+            conversation=conversation,
+            query_text=query,
+            is_user=True,
+            sequence_number=next_sequence
+        )
+
+        # Generate medley
+        from generating_v2.chat_rag import ChatMedleyGenerator
+
+        generator = ChatMedleyGenerator()
+        result = generator.generate_medley(
+            query=query,
+            conversation_history=previous_messages,
+            top_k=50,
+            target_segments=10
+        )
+
+        # Create agora response message
+        response_message = ChatMessage.objects.create(
+            conversation=conversation,
+            query_text=f"[Generated medley with {len(result['selected_segments'])} segments]",
+            is_user=False,
+            sequence_number=next_sequence + 1
+        )
+
+        # Create ChatMedley
+        medley = ChatMedley.objects.create(
+            chat_message=response_message,
+            selected_segments=result['selected_segments'],
+            total_duration=result['estimated_duration'],
+            gpt_reasoning=result['narrative_reasoning'],
+            relevance_score=result['relevance_score']
+        )
+
+        # Update conversation timestamp
+        conversation.save()
+
+        return JsonResponse({
+            'success': True,
+            'user_message_id': user_message.id,
+            'response_message_id': response_message.id,
+            'medley_id': medley.id,
+            'relevance_score': medley.relevance_score,
+            'total_duration': medley.total_duration,
+            'segment_count': len(result['selected_segments'])
+        })
+
+    except ChatConversation.DoesNotExist:
+        return JsonResponse({'error': 'Conversation not found'}, status=404)
+    except Exception as e:
+        print(f"Error in api_chat_query: {e}")
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+def api_chat_medley(request, message_id):
+    """
+    Get medley data for a chat message
+
+    Returns segment data with audio URLs for playback
+    """
+    try:
+        message = ChatMessage.objects.get(id=message_id)
+        medley = message.medley
+
+        # Get segment details with audio URLs
+        segment_ids = [seg['segment_id'] for seg in medley.selected_segments]
+        segments = InterviewSegment.objects.filter(
+            id__in=segment_ids
+        ).select_related('audio__question__interview__participant')
+
+        # Build segment data
+        segments_data = []
+        segment_map = {seg.id: seg for seg in segments}
+
+        for selected_seg in sorted(medley.selected_segments, key=lambda x: x.get('order', 0)):
+            seg_id = selected_seg['segment_id']
+            if seg_id in segment_map:
+                seg = segment_map[seg_id]
+                participant = seg.audio.question.interview.participant
+
+                # Get S3 URL for segment audio
+                audio_url = seg.segment_audio_file.url if seg.segment_audio_file else None
+
+                segments_data.append({
+                    'segment_id': seg.id,
+                    'participant_username': participant.username,
+                    'participant_display_name': participant.display_name,
+                    'segment_text': seg.segment_text,
+                    'duration': seg.duration,
+                    'audio_url': audio_url,
+                    'order': selected_seg.get('order', 0),
+                    'reason_for_selection': selected_seg.get('reason_for_selection', '')
+                })
+
+        return JsonResponse({
+            'medley_id': medley.id,
+            'relevance_score': medley.relevance_score,
+            'total_duration': medley.total_duration,
+            'gpt_reasoning': medley.gpt_reasoning,
+            'segments': segments_data
+        })
+
+    except ChatMessage.DoesNotExist:
+        return JsonResponse({'error': 'Message not found'}, status=404)
+    except Exception as e:
+        print(f"Error in api_chat_medley: {e}")
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'error': str(e)}, status=500)
