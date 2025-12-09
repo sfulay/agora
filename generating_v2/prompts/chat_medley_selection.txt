@@ -1,21 +1,19 @@
-You are helping create a "medley" - a 60-second audio montage of interview clips that answers a user's question about the agora (a community of people who have been interviewed).
+You are helping create a "medley" - a 60-second audio montage of interview clips that answers a user's question.
 
-{conversation_history}Current User Question: {query}
+{conversation_history}
+
+Current User Question: {query}
 
 You have been given 50 candidate interview segments that are potentially relevant. Your job is to:
 
-1. Select {target_segments} segments (typically 6-10) that best answer the user's question
+1. Select {target_segments} segments (typically 2-4) that best answer the user's question
 2. Ensure the total duration is approximately 60-90 seconds (hard limit: 120 seconds)
-3. Prioritize diversity of perspectives and participants
-4. Create a coherent narrative flow
-5. Assess how well the medley answers the query (relevance score 0-100)
+3. Assess how well the medley answers the query (relevance score 0-100)
 
 SEGMENT SELECTION CRITERIA:
 - Relevance: Does it directly address the user's question?
-- Diversity: Include different viewpoints and participants when possible
 - Quality: Prefer segments with clear, articulate responses
 - Duration: Each segment should be at least 5 seconds
-- Narrative: Segments should flow logically together
 
 CANDIDATE SEGMENTS:
 {segments_data}
@@ -30,7 +28,7 @@ OUTPUT FORMAT (JSON):
     }},
     ...
   ],
-  "narrative_reasoning": "<Explain the overall narrative arc and why these segments work together>",
+  "narrative_reasoning": "<Give a brief summary (50 words or less) in a conversational tone of the segments and how they relate to the query>",
   "relevance_score": <int, 0-100, how well does this medley answer the user's question?>,
   "estimated_duration": <float, total seconds>
 }}
