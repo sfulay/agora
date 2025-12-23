@@ -199,4 +199,14 @@ PHASE_2_ONLY = True
 
 SHOW_AVATARS = True
 
+# Data type configuration
+# Options: "cortico" or "sfulay"
 DATA_TYPE = "cortico"
+
+# Prompt directory configuration based on DATA_TYPE
+# Cortico prompts: generating_v2/prompts/
+# Sfulay prompts: generating_v2/prompts_sfulay/
+if DATA_TYPE == "cortico":
+    PROMPT_DIR = "generating_v2/prompts_cortico"
+else:
+    PROMPT_DIR = "generating_v2/prompts"

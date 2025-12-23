@@ -155,6 +155,7 @@ class RecommendationPredictionGenerator:
             rec_text=rec_text,
             display_name=display_name
         )
+        print(f"DEBUG: Live prediction prompt: {live_prediction_prompt}")
 
         try:
             live_prediction_result = self.call_gpt(live_prediction_prompt)

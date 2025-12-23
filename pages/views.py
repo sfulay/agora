@@ -859,7 +859,7 @@ def calculate_leaderboard_for_base_rec(base_rec_id, participant_username=None):
         return []
 
 
-def process_participant_with_db_cleanup(username, new_rec_text, base_recommendation, data_type="cortico"):
+def process_participant_with_db_cleanup(username, new_rec_text, base_recommendation, prompt_dir):
     """
     Thread-safe wrapper for process_single_participant that manages Django DB connections.
 
@@ -881,7 +881,7 @@ def process_participant_with_db_cleanup(username, new_rec_text, base_recommendat
         username: Participant username to process
         new_rec_text: New recommendation text
         base_recommendation: Base recommendation object
-        data_type: Data type setting ("cortico" or other) to determine prompt directory
+        prompt_dir: Path to prompt directory (from settings.PROMPT_DIR)
 
     Returns:
         Dict with processing result (same as process_single_participant)
@@ -892,7 +892,7 @@ def process_participant_with_db_cleanup(username, new_rec_text, base_recommendat
         close_old_connections()
 
         # Process the participant (makes DB queries)
-        result = process_single_participant(username, new_rec_text, base_recommendation, data_type)
+        result = process_single_participant(username, new_rec_text, base_recommendation, prompt_dir)
 
         return result
 
@@ -910,7 +910,7 @@ def process_participant_with_db_cleanup(username, new_rec_text, base_recommendat
         close_old_connections()
 
 
-def process_single_participant(username, new_rec_text, base_recommendation, data_type="cortico"):
+def process_single_participant(username, new_rec_text, base_recommendation, prompt_dir):
     """
     Process a single participant with new recommendation text
     Returns participant data for streaming response
@@ -919,7 +919,7 @@ def process_single_participant(username, new_rec_text, base_recommendation, data
         username: Participant username to process
         new_rec_text: New recommendation text
         base_recommendation: Base recommendation object
-        data_type: Data type setting ("cortico" or other) to determine prompt directory
+        prompt_dir: Path to prompt directory (from settings.PROMPT_DIR)
     """
     try:
         participant = Participant.objects.get(username=username)
@@ -941,13 +941,7 @@ def process_single_participant(username, new_rec_text, base_recommendation, data
         from generating_v2.rec_prediction import RecommendationPredictionGenerator
         from generating_v2.medley_individual import MedleyGenerator
 
-        # Determine prompt directory based on data_type
-        if data_type == "cortico":
-            prompt_dir = "generating_v2/prompts_cortico"
-        else:
-            prompt_dir = "generating_v2/prompts"
-
-        # Initialize generators with appropriate prompt directory
+        # Initialize generators with prompt directory from settings
         generator = RecommendationPredictionGenerator(prompt_dir=prompt_dir)
         medley_generator = MedleyGenerator(prompt_dir=prompt_dir)
 
@@ -1091,18 +1085,18 @@ def recompute_recommendation_stream(request, recommendation_id):
             yield f"data: {json.dumps({'type': 'started', 'new_recommendation_id': new_recommendation.id})}\n\n"
 
             if settings.DATA_TYPE == "cortico":
-                participants_with_data = sample(list(Participant.objects.all()), 20)
+                
+                participants_with_data = Participant.objects.all()[:20]
             else:
                 with open("data/agora_members.txt", "r") as f:
                     participant_data = f.readlines()
                     participant_data = [line.strip() for line in participant_data]
-                
+
                 participants_with_data = Participant.objects.filter(
                     username__in=participant_data
                 ).distinct()
             # Filter to only participants who have completed interviews
             participants_with_data = [p for p in participants_with_data if p.has_completed_interview]
-            from random import sample
             participant_usernames = [p.username for p in participants_with_data]
             #participant_ids = [p.id for p in participants_with_data]
             #print(participant_ids)
@@ -1161,7 +1155,7 @@ def recompute_recommendation_stream(request, recommendation_id):
             with ThreadPoolExecutor(max_workers=min(16, total_participants)) as executor:
                 # Submit all tasks
                 future_to_participant = {
-                    executor.submit(process_participant_with_db_cleanup, username, new_rec_text, base_recommendation, settings.DATA_TYPE): username
+                    executor.submit(process_participant_with_db_cleanup, username, new_rec_text, base_recommendation, settings.PROMPT_DIR): username
                     for username in participant_usernames
                 }
 
