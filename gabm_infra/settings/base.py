@@ -198,3 +198,5 @@ CONDITION = "treatment"
 PHASE_2_ONLY = True
 
 SHOW_AVATARS = True
+
+DATA_TYPE = "cortico"

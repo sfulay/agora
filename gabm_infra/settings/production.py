@@ -18,23 +18,34 @@ DEBUG = False
 ALLOWED_HOSTS = ['*']
 
 # Configure database for RDS
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'ebdb',
-        'USER': 'postgres',
-        'PASSWORD': '***REMOVED***',
-        'HOST': '***REMOVED***',
-       # "HOST": "awseb-e-iahsybbjj8-stack-awsebrdsdatabase-z75czdguoz3d.costcopgfujf.us-east-1.rds.amazonaws.com",
-       # 'HOST': 'agora.costcopgfujf.us-east-1.rds.amazonaws.com',
-        'PORT': '5432',
+if DATA_TYPE == "cortico":
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'agora-iword',
+            'USER': 'agora_iword',
+            'PASSWORD': '***REMOVED***',
+            'HOST': '***REMOVED***',
+            'PORT': '5432',
+        }
     }
-}
+    AWS_STORAGE_BUCKET_NAME = 'ccc-agora'
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'ebdb',
+            'USER': 'postgres',
+            'PASSWORD': '***REMOVED***',
+            'HOST': '***REMOVED***',
+            'PORT': '5432',
+        }
+    }
+    AWS_STORAGE_BUCKET_NAME = 'ccc-sfulay'
 
 # AWS S3 Configuration
 AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
-AWS_STORAGE_BUCKET_NAME = 'ccc-sfulay'
 AWS_S3_REGION_NAME = 'us-east-1'
 AWS_S3_FILE_OVERWRITE = False
 AWS_DEFAULT_ACL = None

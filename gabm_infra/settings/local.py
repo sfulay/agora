@@ -1,25 +1,46 @@
-from .base import *
+
 import os
-SECRET_KEY = "***REMOVED***"
+
+from .base import *
+
+
+print(DATABASES)
+SECRET_KEY = os.environ.get("SECRET_KEY", "***REMOVED***")
 DEBUG = True
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '*']
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'ebdb',
-        'USER': 'postgres',
-        'PASSWORD': '***REMOVED***',
-        'HOST': 'localhost',
-        'PORT': '6543',
+
+
+if DATA_TYPE == "cortico":
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'agora-iword',
+            'USER': 'agora_iword',
+            'PASSWORD': '***REMOVED***',
+            'HOST': 'localhost',
+            'PORT': '6543',
+        }
     }
-}
+    AWS_STORAGE_BUCKET_NAME = 'ccc-agora'
+
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'ebdb',
+            'USER': 'postgres',
+            'PASSWORD': '***REMOVED***',
+            'HOST': 'localhost',
+            'PORT': '6543',
+        }
+    }
+    AWS_STORAGE_BUCKET_NAME = 'ccc-sfulay'
 
 # AWS S3 Configuration
 AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
-print(AWS_ACCESS_KEY_ID)
-print(AWS_SECRET_ACCESS_KEY)
-AWS_STORAGE_BUCKET_NAME = 'ccc-sfulay'
+# print(AWS_ACCESS_KEY_ID)
+# print(AWS_SECRET_ACCESS_KEY)
 AWS_S3_REGION_NAME = 'us-east-1'
 AWS_S3_FILE_OVERWRITE = False
 AWS_DEFAULT_ACL = None

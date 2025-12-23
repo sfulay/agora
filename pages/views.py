@@ -235,7 +235,8 @@ def home(request, det=None):
              "started_interviews_scripts": started_interviews_scripts,
              "curr_timer": curr_timer,
              "pilot": settings.PILOT,
-             "phase_2_only": settings.PHASE_2_ONLY}
+             "phase_2_only": settings.PHASE_2_ONLY,
+             "settings": settings}
 
   template = "pages/home/home.html"
   return render(request, template, context)
@@ -1073,14 +1074,17 @@ def recompute_recommendation_stream(request, recommendation_id):
 
             # Send initial status
             yield f"data: {json.dumps({'type': 'started', 'new_recommendation_id': new_recommendation.id})}\n\n"
-
-            with open("data/agora_members.txt", "r") as f:
-                participant_data = f.readlines()
-                participant_data = [line.strip() for line in participant_data]
             
-            participants_with_data = Participant.objects.filter(
-                username__in=participant_data
-            ).distinct()
+            if settings.DATA_TYPE == "cortico":
+                participants_with_data = Participant.objects.all()
+            else:
+                with open("data/agora_members.txt", "r") as f:
+                    participant_data = f.readlines()
+                    participant_data = [line.strip() for line in participant_data]
+                
+                participants_with_data = Participant.objects.filter(
+                    username__in=participant_data
+                ).distinct()
             # Filter to only participants who have completed interviews
             participants_with_data = [p for p in participants_with_data if p.has_completed_interview]
             from random import sample

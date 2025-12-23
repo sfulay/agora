@@ -75,6 +75,10 @@
   {% endif %}
 
   <!-- Center Button -->
-  <a href="{% url 'recommendation_editor' 273 %}" class="center-button">Enter the Agora</a>
+  {% if settings.DATA_TYPE == "cortico" %}
+    <a href="{% url 'recommendation_editor' 57 %}" class="center-button">Enter the Agora</a>
+  {% else %}
+    <a href="{% url 'recommendation_editor' 273 %}" class="center-button">Enter the Agora</a>
+  {% endif %}
 </body>
 </html>

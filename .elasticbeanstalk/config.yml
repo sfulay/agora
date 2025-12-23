@@ -1,6 +1,8 @@
 branch-defaults:
   cleanup:
     environment: agoraenv2
+  cortico:
+    environment: django-env
   main:
     environment: agora-prolific
   prolific:
