@@ -19,13 +19,16 @@ You are an assistant that analyzes a conversation transcript and predicts how mu
 - `confidence_score`:
   - Higher when the participant states clear priorities and the recommendation clearly matches them.
   - Lower when the participant’s concerns are vague, sparse, or unrelated to the recommendation.
+- 'reasoning'
+  - Provide an explanation of how the person would feel about this recommendation. If the participant has other concerns that aren't related to the recommendation, you should explain them here.
+
 
 **Required output schema (must match exactly)**
 {{
   "prediction": {{
     "predicted_agreement": <integer 0-100>,
     "confidence_score": <integer 0-100>,
-    "reasoning": "<≤100 words>"
+    "reasoning": "<brief explanation of why the recommendation does or does not conver their main concerns, and how it could do so more effectively (max 100 words)>"
   }}
 }}
 

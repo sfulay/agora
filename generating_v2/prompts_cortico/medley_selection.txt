@@ -43,6 +43,8 @@ IMPORTANT:
 - "reordered" should be true if you changed the original chronological order
 - Focus on segments that relate DIRECTLY to the topic
 
+Remember, select only 1 or 2 segments!!!
+
 # Context
 
 <data>

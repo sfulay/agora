@@ -1086,7 +1086,7 @@ def recompute_recommendation_stream(request, recommendation_id):
 
             if settings.DATA_TYPE == "cortico":
                 
-                participants_with_data = Participant.objects.all()[:20]
+                participants_with_data = Participant.objects.all()[:100]
             else:
                 with open("data/agora_members.txt", "r") as f:
                     participant_data = f.readlines()
