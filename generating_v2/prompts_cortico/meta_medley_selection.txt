@@ -1,0 +1,105 @@
+You are creating a group narrative medley that combines perspectives from multiple participants.
+
+CONTEXT:
+- Recommendation: {recommendation_text}
+- Number of participants: {participant_count}
+- Target duration: 60-90 seconds
+- Each participant has an individual medley with 4-6 curated segments
+
+GROUP CONTEXT:
+- Meta-medley group: {group_name}
+- Predicted support stance: {group_support_stance}
+- Segment alignment requirement: {segment_alignment_guidance}
+- Diversity reminder: {diversity_guidance}
+
+YOUR TASK:
+Create a cohesive group narrative by:
+1. Selecting 6-8 high-quality segments total across all participants
+2. Ordering segments to create a compelling multi-voice story
+3. Ensuring diverse perspectives are represented **within this group's stance**
+4. Maintaining logical narrative flow between speakers
+5. Staying within the 60-90 second duration target
+7. AVOID personal background stories unless they directly relate to the recommendation
+8. Select segments of natural length (don't force shorter segments)
+
+PARTICIPANTS AND THEIR MEDLEYS:
+{medley_data}
+
+SELECTION CRITERIA:
+- Choose 6-8 segments that directly address the recommendation topic
+- Balance representation across participants (aim for 1 segment per participant)
+- Prioritize segments that add unique perspectives or experiences
+- Show diverse viewpoints and  experiences, especially around hopes and concerns of people.
+- Create natural transitions between different speakers
+- Skip generic personal background unless it's essential context
+- Target 60-90 seconds total duration
+- Quality over quantity: better to have 6 excellent segments than 12 mediocre ones
+
+ORDERING GUIDELINES:
+- Build the narrative by showing different perspectives and experiences that align with this stance
+- Include varied experiences and angles on the topic
+- End with a strong conclusion or key insight that matches the group's stance
+- Consider pacing: mix shorter and longer segments
+- Ensure smooth transitions between speakers
+- Maximize diversity of perspectives within the duration constraint
+
+CONSTRAINTS:
+- Select 6-8 segments total (quality over quantity)
+- Target duration: 60-90 seconds (STRICTLY ENFORCE - do not exceed 90 seconds)
+- HARD LIMIT: Total duration MUST NOT exceed 120 seconds under any circumstances
+- Calculate total by ADDING UP the duration of each segment you select
+- Include at least 2 participants (ideally spread across most/all available)
+- DO NOT select segments shorter than 5 seconds
+- Prefer segments in the 8-15 second range for natural pacing
+- DO NOT repeat the same segment multiple times
+- DO NOT include generic "I grew up in..." or background segments
+
+DURATION CALCULATION - CRITICAL:
+You MUST calculate the total duration by ADDING UP each segment's duration from the data provided.
+The duration is shown in the format "ID | Duration | Text" (e.g., "ID 123 | 15.5s | text...")
+
+EXAMPLE CALCULATION:
+If you select 10 segments:
+  - Segment ID 123 | 8.5s
+  - Segment ID 456 | 6.3s
+  - Segment ID 789 | 9.1s
+  - Segment ID 234 | 7.2s
+  - Segment ID 567 | 10.5s
+  - Segment ID 890 | 8.8s
+  - Segment ID 345 | 7.9s
+  - Segment ID 678 | 9.4s
+  - Segment ID 901 | 11.2s
+  - Segment ID 111 | 8.1s
+TOTAL = 8.5 + 6.3 + 9.1 + 7.2 + 10.5 + 8.8 + 7.9 + 9.4 + 11.2 + 8.1 = 87.0s ✓ GOOD
+
+STRATEGY TO STAY UNDER 90s WITH 6-8 SEGMENTS:
+- Target average: 90s ÷ 7 segments = ~12-13s per segment
+- Prefer segments in the 8-15 second range
+- You can include 1-2 longer segments (up to 20s) if balanced with shorter ones
+- Avoid very long segments (>20s) as they make it hard to stay under 90s
+- Calculate running total as you select to ensure you stay under limit
+- Example good mix: 12s + 10s + 15s + 8s + 14s + 11s + 9s = 79s ✓
+
+OUTPUT FORMAT:
+Respond with valid JSON only (no additional text):
+{{
+  "selected_segments": [
+    {{
+      "participant_username": "username1",
+      "segment_id": 123,
+      "order": 1,
+      "transition_reasoning": "Brief explanation of why this segment comes here"
+    }},
+    ...
+  ],
+  "narrative_reasoning": "Summarize what the different hopes and concerns of people in this group are and how well the recommendation address them, and also if it doesn't address them, ways to improvce it.",
+  "estimated_duration": 75.5
+}}
+
+IMPORTANT:
+- The order field determines playback sequence (1, 2, 3, ...)
+- segment_id must match IDs from the provided medley data
+- participant_username must match usernames from the provided data
+- estimated_duration should be sum of selected segment durations
+- Ensure JSON is valid and properly formatted
+
