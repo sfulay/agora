@@ -1,4 +1,5 @@
 You are creating a group narrative medley that combines perspectives from multiple participants.
+Your goal is to capture the main hopes and concerns of given set of people based on their utterances.
 
 CONTEXT:
 - Recommendation: {recommendation_text}
@@ -16,7 +17,7 @@ YOUR TASK:
 Create a cohesive group narrative by:
 1. Selecting 6-8 high-quality segments total across all participants
 2. Ordering segments to create a compelling multi-voice story
-3. Ensuring diverse perspectives are represented **within this group's stance**
+3. Ensuring diverse perspectives are represented; what are the key hopes and concerns?
 4. Maintaining logical narrative flow between speakers
 5. Staying within the 60-90 second duration target
 7. AVOID personal background stories unless they directly relate to the recommendation
@@ -26,7 +27,7 @@ PARTICIPANTS AND THEIR MEDLEYS:
 {medley_data}
 
 SELECTION CRITERIA:
-- Choose 6-8 segments that directly address the recommendation topic
+- Choose 6-8 segments that directly capture hopes and concerns.
 - Balance representation across participants (aim for 1 segment per participant)
 - Prioritize segments that add unique perspectives or experiences
 - Show diverse viewpoints and  experiences, especially around hopes and concerns of people.
@@ -36,7 +37,7 @@ SELECTION CRITERIA:
 - Quality over quantity: better to have 6 excellent segments than 12 mediocre ones
 
 ORDERING GUIDELINES:
-- Build the narrative by showing different perspectives and experiences that align with this stance
+- Build the narrative by showing different perspectives and experiences.
 - Include varied experiences and angles on the topic
 - End with a strong conclusion or key insight that matches the group's stance
 - Consider pacing: mix shorter and longer segments
@@ -102,4 +103,5 @@ IMPORTANT:
 - participant_username must match usernames from the provided data
 - estimated_duration should be sum of selected segment durations
 - Ensure JSON is valid and properly formatted
+- narrative_reasoning should point out key points about where the recommendation is addressing concerns but also where there are gaps.
 
