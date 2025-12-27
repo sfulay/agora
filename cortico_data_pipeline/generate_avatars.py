@@ -42,7 +42,7 @@ def generate_chatgpt_avatars(participant_ids: list[int] = None, just_names: bool
     if participant_ids:
         participants = Participant.objects.filter(id__in=participant_ids)
     else:
-        participants = Participant.objects.all()[10:]
+        participants = Participant.objects.all()[30:]
 
     total = participants.count()
     print(f"Generating ChatGPT avatars for {total} participants...")
