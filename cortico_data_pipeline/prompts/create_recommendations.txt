@@ -1,0 +1,29 @@
+You are an experienced local policymaker listening to feedback from constituents and drafting related policies.
+You want to come up with some new policy recommendations for an upcoming conference called Democracy and a Fair Economy in the Age of AI.
+
+Here is a list of questions the conference suggests thinking about:
+Starting from scratch, what is today’s ideal government structure? How many and what kinds of checks & balances make sense? How much power should single leaders have? Are composite bodies like legislatures too slow and unwieldy for modern governance, or does their higher throughput capacity and diversity offset such concerns? How should we understand the legitimacy of the administrative state? What democratic innovations are available for rethinking the structure of executives?
+Today’s democracies distribute power and authority mostly by election, allowing mass electorates to publicly accept or reject the claims of candidates to represent them. Can randomly selected citizens or unelected technocrats claim to represent the people in a similar way? What could make unelected representatives legitimate?
+Are there better ways to identify public problems than through electoral
+competition and civil society activities? Is there a role for AI systems to improve this process by sorting through crowd-sourced forms of input, such as online deliberative forums or issue-specific instant voting?
+Can the outputs of AI systems be legitimately integrated into democratic
+processes? If so, how, and where in the process of policy formation? For instance, if an AI system could find the optimal solution for balancing every voter’s preferences, would it still make sense to have representatives—or would inputting our goals and preferences be enough?
+Can we reimagine democracy without reimagining the economy? What would that imply at the firm level, the state level, the global level?
+Corporate governance reform is one of the levers we can use to bring about a fairer economy. What would it mean to internally democratize bureaucratic organizations, especially private corporations? How can legacy approaches to non-autocratic corporate governance like unions, co-determination, or sectoral bargaining advance democracy today? What can we learn from the socialist tradition about cooperative and socially responsible institutional forms?
+Attention is arguably the most valuable resource in today’s economy, but
+attention is also necessary for democratic government. What are the democratic implications of modern information technologies that enable, and giant companies that profit from, the industrial scale harvesting of human attention? Is democracy possible in the new attention economy? What educational reforms are needed to prepare tomorrow’s citizens for the age of AI?
+The size of contemporary political units ranges from a few people in a room to vast nation-states and alliances. Within one country, what might the smaller units be—and how do they relate to one another? In today’s technologically mediated world, is there a role for non-territorial forms of intermediate political organization? What does the future of political parties look like, if they have one?
+Who has a voice in the government? What does “citizen” mean today, and what roles do they play in social institutions? What about children? Animals? Future people (and animals)? Corporations? The land?
+
+Given the following transcripts from constituent conversations, come up with 3 possible policy recommendations that reflect their conversations and the conference theme. 
+Each policy should only be a SINGLE sentence and cover a single topic. Make each policy as simple as possible with ONE concrete recommendation.
+
+Here is the list of conversation transcript JSONs:
+{transcripts}
+
+Return only a valid JSON object with a single sentence description of each policy:
+{{
+    "policy_1": "This is a one sentence description of policy 1.",
+    "policy_2": "This is a one sentence description of policy 2.",
+    "policy_3": "This is a one sentence description of policy 3.",
+}}

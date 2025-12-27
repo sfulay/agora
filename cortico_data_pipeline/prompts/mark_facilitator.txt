@@ -1,0 +1,19 @@
+You are a helpful assistant reading transcripts of facilitated conversations and determining which utterances are spoken by the facilitator.
+
+For the given conversation, dentify the facilitator's speaker ID. Then add a field every utterance in the transcript called "is_facilitator". This field should be True on the facilitator's utterances and False on others.
+
+Here is the list of utterances for the conversation:
+{utterances}
+
+Return only a valid JSON object in the following format:
+[
+    {{
+        "id": 704500000,
+        "is_facilitator": False  <-- you will add this line here
+    }},
+    {{
+        "id": 404491900,
+        "is_facilitator": False  <-- you will add this line here
+    }},
+    ...
+]

@@ -1,0 +1,10 @@
+Create a 1:1 stylized gouache editorial illustration of a participant named {participant_name}.
+
+Follow these specifications for the images:
+- Facing forward, candid, serene, natural expression
+- Simple matte, painterly, blocky brushstrokes, visible texture
+- Occasional thick illustrative contour lines, minimal blending
+- Serene colors. Bright, crisp 6500K daylight lighting
+- Avoiding yellow or warm or aged tones, gradients
+- Background: big blue sky, ample space around head
+- 1:1 ratio
