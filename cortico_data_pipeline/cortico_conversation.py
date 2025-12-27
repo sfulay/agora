@@ -557,7 +557,7 @@ def generate_chatgpt_avatars(participant_ids: list[int] = None, just_names: bool
     if participant_ids:
         participants = Participant.objects.filter(id__in=participant_ids)
     else:
-        participants = Participant.objects.all()
+        participants = Participant.objects.all()[:10]
 
     total = participants.count()
     print(f"Generating ChatGPT avatars for {total} participants...")
@@ -579,10 +579,38 @@ def generate_chatgpt_avatars(participant_ids: list[int] = None, just_names: bool
                 results["skipped"] += 1
                 continue
 
-            # Combine utterances into a transcript
-            utterances_text = "\n".join(
-                f"- {u}" for u in utterances[:50]
-            )  # Limit to 50 utterances
+            # Combine utterances into plain text for demographic inference
+            utterance_text = " ".join([u for u in utterances if u])
+
+            # Use GPT-4o to infer demographic information from utterances
+            if not just_names:
+                print("  -> Inferring demographics with GPT-4o...")
+                summary_prompt = (
+                    "Given the following utterances from a participant in a conversation, "
+                    "generate demographic details of who you think this participant is. Include their likely age, gender, and race. "
+                    "Be concise, only include likely age, gender, and race.\n"
+                    "Utterances:\n"
+                    f"{utterance_text}"
+                )
+                summary_response = client.chat.completions.create(
+                    model="gpt-4o",
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": "You are a careful summarizer and demographic guesser based on conversational context."
+                        },
+                        {
+                            "role": "user",
+                            "content": summary_prompt
+                        }
+                    ],
+                    max_tokens=160,
+                    temperature=0.4,
+                )
+                participant_summary = summary_response.choices[0].message.content.strip()
+                print(f"  -> Demographic summary: {participant_summary}")
+            else:
+                participant_summary = ""
 
             # Get participant name
             participant_name = (
@@ -594,7 +622,7 @@ def generate_chatgpt_avatars(participant_ids: list[int] = None, just_names: bool
             # Build the prompt from template
             prompt = prompt_template.replace("{participant name}", participant_name)
             if not just_names:
-                prompt = prompt.replace("{utterances}", utterances_text)
+                prompt = prompt.replace("{utterances}", participant_summary)
             else:
                 prompt = prompt.replace("{utterances}", "")
 
@@ -644,7 +672,7 @@ def generate_chatgpt_avatars(participant_ids: list[int] = None, just_names: bool
 
             # Update avatar metadata
             avatar.is_generated = True
-            avatar.generation_model = "gpt-image-1"
+            avatar.generation_model = "gpt-4o-dalle-3"  # Reflects two-step process: GPT-4o demographics + DALL-E 3
             avatar.generation_prompt = prompt[:2000]  # Store first 2000 chars of prompt
             avatar.generated_date = timezone.now()
             avatar.save()
