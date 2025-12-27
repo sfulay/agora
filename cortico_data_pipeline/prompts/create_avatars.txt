@@ -1,14 +1,72 @@
-Create a 1:1 stylized gouache editorial illustration of a participant based on their contributions to a conversation. Focus on demographic information they share and their name.
+Create ONE single image on ONE square 1:1 canvas: a stylized editorial painted headshot of {participant_name}, based only on demographic details and identity cues explicitly stated in their conversation contributions below.
 
-Follow these specifications for the images:
-
-- Facing forward, candid, serene, natural expression
-- Simple matte, painterly, blocky brushstrokes, visible texture
-- Occasional thick illustrative contour lines, minimal blending
-- Serene colors. Bright, crisp 6500K daylight lighting
-- Avoiding yellow or warm or aged tones, gradients
-- Background: big blue sky, ample space around head
-- 1:1 ratio
-
-Here are the utterances for {participant name}:
+Conversation contributions (source of truth):
 {utterances}
+
+Absolute layout rules (must follow)
+
+Single frame only (one panel, one canvas).
+
+Not a collage: no diptych, triptych, grid, contact sheet, multi-panel layout, split-screen, storyboard, film strip, multiple thumbnails, or multiple “versions.”
+
+No borders or frames (no polaroid edges, no picture-in-picture, no inset box, no UI elements).
+
+Subject rules (strict)
+
+ONE human face only (single subject).
+
+Headshot only: show head + neck + a small visible clothing neckline/collar at the bottom edge so it is obvious they are clothed.
+
+Clothing must be visible: crewneck / collar / turtleneck.
+
+No bare shoulders, no bare chest.
+
+Centered, facing forward, serene natural expression.
+
+No text of any kind.
+
+Background (strict)
+
+Big flat blue sky only, empty.
+
+No clouds, birds, buildings, trees, landscape, sun/moon.
+
+Matte finish.
+
+Style (refined, not blocky)
+
+Gouache-inspired editorial realism, finer brushwork, soft edges.
+
+Subtle painted transitions without airbrushed gradients.
+
+Natural proportions, no surreal features.
+
+Color & lighting (strict)
+
+Serene cool palette.
+
+Bright, crisp 6500K daylight look.
+
+Avoid warm/yellow/aged tones.
+
+No gradients anywhere (keep sky flat).
+
+Hard negatives (must not include)
+
+Multiple images / multiple panels / grid / collage / contact sheet
+
+Any second face/person, extra heads, reflections, mirrors
+
+Nudity, shirtless, bare shoulders, bare chest
+
+Shoulders/upper body/hands
+
+Props (unless explicitly mentioned in utterances)
+
+Text, watermark, logo
+
+Sepia/vintage tones, warm filters
+
+Overly blocky posterized paint
+
+If demographic details are missing, do not invent them; keep the portrait neutral and generic.

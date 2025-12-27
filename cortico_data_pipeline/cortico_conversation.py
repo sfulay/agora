@@ -1,3 +1,4 @@
+#%%
 import colorsys
 import json
 import re
@@ -26,7 +27,7 @@ from ..pages.models import (
     Recommendation,
 )
 from .prompt_gpt import facilitator, recommendations, structural_highlights
-
+#%%
 
 @dataclass
 class CorticoConversation:
@@ -668,3 +669,5 @@ def generate_chatgpt_avatars(participant_ids: list[int] = None, just_names: bool
             print(f"  - {error}")
 
     return results
+
+# %%
