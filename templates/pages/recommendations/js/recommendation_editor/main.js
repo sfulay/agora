@@ -18,7 +18,8 @@ import {
     updateSummaryStats,
     calculateMeanSupport,
     initializeConfidenceFilter,
-    setupChartResizeListener
+    setupChartResizeListener,
+    updateMetaMedleyGroups
 } from './components/avatars.js';
 import { initializeLeaderboard, reloadLeaderboard } from './components/leaderboard.js';
 import { openMetaMedleyPanel, closeMetaMedleyPanel } from './components/metaMedley.js';
@@ -26,6 +27,7 @@ import { loadParticipantModal } from './components/modals.js';
 
 // Expose functions globally for inline onclick handlers in templates
 window.closeMetaMedleyPanel = closeMetaMedleyPanel;
+window.updateMetaMedleyGroups = updateMetaMedleyGroups;
 
 // Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', function() {
@@ -70,6 +72,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 initializeAvatars();
                 initializeConfidenceFilter();
                 setupChartResizeListener();
+
+                // Update meta-medley groups with current participants
+                // This ensures groups are populated on initial load
+                setTimeout(() => {
+                    console.log('[DEBUG] Checking PARTICIPANT_DATA_FROM_TEMPLATE:', window.PARTICIPANT_DATA_FROM_TEMPLATE);
+                    console.log('[DEBUG] AppState.currentParticipants size:', AppState.currentParticipants.size);
+
+                    // Try AppState first (populated during streaming updates)
+                    if (AppState.currentParticipants.size > 0) {
+                        console.log('[DEBUG] Using AppState.currentParticipants');
+                        updateMetaMedleyGroups(Array.from(AppState.currentParticipants.values()));
+                    }
+                    // Fall back to template data on initial load
+                    else if (window.PARTICIPANT_DATA_FROM_TEMPLATE && window.PARTICIPANT_DATA_FROM_TEMPLATE.length > 0) {
+                        console.log('[DEBUG] Using PARTICIPANT_DATA_FROM_TEMPLATE');
+                        updateMetaMedleyGroups(window.PARTICIPANT_DATA_FROM_TEMPLATE);
+                    } else {
+                        console.log('[DEBUG] No participant data available');
+                    }
+                }, 500);
             }
 
             // Initialize leaderboard

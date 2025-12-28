@@ -1395,77 +1395,6 @@ function updateResults(results) {
     }, 50);
 }
 
-function updateMetaMedleyGroups(participants) {
-    if (!Array.isArray(participants) || participants.length === 0) {
-        window.metaMedleyGroups = { bottom: [], middle: [], top: [] };
-        return;
-    }
-
-    const sorted = [...participants].sort((a, b) => {
-        const aSupport = typeof a.predicted_agreement === 'number' ? a.predicted_agreement : 0;
-        const bSupport = typeof b.predicted_agreement === 'number' ? b.predicted_agreement : 0;
-        return aSupport - bSupport;
-    });
-
-    let bottom = [];
-    let middle = [];
-    let top = [];
-
-    if (sorted.length >= 90) {
-        bottom = sorted.slice(0, 30);
-        middle = sorted.slice(30, 60);
-        top = sorted.slice(60, 90);
-    } else {
-        const third = Math.floor(sorted.length / 3);
-        bottom = sorted.slice(0, third);
-        middle = sorted.slice(third, third * 2);
-        top = sorted.slice(third * 2);
-    }
-
-    window.metaMedleyGroups = {
-        bottom: bottom.map(p => p.username),
-        middle: middle.map(p => p.username),
-        top: top.map(p => p.username)
-    };
-
-    if (window.activeMedleyGroup) {
-        applyGroupAvatarFocus(window.activeMedleyGroup);
-    }
-}
-
-function getAllAvatarElements() {
-    return document.querySelectorAll('.participant-avatar, .avatar-circle');
-}
-
-function applyGroupAvatarFocus(groupKey) {
-    if (!groupKey || !window.metaMedleyGroups || !window.metaMedleyGroups[groupKey]) {
-        return;
-    }
-
-    const targetUsernames = new Set(window.metaMedleyGroups[groupKey] || []);
-
-    if (targetUsernames.size === 0) {
-        clearGroupAvatarFocus();
-        return;
-    }
-
-    getAllAvatarElements().forEach(avatar => {
-        const username = avatar.dataset.participantId || avatar.dataset.username;
-        if (username && targetUsernames.has(username)) {
-            avatar.classList.add('avatar-group-focus');
-            avatar.classList.remove('avatar-dimmed');
-        } else {
-            avatar.classList.add('avatar-dimmed');
-            avatar.classList.remove('avatar-group-focus');
-        }
-    });
-}
-
-function clearGroupAvatarFocus() {
-    getAllAvatarElements().forEach(avatar => {
-        avatar.classList.remove('avatar-dimmed', 'avatar-group-focus');
-    });
-}
 
 // =============================================================================
 // CONFIDENCE FILTER
@@ -1722,6 +1651,9 @@ function updateAvatars(results) {
             avatar.style.transform = 'scale(1)';
         }, index * 75); // Stagger by 150ms
     });
+
+    // Update meta-medley groups with current results
+    updateMetaMedleyGroups(results);
 }
 
 // Initialize avatars on page load from template data

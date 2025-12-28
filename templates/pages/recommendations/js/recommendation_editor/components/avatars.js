@@ -481,8 +481,11 @@ export function updateAvatars(results, loadModalCallback) {
  * Extracted from lines 1365-1401
  */
 export function updateMetaMedleyGroups(participants) {
+    console.log('[DEBUG] updateMetaMedleyGroups called with', participants?.length, 'participants');
+
     if (!Array.isArray(participants) || participants.length === 0) {
         AppState.metaMedley.groups = { bottom: [], middle: [], top: [] };
+        console.log('[DEBUG] No participants, resetting groups');
         return;
     }
 
@@ -513,7 +516,10 @@ export function updateMetaMedleyGroups(participants) {
         top: top.map(p => p.username)
     };
 
+    console.log('[DEBUG] Updated AppState.metaMedley.groups:', AppState.metaMedley.groups);
+
     if (AppState.metaMedley.activeGroup) {
+        console.log('[DEBUG] Re-applying focus for active group:', AppState.metaMedley.activeGroup);
         applyGroupAvatarFocus(AppState.metaMedley.activeGroup);
     }
 }
@@ -523,25 +529,36 @@ export function updateMetaMedleyGroups(participants) {
  * Extracted from lines 1407-1429
  */
 export function applyGroupAvatarFocus(groupKey) {
+    console.log('[DEBUG] applyGroupAvatarFocus called with groupKey:', groupKey);
+    console.log('[DEBUG] AppState.metaMedley.groups:', AppState.metaMedley.groups);
+
     if (!groupKey || !AppState.metaMedley.groups || !AppState.metaMedley.groups[groupKey]) {
+        console.log('[DEBUG] Early return - missing data');
         return;
     }
 
     const targetUsernames = new Set(AppState.metaMedley.groups[groupKey] || []);
+    console.log('[DEBUG] targetUsernames:', Array.from(targetUsernames));
 
     if (targetUsernames.size === 0) {
+        console.log('[DEBUG] No target usernames, clearing focus');
         clearGroupAvatarFocus();
         return;
     }
+
+    const avatars = getAllAvatarElements();
+    console.log('[DEBUG] Found', avatars.length, 'avatar elements');
 
     getAllAvatarElements().forEach(avatar => {
         const username = avatar.dataset.participantId || avatar.dataset.username;
         if (username && targetUsernames.has(username)) {
             avatar.classList.add('avatar-group-focus');
             avatar.classList.remove('avatar-dimmed');
+            console.log('[DEBUG] Focusing avatar:', username);
         } else {
             avatar.classList.add('avatar-dimmed');
             avatar.classList.remove('avatar-group-focus');
+            console.log('[DEBUG] Dimming avatar:', username);
         }
     });
 }
