@@ -253,12 +253,11 @@ function calculateMaxStackSize(participants) {
  * Calculate dynamic avatar size based on participant distribution
  * Ensures the tallest stack fits within the plot height
  */
-function calculateDynamicAvatarSize(participants, plotHeight, isModalOpen = false) {
+function calculateDynamicAvatarSize(participants, plotHeight, isModalOpen = false, maxParticipants = 300) {
     const numParticipants = participants.length;
 
-    // Min-max scaling: assuming min=10 participants, max=1000 participants
-    const minParticipants = 10;
-    const maxParticipants = 300;
+    // Min-max scaling: using visible participant count in numerator, total count in denominator
+    const minParticipants = 0;
     const minSize = 20;
     const maxSize = 50;
 
@@ -392,7 +391,7 @@ export function animateAvatarToPosition(avatar, participantData, plot, avatarSiz
         const isModalOpen = document.body.classList.contains('participant-modal-open') ||
                             document.body.classList.contains('meta-panel-open');
         const participants = Array.from(AppState.currentParticipants.values());
-        avatarSize = calculateDynamicAvatarSize(participants, plotHeight, isModalOpen);
+        avatarSize = calculateDynamicAvatarSize(participants, plotHeight, isModalOpen, AppState.totalParticipantCount);
     }
 
     // Round support to nearest 5
@@ -506,10 +505,16 @@ export function updateAvatars(results, loadModalCallback) {
         return;
     }
 
+    // Store total participant count for scaling (first time only)
+    if (AppState.totalParticipantCount === 0) {
+        AppState.totalParticipantCount = results.length;
+        Logger.debug('Stored total participant count:', AppState.totalParticipantCount);
+    }
+
     // Calculate dynamic avatar size ONCE for all participants
     const isModalOpen = document.body.classList.contains('participant-modal-open') ||
                         document.body.classList.contains('meta-panel-open');
-    const avatarSize = calculateDynamicAvatarSize(results, plotHeight, isModalOpen);
+    const avatarSize = calculateDynamicAvatarSize(results, plotHeight, isModalOpen, AppState.totalParticipantCount);
 
     const positionedAvatars = [];
 
@@ -745,7 +750,7 @@ function applyConfidenceFilter(minConfidence, shouldReposition = false, shouldUp
         });
         const isModalOpen = document.body.classList.contains('participant-modal-open') ||
                             document.body.classList.contains('meta-panel-open');
-        const avatarSize = calculateDynamicAvatarSize(visibleParticipants, plotHeight, isModalOpen);
+        const avatarSize = calculateDynamicAvatarSize(visibleParticipants, plotHeight, isModalOpen, AppState.totalParticipantCount);
 
         repositionVisibleAvatars(visibleAvatars, plotWidth, plotHeight, avatarSize);
     }

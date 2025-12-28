@@ -14,6 +14,7 @@ export const AppState = {
 
     // Participant data
     currentParticipants: new Map(),  // Map<username, participantData>
+    totalParticipantCount: 0,  // Initial total count for avatar scaling
 
     // Meta-medley system
     metaMedley: {
