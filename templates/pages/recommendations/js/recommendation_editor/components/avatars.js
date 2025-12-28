@@ -5,7 +5,7 @@
  * Extracted from lines 950-1792 of original code.
  */
 
-import { CONFIG } from '../config.js';
+import { CONFIG, calculateAvatarSize } from '../config.js';
 import { AppState } from '../state.js';
 import { getSupportLevelColor, getSupportBorderColor } from '../utils/colors.js';
 import { Logger } from '../utils/logger.js';
@@ -109,7 +109,7 @@ function setAvatarInitials(avatar, displayName) {
  * Extracted from lines 1094-1189
  */
 export function createAvatarElement(participantData, loadModalCallback) {
-    const avatarSize = CONFIG.AVATAR_SIZE.DEFAULT;
+    const avatarSize = AppState.avatars.currentSize;
     const avatar = document.createElement('div');
     avatar.className = 'participant-avatar processing';
     avatar.setAttribute('data-participant-id', participantData.username);
@@ -313,7 +313,7 @@ export function findStackingPositionStatic(targetX, roundedSupport, currentUsern
 export function animateAvatarToPosition(avatar, participantData, plot) {
     const plotWidth = plot.offsetWidth;
     const plotHeight = plot.offsetHeight;
-    const avatarSize = CONFIG.AVATAR_SIZE.DEFAULT;
+    const avatarSize = AppState.avatars.currentSize;
 
     // Round support to nearest 5
     const roundedSupport = Math.round(participantData.predicted_agreement / 5) * 5;
@@ -417,7 +417,7 @@ export function updateAvatars(results, loadModalCallback) {
     const plotWidth = plot.offsetWidth;
     const plotHeight = plot.offsetHeight;
     Logger.debug('Plot dimensions:', plotWidth, plotHeight);
-    const avatarSize = CONFIG.AVATAR_SIZE.DEFAULT;
+    const avatarSize = AppState.avatars.currentSize;
 
     if (plotWidth === 0 || plotHeight === 0) {
         setTimeout(() => updateAvatars(results, loadModalCallback), 100);
@@ -626,7 +626,7 @@ function applyConfidenceFilter(minConfidence, shouldReposition = false, shouldUp
 
     const plotWidth = plot.offsetWidth;
     const plotHeight = plot.offsetHeight;
-    const avatarSize = CONFIG.AVATAR_SIZE.DEFAULT;
+    const avatarSize = AppState.avatars.currentSize;
 
     const avatars = Array.from(getAllAvatarElements());
     Logger.debug(`Found ${avatars.length} avatars to filter`);
@@ -765,9 +765,12 @@ function repositionExistingAvatars() {
     const plotWidth = plot.offsetWidth;
     const plotHeight = plot.offsetHeight;
 
-    const avatarSize = document.body.classList.contains('participant-modal-open')
-        ? CONFIG.AVATAR_SIZE.MODAL_OPEN
-        : CONFIG.AVATAR_SIZE.DEFAULT;
+    // Recalculate avatar size based on participant count and modal state
+    const isModalOpen = document.body.classList.contains('participant-modal-open');
+    const avatarSize = calculateAvatarSize(AppState.avatars.totalParticipantCount, isModalOpen);
+
+    // Update the current size in state
+    AppState.avatars.currentSize = avatarSize;
 
     const avatars = container.querySelectorAll('.participant-avatar');
     if (avatars.length === 0) return;
@@ -786,6 +789,9 @@ function repositionExistingAvatars() {
 
         const stackingPosition = findStackingPositionStatic(x, roundedSupport, username, plotWidth, plotHeight, avatarSize, positionedAvatars);
 
+        // Update avatar size and position
+        avatar.style.width = `${avatarSize}px`;
+        avatar.style.height = `${avatarSize}px`;
         avatar.style.left = (stackingPosition.x - avatarSize/2) + 'px';
         avatar.style.top = (stackingPosition.y - avatarSize/2) + 'px';
 
@@ -911,7 +917,13 @@ export function initializeAvatars() {
         AppState.currentParticipants.set(participant.username, participant);
     });
 
+    // Calculate avatar size based on initial participant count
+    AppState.avatars.totalParticipantCount = initialData.length;
+    const isModalOpen = document.body.classList.contains('participant-modal-open');
+    AppState.avatars.currentSize = calculateAvatarSize(initialData.length, isModalOpen);
+
     Logger.debug('Current participants:', AppState.currentParticipants);
+    Logger.debug(`Initial avatar size: ${AppState.avatars.currentSize}px for ${initialData.length} participants`);
 
     if (initialData.length > 0) {
         const plot = document.getElementById('editor-support-plot');

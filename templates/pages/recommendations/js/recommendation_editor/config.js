@@ -13,10 +13,12 @@ export const CONFIG = {
         MAX: 500        // Maximum allowed characters
     },
 
-    // Avatar sizing
+    // Avatar sizing - dynamic based on participant count
     AVATAR_SIZE: {
-        DEFAULT: 30,        // Normal avatar size
-        MODAL_OPEN: 20      // Reduced size when modal is open
+        MIN: 20,                    // Minimum avatar size (at max participants)
+        MAX: 60,                    // Maximum avatar size (at 0 participants)
+        MAX_PARTICIPANTS: 500,      // Expected maximum number of participants
+        MODAL_REDUCTION_FACTOR: 0.8 // Size reduction factor when modal is open
     },
 
     // Timing and delays (in milliseconds)
@@ -68,3 +70,28 @@ export const CONFIG = {
         }
     }
 };
+
+/**
+ * Calculate dynamic avatar size based on participant count
+ * Uses inverse scaling: fewer participants = larger avatars
+ *
+ * @param {number} participantCount - Current number of participants
+ * @param {boolean} isModalOpen - Whether the participant modal is open
+ * @returns {number} Avatar size in pixels
+ */
+export function calculateAvatarSize(participantCount, isModalOpen = false) {
+    const { MIN, MAX, MAX_PARTICIPANTS, MODAL_REDUCTION_FACTOR } = CONFIG.AVATAR_SIZE;
+
+    // Inverse scaling: 60px at 0 participants, 20px at 500+ participants
+    // Formula: MAX - ((participantCount / MAX_PARTICIPANTS) * (MAX - MIN))
+    const scaling = Math.min(participantCount / MAX_PARTICIPANTS, 1.0);
+    let size = MAX - (scaling * (MAX - MIN));
+
+    // Apply modal reduction if modal is open
+    if (isModalOpen) {
+        size = size * MODAL_REDUCTION_FACTOR;
+    }
+
+    // Ensure we stay within bounds
+    return Math.max(MIN, Math.min(MAX, Math.round(size)));
+}

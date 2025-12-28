@@ -43,6 +43,12 @@ export const AppState = {
     ui: {
         useAIRecommendation: null,  // Function to use AI recommendation
         currentUserId: null         // Current logged-in user ID
+    },
+
+    // Avatar sizing
+    avatars: {
+        currentSize: 60,           // Current avatar size in pixels (starts at max)
+        totalParticipantCount: 0   // Total participant count from server
     }
 };
 
@@ -74,4 +80,8 @@ export function resetState() {
         currentSegment: 0
     };
     AppState.recommendation.previousMeanSupport = null;
+    AppState.avatars = {
+        currentSize: 60,
+        totalParticipantCount: 0
+    };
 }

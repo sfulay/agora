@@ -201,7 +201,7 @@ SHOW_AVATARS = True
 
 # Data type configuration
 # Options: "cortico" or "sfulay"
-DATA_TYPE = "cortico"
+DATA_TYPE = "interview"
 
 # Prompt directory configuration based on DATA_TYPE
 # Cortico prompts: generating_v2/prompts/

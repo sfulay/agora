@@ -48,9 +48,9 @@ AWS_S3_VERIFY = True
 AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
 
 # Static files configuration
-#STATICFILES_STORAGE = 'gabm_infra.utils.StaticRootS3BotoStorage'
-#STATIC_ROOT = f'https://{AWS_S3_CUSTOM_DOMAIN}/static'
-STATIC_ROOT = f'{BASE_DIR}/static_root' 
+STATICFILES_STORAGE = 'gabm_infra.utils.StaticRootS3BotoStorage'
+STATIC_ROOT = f'https://{AWS_S3_CUSTOM_DOMAIN}/static'
+#STATIC_ROOT = f'{BASE_DIR}/static_root' 
 #STATIC_ROOT = 'static_root'
 STATIC_URL = '/static/'
 STATICFILES_DIRS = (

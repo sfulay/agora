@@ -3143,12 +3143,8 @@ body.participant-modal-open .support-section-block {
     max-width: calc(100vw - 18% - 450px - 6rem);
 }
 
-/* Scale avatars smaller when chart is narrow */
-body.meta-panel-open .participant-avatar,
-body.participant-modal-open .participant-avatar {
-    width: 30px !important;
-    height: 30px !important;
-}
+/* Note: Avatar sizing is now dynamic and handled by JavaScript based on participant count */
+/* See avatars.js repositionExistingAvatars() for dynamic size calculation */
 </style>
 
 {% endblock %}
