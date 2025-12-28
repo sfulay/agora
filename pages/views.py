@@ -1004,7 +1004,7 @@ def recommendation_editor(request, recommendation_id):
         # Get all participants with existing summaries for this recommendation
         summaries = LivePrediction.objects.filter(
             recommendation=recommendation
-        ).select_related('participant').annotate(
+        ).select_related('participant', 'participant__avatar').annotate(
             quality_score=Subquery(
                 Medley.objects.filter(
                     recommendation=OuterRef('recommendation'),
