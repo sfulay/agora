@@ -18,7 +18,7 @@ export const CONFIG = {
         MIN: 20,                    // Minimum avatar size (at max participants)
         MAX: 60,                    // Maximum avatar size (at 0 participants)
         MAX_PARTICIPANTS: 500,      // Expected maximum number of participants
-        MODAL_REDUCTION_FACTOR: 0.8 // Size reduction factor when modal is open
+        MODAL_REDUCTION_FACTOR: 0.6 // Size reduction factor when modal is open
     },
 
     // Timing and delays (in milliseconds)
