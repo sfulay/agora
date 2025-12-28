@@ -60,6 +60,7 @@ STATIC_ROOT = f'https://{AWS_S3_CUSTOM_DOMAIN}/static'
 STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     f"{BASE_DIR}/static_dirs",
+    f"{BASE_DIR}/static",
 )
 
 # Media files configuration
