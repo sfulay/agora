@@ -108,8 +108,7 @@ function setAvatarInitials(avatar, displayName) {
  * Create avatar element
  * Extracted from lines 1094-1189
  */
-export function createAvatarElement(participantData, loadModalCallback) {
-    const avatarSize = CONFIG.AVATAR_SIZE.DEFAULT;
+export function createAvatarElement(participantData, loadModalCallback, avatarSize = CONFIG.AVATAR_SIZE.DEFAULT) {
     const avatar = document.createElement('div');
     avatar.className = 'participant-avatar processing';
     avatar.setAttribute('data-participant-id', participantData.username);
@@ -219,6 +218,80 @@ export function updateExistingAvatar(avatar, participantData) {
 }
 
 // =============================================================================
+// DYNAMIC AVATAR SIZING
+// =============================================================================
+
+/**
+ * Calculate maximum stack size based on participant distribution
+ * Groups participants by support level and returns the size of the largest group
+ */
+function calculateMaxStackSize(participants) {
+    if (!participants || participants.length === 0) {
+        return 1; // Avoid division by zero
+    }
+
+    // Group participants by rounded support level (nearest 5%)
+    const supportGroups = new Map();
+
+    participants.forEach(participant => {
+        const roundedSupport = Math.round(participant.predicted_agreement / 5) * 5;
+        const count = supportGroups.get(roundedSupport) || 0;
+        supportGroups.set(roundedSupport, count + 1);
+    });
+
+    // Find the maximum group size
+    let maxStackSize = 0;
+    for (const count of supportGroups.values()) {
+        maxStackSize = Math.max(maxStackSize, count);
+    }
+
+    Logger.debug(`Max stack size: ${maxStackSize} participants (from ${participants.length} total)`);
+    return maxStackSize;
+}
+
+/**
+ * Calculate dynamic avatar size based on participant distribution
+ * Ensures the tallest stack fits within the plot height
+ */
+function calculateDynamicAvatarSize(participants, plotHeight, isModalOpen = false) {
+    const numParticipants = participants.length;
+
+    // Min-max scaling: assuming min=10 participants, max=1000 participants
+    const minParticipants = 10;
+    const maxParticipants = 300;
+    const minSize = 20;
+    const maxSize = 50;
+
+    // Calculate scaling factor
+    const scaling = (numParticipants - minParticipants) / (maxParticipants - minParticipants);
+
+    // Calculate avatar size: 20 + scaling * (50 - 20)
+    // Note: Larger participant count = smaller avatars, so we invert the scaling
+    let avatarSize = minSize + (1 - scaling) * (maxSize - minSize);
+
+    // Clamp to bounds
+    avatarSize = Math.max(minSize, Math.min(maxSize, avatarSize));
+    avatarSize = Math.floor(avatarSize);
+
+    console.log(`🎯 DYNAMIC SIZING DEBUG:`, {
+        participantCount: numParticipants,
+        scaling: scaling.toFixed(3),
+        calculatedSize: avatarSize,
+        isModalOpen
+    });
+
+    // Reduce by 25% when modal is open
+    if (isModalOpen) {
+        avatarSize = Math.floor(avatarSize * 0.75);
+        avatarSize = Math.max(minSize, avatarSize); // Ensure still above minimum
+    }
+
+    console.log(`✅ Final avatar size: ${avatarSize}px`);
+    Logger.debug(`Dynamic avatar size: ${avatarSize}px (modal: ${isModalOpen})`);
+    return avatarSize;
+}
+
+// =============================================================================
 // AVATAR POSITIONING
 // =============================================================================
 
@@ -310,10 +383,17 @@ export function findStackingPositionStatic(targetX, roundedSupport, currentUsern
  * Animate avatar to position
  * Extracted from lines 1203-1248
  */
-export function animateAvatarToPosition(avatar, participantData, plot) {
+export function animateAvatarToPosition(avatar, participantData, plot, avatarSize = null) {
     const plotWidth = plot.offsetWidth;
     const plotHeight = plot.offsetHeight;
-    const avatarSize = CONFIG.AVATAR_SIZE.DEFAULT;
+
+    // If no size provided, calculate it dynamically
+    if (!avatarSize) {
+        const isModalOpen = document.body.classList.contains('participant-modal-open') ||
+                            document.body.classList.contains('meta-panel-open');
+        const participants = Array.from(AppState.currentParticipants.values());
+        avatarSize = calculateDynamicAvatarSize(participants, plotHeight, isModalOpen);
+    }
 
     // Round support to nearest 5
     const roundedSupport = Math.round(participantData.predicted_agreement / 5) * 5;
@@ -333,9 +413,11 @@ export function animateAvatarToPosition(avatar, participantData, plot) {
     const finalX = finalPosition.x - avatarSize/2;
     const finalY = finalPosition.y - avatarSize/2;
 
-    // Set initial position
+    // Set initial position and size
     avatar.style.left = startX + 'px';
     avatar.style.top = startY + 'px';
+    avatar.style.width = avatarSize + 'px';
+    avatar.style.height = avatarSize + 'px';
     avatar.style.transition = 'none';
 
     // Force reflow
@@ -386,7 +468,7 @@ export function updateSingleParticipant(participantData, loadModalCallback) {
         updateExistingAvatar(avatar, participantData);
     }
 
-    // Animate to position
+    // Animate to position (uses default or existing size)
     animateAvatarToPosition(avatar, participantData, plot);
 
     // Update meta-medley groups
@@ -398,6 +480,7 @@ export function updateSingleParticipant(participantData, loadModalCallback) {
  * Extracted from lines 1615-1692
  */
 export function updateAvatars(results, loadModalCallback) {
+    console.log('🔄 updateAvatars called with', results.length, 'participants');
     Logger.debug('Updating avatars');
 
     const container = getElement('avatars-container');
@@ -417,18 +500,22 @@ export function updateAvatars(results, loadModalCallback) {
     const plotWidth = plot.offsetWidth;
     const plotHeight = plot.offsetHeight;
     Logger.debug('Plot dimensions:', plotWidth, plotHeight);
-    const avatarSize = CONFIG.AVATAR_SIZE.DEFAULT;
 
     if (plotWidth === 0 || plotHeight === 0) {
         setTimeout(() => updateAvatars(results, loadModalCallback), 100);
         return;
     }
 
+    // Calculate dynamic avatar size ONCE for all participants
+    const isModalOpen = document.body.classList.contains('participant-modal-open') ||
+                        document.body.classList.contains('meta-panel-open');
+    const avatarSize = calculateDynamicAvatarSize(results, plotHeight, isModalOpen);
+
     const positionedAvatars = [];
 
     results.forEach((participant, index) => {
-        // Create avatar
-        const avatar = createAvatarElement(participant, loadModalCallback);
+        // Create avatar with calculated size
+        const avatar = createAvatarElement(participant, loadModalCallback, avatarSize);
         avatar.className = 'participant-avatar';
 
         // Apply support-based border color
@@ -609,7 +696,6 @@ function applyConfidenceFilter(minConfidence, shouldReposition = false, shouldUp
 
     const plotWidth = plot.offsetWidth;
     const plotHeight = plot.offsetHeight;
-    const avatarSize = CONFIG.AVATAR_SIZE.DEFAULT;
 
     const avatars = Array.from(getAllAvatarElements());
     Logger.debug(`Found ${avatars.length} avatars to filter`);
@@ -652,6 +738,15 @@ function applyConfidenceFilter(minConfidence, shouldReposition = false, shouldUp
 
     // Reposition when user releases slider
     if (shouldReposition) {
+        // Calculate dynamic size based on visible avatars only
+        const visibleParticipants = Array.from(AppState.currentParticipants.values()).filter(p => {
+            const confidence = p.confidence_score || 0;
+            return confidence >= minConfidence;
+        });
+        const isModalOpen = document.body.classList.contains('participant-modal-open') ||
+                            document.body.classList.contains('meta-panel-open');
+        const avatarSize = calculateDynamicAvatarSize(visibleParticipants, plotHeight, isModalOpen);
+
         repositionVisibleAvatars(visibleAvatars, plotWidth, plotHeight, avatarSize);
     }
 
@@ -710,6 +805,8 @@ function repositionVisibleAvatars(avatars, plotWidth, plotHeight, avatarSize) {
 
         avatar.style.left = `${leftPosition}px`;
         avatar.style.top = `${topPosition}px`;
+        avatar.style.width = `${avatarSize}px`;
+        avatar.style.height = `${avatarSize}px`;
         avatar.style.opacity = '1';
         avatar.style.transform = 'scale(1)';
         avatar.style.pointerEvents = 'auto';

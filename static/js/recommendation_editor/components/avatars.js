@@ -227,6 +227,15 @@ function calculateDynamicAvatarSize(participants, plotHeight, isModalOpen = fals
     // Calculate size needed to fit max stack
     let avatarSize = Math.floor(availableHeight / maxStackSize);
 
+    console.log(`🎯 DYNAMIC SIZING DEBUG:`, {
+        participantCount: participants.length,
+        maxStackSize,
+        plotHeight,
+        availableHeight,
+        calculatedSize: avatarSize,
+        isModalOpen
+    });
+
     // Apply bounds: min 12px, max 40px
     avatarSize = Math.max(12, Math.min(40, avatarSize));
 
@@ -236,6 +245,7 @@ function calculateDynamicAvatarSize(participants, plotHeight, isModalOpen = fals
         avatarSize = Math.max(12, avatarSize); // Ensure still above minimum
     }
 
+    console.log(`✅ Final avatar size: ${avatarSize}px`);
     Logger.debug(`Dynamic avatar size: ${avatarSize}px (modal: ${isModalOpen})`);
     return avatarSize;
 }
@@ -425,6 +435,8 @@ export function animateAvatarToPosition(avatar, participantData, plot, avatarSiz
  * Extracted from lines 1039-1067
  */
 export function updateSingleParticipant(participantData, loadModalCallback) {
+    console.log('👤 updateSingleParticipant called for:', participantData.username);
+
     // Store participant data
     AppState.currentParticipants.set(participantData.username, participantData);
 
@@ -440,6 +452,7 @@ export function updateSingleParticipant(participantData, loadModalCallback) {
     const isModalOpen = document.body.classList.contains('participant-modal-open') ||
                         document.body.classList.contains('meta-panel-open');
     const participants = Array.from(AppState.currentParticipants.values());
+    console.log('📊 Total participants in state:', participants.length);
     const avatarSize = calculateDynamicAvatarSize(participants, plot.offsetHeight, isModalOpen);
 
     // Find existing avatar or create new one
@@ -464,11 +477,13 @@ export function updateSingleParticipant(participantData, loadModalCallback) {
  * Extracted from lines 1615-1692
  */
 export function updateAvatars(results, loadModalCallback) {
-    console.log('Updating NEWW')
+    console.log('🔄 updateAvatars called with', results.length, 'participants');
     Logger.debug('Updating avatars');
 
     const container = getElement('avatars-container');
     const plot = getElement('editor-support-plot');
+
+    console.log('📦 Container:', container, 'Plot:', plot);
 
     if (!container || !plot) {
         Logger.error('Missing container or plot element');
