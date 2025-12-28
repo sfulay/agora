@@ -15,8 +15,8 @@ export const CONFIG = {
 
     // Avatar sizing
     AVATAR_SIZE: {
-        DEFAULT: 40,        // Normal avatar size
-        MODAL_OPEN: 30      // Reduced size when modal is open
+        DEFAULT: 30,        // Normal avatar size
+        MODAL_OPEN: 20      // Reduced size when modal is open
     },
 
     // Timing and delays (in milliseconds)
