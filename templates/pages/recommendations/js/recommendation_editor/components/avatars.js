@@ -850,9 +850,20 @@ function repositionExistingAvatars() {
     const plotWidth = plot.offsetWidth;
     const plotHeight = plot.offsetHeight;
 
-    const avatarSize = document.body.classList.contains('participant-modal-open')
-        ? CONFIG.AVATAR_SIZE.MODAL_OPEN
-        : CONFIG.AVATAR_SIZE.DEFAULT;
+    // Calculate dynamic avatar size based on current participants
+    const isModalOpen = document.body.classList.contains('participant-modal-open') ||
+                        document.body.classList.contains('meta-panel-open');
+    const participants = Array.from(AppState.currentParticipants.values());
+    const avatarSize = calculateDynamicAvatarSize(participants, plotHeight, isModalOpen, AppState.totalParticipantCount);
+
+    console.log('🔧 repositionExistingAvatars:', {
+        isModalOpen,
+        participantCount: participants.length,
+        totalCount: AppState.totalParticipantCount,
+        plotWidth,
+        plotHeight,
+        calculatedAvatarSize: avatarSize
+    });
 
     const avatars = container.querySelectorAll('.participant-avatar');
     if (avatars.length === 0) return;
@@ -871,6 +882,9 @@ function repositionExistingAvatars() {
 
         const stackingPosition = findStackingPositionStatic(x, roundedSupport, username, plotWidth, plotHeight, avatarSize, positionedAvatars);
 
+        // Update avatar size and position
+        avatar.style.width = avatarSize + 'px';
+        avatar.style.height = avatarSize + 'px';
         avatar.style.left = (stackingPosition.x - avatarSize/2) + 'px';
         avatar.style.top = (stackingPosition.y - avatarSize/2) + 'px';
 
