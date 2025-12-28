@@ -765,8 +765,9 @@ function repositionExistingAvatars() {
     const plotWidth = plot.offsetWidth;
     const plotHeight = plot.offsetHeight;
 
-    // Recalculate avatar size based on participant count and modal state
-    const isModalOpen = document.body.classList.contains('participant-modal-open');
+    // Recalculate avatar size based on participant count and modal/panel state
+    const isModalOpen = document.body.classList.contains('participant-modal-open') ||
+                         document.body.classList.contains('meta-panel-open');
     const avatarSize = calculateAvatarSize(AppState.avatars.totalParticipantCount, isModalOpen);
 
     // Update the current size in state
@@ -919,7 +920,8 @@ export function initializeAvatars() {
 
     // Calculate avatar size based on initial participant count
     AppState.avatars.totalParticipantCount = initialData.length;
-    const isModalOpen = document.body.classList.contains('participant-modal-open');
+    const isModalOpen = document.body.classList.contains('participant-modal-open') ||
+                         document.body.classList.contains('meta-panel-open');
     AppState.avatars.currentSize = calculateAvatarSize(initialData.length, isModalOpen);
 
     Logger.debug('Current participants:', AppState.currentParticipants);

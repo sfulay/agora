@@ -53,7 +53,8 @@ export function startRecomputeStream(recId, recText, callbacks) {
                     AppState.avatars.totalParticipantCount = totalParticipants;
 
                     // Calculate and set initial avatar size based on total count
-                    const isModalOpen = document.body.classList.contains('participant-modal-open');
+                    const isModalOpen = document.body.classList.contains('participant-modal-open') ||
+                                         document.body.classList.contains('meta-panel-open');
                     AppState.avatars.currentSize = calculateAvatarSize(totalParticipants, isModalOpen);
 
                     Logger.debug(`Avatar size calculated: ${AppState.avatars.currentSize}px for ${totalParticipants} participants`);
