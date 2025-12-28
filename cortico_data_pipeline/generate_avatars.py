@@ -183,4 +183,118 @@ def generate_chatgpt_avatars(participant_ids: list[int] = None, just_names: bool
 
     return results
 
+
+def load_avatars_from_folder(folder_path: str = "data/avatars/", participant_ids: list[int] = None) -> dict[str, Any]:
+    """
+    Load avatar images from a folder and assign them to participants.
+
+    Matches images to participants by filename (e.g., '334.png' -> participant ID 334).
+    Uploads images to S3 and updates the database.
+
+    Args:
+        folder_path: Path to folder containing avatar images (default: "data/avatars/")
+        participant_ids: List of participant IDs to process. If None, processes all images found.
+
+    Returns:
+        Dictionary with 'updated', 'skipped', and 'errors' counts/lists.
+
+    Example:
+        >>> load_avatars_from_folder("data/avatars/", participant_ids=[334, 335, 336])
+    """
+    results = {"updated": 0, "skipped": 0, "errors": []}
+    folder = Path(folder_path)
+
+    # Check if folder exists
+    if not folder.exists():
+        raise FileNotFoundError(f"Folder not found: {folder_path}")
+
+    # Find all image files in the folder
+    image_extensions = ['.png', '.jpg', '.jpeg']
+    image_files = []
+    for ext in image_extensions:
+        image_files.extend(folder.glob(f'*{ext}'))
+
+    if not image_files:
+        print(f"No image files found in {folder_path}")
+        return results
+
+    print(f"Found {len(image_files)} image files in {folder_path}")
+
+    # Process each image file
+    for idx, image_path in enumerate(image_files, 1):
+        # Extract participant ID from filename (e.g., "334.png" -> 334)
+        try:
+            participant_id = int(image_path.stem)
+        except ValueError:
+            print(f"[{idx}/{len(image_files)}] Skipping {image_path.name} - filename is not a valid participant ID")
+            results["skipped"] += 1
+            continue
+
+        # Skip if participant_ids filter provided and this ID is not in it
+        if participant_ids and participant_id not in participant_ids:
+            continue
+
+        print(f"\n[{idx}/{len(image_files)}] Processing participant {participant_id} from {image_path.name}...")
+
+        try:
+            # Get participant
+            try:
+                participant = Participant.objects.get(id=participant_id)
+            except Participant.DoesNotExist:
+                print(f"  -> Skipping: No participant found with ID {participant_id}")
+                results["skipped"] += 1
+                continue
+
+            # Read image file
+            with open(image_path, 'rb') as f:
+                image_bytes = f.read()
+
+            print(f"  -> Loaded image ({len(image_bytes)} bytes)")
+
+            # Delete old generated avatar if it exists
+            if participant.avatar and participant.avatar.generated_image:
+                old_image_name = participant.avatar.generated_image.name
+                print(f"  -> Deleting old avatar: {old_image_name}")
+                participant.avatar.generated_image.delete(save=False)
+
+            # Get or create avatar
+            if not participant.avatar:
+                avatar = Avatar.objects.create()
+                participant.avatar = avatar
+                participant.save()
+            else:
+                avatar = participant.avatar
+
+            # Save the image (Django's storage backend handles S3 upload)
+            filename = f"loaded_avatar_{participant.id}_{timezone.now().strftime('%Y%m%d_%H%M%S')}{image_path.suffix}"
+            avatar.generated_image.save(filename, ContentFile(image_bytes), save=False)
+
+            # Update avatar metadata
+            avatar.is_generated = False  # Not AI-generated
+            avatar.generation_model = "folder-upload"
+            avatar.generation_prompt = f"Loaded from {image_path.name}"
+            avatar.generated_date = timezone.now()
+            avatar.save()
+
+            # Set participant to use this avatar
+            participant.use_generated_avatar = True
+            participant.save()
+
+            results["updated"] += 1
+            print(f"  ✓ Successfully loaded avatar for participant {participant.id}")
+
+        except Exception as e:
+            error_msg = f"Failed to load avatar for participant {participant_id}: {str(e)}"
+            results["errors"].append(error_msg)
+            print(f"  ✗ {error_msg}")
+
+    print(f"\n{'='*50}")
+    print(f"Done! Updated: {results['updated']}, Skipped: {results['skipped']}, Errors: {len(results['errors'])}")
+    if results["errors"]:
+        print("Errors:")
+        for error in results["errors"]:
+            print(f"  - {error}")
+
+    return results
+
 # %%
