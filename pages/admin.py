@@ -134,7 +134,7 @@ admin.site.register(Recommendation, RecommendationAdmin)
 class RecommendationParticipantSummaryAdmin(admin.ModelAdmin):
     list_display = ('recommendation', 'participant', 'created_at', 'updated_at')
     list_filter = ('created_at', 'updated_at')
-    search_fields = ('summary', 'participant__prolific_id', 'recommendation__rec_text')
+    search_fields = ('summary', 'participant__email', 'participant__prolific_id', 'recommendation__rec_text')
     readonly_fields = ('created_at', 'updated_at')
     fieldsets = (
         (None, {

@@ -69,12 +69,15 @@
             <form class="login" method="POST" action="{% url 'account_login' %}">
               {% csrf_token %}
               <div class="mb-3">
-                {{ form.prolific_id|as_crispy_field }}
+                {{ form.login|as_crispy_field }}
+              </div>
+              <div class="mb-3">
+                {{ form.password|as_crispy_field }}
               </div>
               {% if redirect_field_value %}
               <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
               {% endif %}
-              
+
               {% if form.non_field_errors %}
               <div class="alert alert-danger">
                 {% for error in form.non_field_errors %}
@@ -82,8 +85,11 @@
                 {% endfor %}
               </div>
               {% endif %}
-              
-              <br>
+
+              <div class="mb-3">
+                <a href="{% url 'account_reset_password' %}">Forgot your password?</a>
+              </div>
+
               <button class="primaryAction btn btn-black" type="submit" style="width: 100%; ">{% trans "Sign In" %}</button>
             </form>
 

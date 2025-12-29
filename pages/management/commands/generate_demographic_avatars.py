@@ -129,7 +129,7 @@ class Command(BaseCommand):
                     participant = Participant.objects.get(id=pid)
                     enhanced_description, has_interview = generator.generate_enhanced_description(participant)
                     interview_note = " (with interview context)" if has_interview else " (demographics only)"
-                    self.stdout.write(f'Participant {pid} ({participant.prolific_id}){interview_note}')
+                    self.stdout.write(f'Participant {pid} ({participant.email or participant.prolific_id}){interview_note}')
                     self.stdout.write(f'  Would generate: {enhanced_description}')
                 except Participant.DoesNotExist:
                     self.stdout.write(self.style.ERROR(f'Participant {pid} not found'))

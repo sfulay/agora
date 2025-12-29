@@ -49,7 +49,7 @@ def generate_chatgpt_avatars(participant_ids: list[int] = None, just_names: bool
 
     for idx, participant in enumerate(participants, 1):
         print(
-            f"\n[{idx}/{total}] Processing participant {participant.id} ({participant.display_name or participant.prolific_id})..."
+            f"\n[{idx}/{total}] Processing participant {participant.id} ({participant.display_name or participant.email or participant.prolific_id})..."
         )
 
         try:
@@ -100,6 +100,7 @@ def generate_chatgpt_avatars(participant_ids: list[int] = None, just_names: bool
             # Get participant name
             participant_name = (
                 participant.display_name
+                or participant.email
                 or participant.prolific_id
                 or f"Participant {participant.id}"
             )

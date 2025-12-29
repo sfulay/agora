@@ -766,9 +766,13 @@ class Interview(models.Model):
                  "completed_sec": self.completed_sec} 
     next_step.update(m.generate_next_step(
                        self.get_interviewer_summary(True), q, self.p_notes))
-    if "<!user_first_name!>" in next_step["next_utt"]: 
-      next_step["next_utt"] = (next_step["next_utt"]
-        .replace("<!user_first_name!>", self.participant.prolific_id))
+    if "<!user_first_name!>" in next_step["next_utt"]:
+      # Use display_name if available, otherwise email prefix, otherwise prolific_id
+      user_name = (self.participant.display_name or
+                   (self.participant.email.split('@')[0] if self.participant.email else None) or
+                   self.participant.prolific_id or
+                   "there")
+      next_step["next_utt"] = next_step["next_utt"].replace("<!user_first_name!>", user_name)
 
     # Once the next step is created, we do post processing. The main
     # conditional here is whether the current question's conversation has
@@ -1309,7 +1313,7 @@ class Participant(AbstractUser):
   avatar = models.OneToOneField(Avatar, blank=True, null=True, 
                                 on_delete=models.CASCADE)
   email = models.EmailField(unique=True, blank=False, null=False)
-  prolific_id = models.CharField(max_length=255, unique=True, blank=False, null=True)
+  prolific_id = models.CharField(max_length=255, unique=True, blank=True, null=True)
   username = models.CharField(max_length=150, unique=True, blank=True, null=True)  # Make username optional
   display_name = models.CharField(max_length=150, blank=True, null=True)
   # Names of the completed modules. This is stored as a list of comma 
@@ -1358,7 +1362,7 @@ class Participant(AbstractUser):
     return completed_interviews
 
   def __str__(self):
-    return str(self.prolific_id)
+    return self.email or self.prolific_id or self.username or f"User {self.id}"
 
   def get_avatar_url(self):
     """

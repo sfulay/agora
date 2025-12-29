@@ -104,14 +104,22 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 
 AUTH_USER_MODEL = 'pages.Participant'
+
+# Allauth settings for email/password authentication
+ACCOUNT_AUTHENTICATION_METHOD = 'email'  # Use email instead of username
 ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_USERNAME_REQUIRED = False  # Don't require username field
+ACCOUNT_EMAIL_VERIFICATION = 'none'  # No email verification required
+ACCOUNT_UNIQUE_EMAIL = True  # Enforce unique emails
 
 ACCOUNT_FORMS = {
     'signup': 'pages.forms.CustomSignupForm',
     'login': 'pages.forms.CustomLoginForm'
 }
 SOCIALACCOUNT_ADAPTER = 'pages.pipelines.CustomSocialAccountAdapter'
+
+# Email backend for development (prints emails to console)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 
 WSGI_APPLICATION = 'gabm_infra.wsgi.application'

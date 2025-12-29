@@ -25,63 +25,47 @@ class ConsentForm(forms.Form):
     )
 
 class CustomSignupForm(SignupForm):
-  prolific_id = forms.CharField(
+  email = forms.EmailField(
       label='Email Address',
       required=True,
-      widget=forms.TextInput(attrs={'placeholder': 'Enter your email address'}),
+      widget=forms.EmailInput(attrs={'placeholder': 'Enter your email address'}),
       error_messages={
-          'required': 'Please enter your email address to continue.'
+          'required': 'Please enter your email address to continue.',
+          'invalid': 'Please enter a valid email address.'
       }
   )
 
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
-    # Remove username and email fields completely
-    del self.fields['username']
-    del self.fields['email']
-    self.fields['password1'].required = False
-    self.fields['password1'].widget = forms.HiddenInput()
-    self.fields['password2'].required = False
-    self.fields['password2'].widget = forms.HiddenInput()
+    # Remove username field - we'll use email instead
+    if 'username' in self.fields:
+      del self.fields['username']
+    # Make password fields visible and required
+    self.fields['password1'].required = True
+    self.fields['password1'].widget = forms.PasswordInput(attrs={'placeholder': 'Enter your password'})
+    self.fields['password2'].required = True
+    self.fields['password2'].widget = forms.PasswordInput(attrs={'placeholder': 'Confirm your password'})
 
-  def clean_prolific_id(self):
-    prolific_id = self.cleaned_data.get('prolific_id')
-    if prolific_id:
-      # Check if a user with this Prolific ID already exists
-      if Participant.objects.filter(
-          Q(prolific_id=prolific_id) | Q(username=prolific_id)
-      ).exists():
+  def clean_email(self):
+    email = self.cleaned_data.get('email')
+    if email:
+      # Check if a user with this email already exists
+      if Participant.objects.filter(email=email).exists():
           raise forms.ValidationError(
-              'This Prolific ID is already registered. Please use a different ID or sign in if this is your account.'
+              'This email address is already registered. Please use a different email or sign in if this is your account.'
           )
-      if ' ' in prolific_id:
-        raise forms.ValidationError('Prolific ID must not contain spaces.')
-      if any(c.isupper() for c in prolific_id):
-        raise forms.ValidationError('Prolific ID must be all lowercase (no uppercase letters).')
-    return prolific_id
-
-  def clean(self):
-    cleaned_data = super().clean()
-    prolific_id = cleaned_data.get('prolific_id')
-    
-    if prolific_id:  # Only proceed if prolific_id is valid
-      # Generate a random password since we don't need it
-      cleaned_data['password1'] = 'random_password_123'
-      cleaned_data['password2'] = 'random_password_123'
-      # Set email to a placeholder since it's required by the model
-      cleaned_data['email'] = f"{prolific_id}@placeholder.com"
-    
-    return cleaned_data
+    return email
 
   def save(self, request):
     try:
       user = super(CustomSignupForm, self).save(request)
-      user.prolific_id = self.cleaned_data['prolific_id']
-      user.username = self.cleaned_data['prolific_id']
-      user.email = f"{self.cleaned_data['prolific_id']}@placeholder.com"
-      user.set_password('random_password_123')  # Set a random password
+      # Set username to email (required by Django's User model)
+      user.username = self.cleaned_data['email']
+      user.email = self.cleaned_data['email']
+      # Leave prolific_id as None for new users
+      user.prolific_id = None
       user.save()
-      logger.info(f"[SIGNUP] User created successfully with Prolific ID: {user.prolific_id}")
+      logger.info(f"[SIGNUP] User created successfully with email: {user.email}")
       return user
     except Exception as e:
       logger.error(f"[SIGNUP] Error saving user: {str(e)}")
@@ -126,40 +110,47 @@ class ExperimentCodeForm(forms.Form):
 
 
 class CustomLoginForm(LoginForm):
-    prolific_id = forms.CharField(
-        label='Email Address',
-        required=True,
-        widget=forms.TextInput(attrs={'placeholder': 'Enter your email address'})
-    )
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Keep login field but make it hidden
-        self.fields['login'].required = False
-        self.fields['login'].widget = forms.HiddenInput()
-        self.fields['password'].required = False
-        self.fields['password'].widget = forms.HiddenInput()
-
-    def clean_prolific_id(self):
-        prolific_id = self.cleaned_data.get('prolific_id')
-        if prolific_id:
-            try:
-                user = Participant.objects.get(prolific_id=prolific_id)
-                # Set the login field to the user's username
-                self.cleaned_data['login'] = user.username
-                self.cleaned_data['password'] = 'random_password_123'
-            except Participant.DoesNotExist:
-                raise forms.ValidationError('Invalid email address')
-        return prolific_id
+        # Update login field to be email
+        self.fields['login'].label = 'Email Address'
+        self.fields['login'].widget.attrs.update({'placeholder': 'Enter your email address'})
+        # Make password field visible and required
+        self.fields['password'].required = True
+        self.fields['password'].widget = forms.PasswordInput(attrs={'placeholder': 'Enter your password'})
 
     def clean(self):
         cleaned_data = super().clean()
+        login = cleaned_data.get('login')
+
+        # Support backward compatibility: if user enters prolific_id, try to find by that
+        if login and '@' not in login:
+            try:
+                user = Participant.objects.get(prolific_id=login)
+                # If found, update login to use their username for authentication
+                cleaned_data['login'] = user.username
+            except Participant.DoesNotExist:
+                # Not a prolific_id, will fail authentication normally
+                pass
+
         return cleaned_data
 
     def user_credentials(self, form = None, login_field = None, password_field = None):
+        # Use email as username for authentication
+        login = self.cleaned_data.get('login')
+        password = self.cleaned_data.get('password')
+
+        # Try to find user by email first
+        try:
+            user = Participant.objects.get(email=login)
+            username = user.username
+        except Participant.DoesNotExist:
+            # Use login as-is (might be username or prolific_id from backward compat)
+            username = login
+
         return {
-            'username': self.cleaned_data['login'],  # Use the username we set in clean_prolific_id
-            'password': 'random_password_123'
+            'username': username,
+            'password': password
         }
 
 class EditableRecommendationForm(forms.Form):

@@ -138,7 +138,7 @@ high quality portrait style. ONLY ONE PERSON IN THE IMAGE."""
             print(f"Participant {participant_id} not found")
             return False
         
-        print(f"Generating avatar for participant {participant_id} ({participant.prolific_id})")
+        print(f"Generating avatar for participant {participant_id} ({participant.email or participant.prolific_id})")
         
         # Step 1: Extract characteristics from interview
         characteristics = self.extract_participant_characteristics(participant)

@@ -667,7 +667,7 @@ def download_p_list_of_fin_interview(request):
       if "Survey Pt.1" in curr_user.get_completed_modules():
         curr_interview = Interview.objects.get(participant=curr_user, script_v="minwage_script_v2")
         if curr_interview.zipped_main:
-          curr_row += [curr_user.prolific_id,  curr_user.created, curr_user.get_curr_modules()]
+          curr_row += [curr_user.email, curr_user.prolific_id, curr_user.created, curr_user.get_curr_modules()]
           rows += [curr_row]
 
     except:
