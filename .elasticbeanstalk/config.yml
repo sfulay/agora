@@ -3,6 +3,8 @@ branch-defaults:
     environment: agoraenv2
   cortico:
     environment: django-env
+  login:
+    environment: agoraenv2
   main:
     environment: agoraenv2
   prolific:
