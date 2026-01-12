@@ -3,6 +3,8 @@ branch-defaults:
     environment: agoraenv2
   cortico:
     environment: django-env
+  cortico_api:
+    environment: django-env
   login:
     environment: agoraenv2
   main:
