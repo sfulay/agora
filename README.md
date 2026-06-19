@@ -70,12 +70,12 @@ Copy the IP address from the output (e.g., `44.223.23.188`).
 
 **SSH with port forwarding:**
 ```bash
-ssh -i ~/.ssh/agora.pem ec2-user@<EC2_IP_ADDRESS> -L 6543:***REMOVED***:5432
+ssh -i ~/.ssh/agora.pem ec2-user@<EC2_IP_ADDRESS> -L 6543:<RDS_DATABASE_HOST>:5432
 ```
 
 For example:
 ```bash
-ssh -i ~/.ssh/agora.pem ec2-user@44.223.23.188 -L 6543:***REMOVED***:5432
+ssh -i ~/.ssh/agora.pem ec2-user@<EC2_IP_ADDRESS> -L 6543:<RDS_DATABASE_HOST>:5432
 ```
 
 **What this does:**
