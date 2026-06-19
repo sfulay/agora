@@ -4,7 +4,7 @@ Agora is an interactive policy deliberation tool that enables users to iterative
 
   <div align="center">
     <video autoplay loop muted playsinline width="80%">
-      <source src="https://github.com/user-attachments/assets/4f924441-bca4-4cb8-8f56-2d9146816e9a" type="video/mp4">
+      <source src="https://drive.google.com/file/d/1grbFF15-c-lZd0ukIoRC98wOWzanwCuI/view?usp=sharing" type="video/mp4">
     </video>
   </div>
 
