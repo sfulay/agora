@@ -1,6 +1,6 @@
-# Agora - AI-Powered Policy Deliberation Platform
+# Agora
 
-Agora is an interactive policy deliberation tool that enables users to iteratively refine policy proposals while receiving real-time AI predictions about public support. Users can edit policy recommendations, see live predictions of how real people would respond based on their interview data, and explore detailed participant perspectives through audio clips and narrative summaries.
+Agora is an interactive tool that enables users to iteratively refine policy proposals while receiving real-time AI predictions about public support. Users can edit policy recommendations, see live predictions of how real people would respond based on their interview data, and explore detailed participant perspectives through audio clips and summaries.
 
 https://github.com/user-attachments/assets/26398693-0928-4ffc-be77-d36a7c0fa401
 
