@@ -1,6 +1,8 @@
 from .base import *
 import os
-SECRET_KEY = os.environ.get('SECRET_KEY', '***REMOVED***')
+SECRET_KEY = os.environ.get('SECRET_KEY')
+if not SECRET_KEY:
+    raise ValueError("SECRET_KEY environment variable must be set for production")
 
 DEBUG = False
 # ALLOWED_HOSTS = [ '.elasticbeanstalk.com', 'localhost', '127.0.0.1', 
@@ -15,33 +17,33 @@ DEBUG = False
 #     '127.0.0.1',
 #     '54.160.196.52'  # Add this line
 # ]
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 
 # Configure database for RDS
 if DATA_TYPE == "cortico":
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'agora-iword',
-            'USER': 'agora_iword',
-            'PASSWORD': '***REMOVED***',
-            'HOST': '***REMOVED***',
-            'PORT': '5432',
+            'NAME': os.environ.get('DB_NAME', 'agora-iword'),
+            'USER': os.environ.get('DB_USER', 'agora_iword'),
+            'PASSWORD': os.environ.get('DB_PASSWORD'),
+            'HOST': os.environ.get('DB_HOST'),
+            'PORT': os.environ.get('DB_PORT', '5432'),
         }
     }
-    AWS_STORAGE_BUCKET_NAME = 'ccc-agora'
+    AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', 'ccc-agora')
 else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'ebdb',
-            'USER': 'postgres',
-            'PASSWORD': '***REMOVED***',
-            'HOST': '***REMOVED***',
-            'PORT': '5432',
+            'NAME': os.environ.get('DB_NAME', 'ebdb'),
+            'USER': os.environ.get('DB_USER', 'postgres'),
+            'PASSWORD': os.environ.get('DB_PASSWORD'),
+            'HOST': os.environ.get('DB_HOST'),
+            'PORT': os.environ.get('DB_PORT', '5432'),
         }
     }
-    AWS_STORAGE_BUCKET_NAME = 'ccc-sfulay'
+    AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', 'ccc-sfulay')
 
 # AWS S3 Configuration
 AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
