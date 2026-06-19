@@ -2,6 +2,8 @@
 
 Agora is an interactive policy deliberation tool that enables users to iteratively refine policy proposals while receiving real-time AI predictions about public support. Users can edit policy recommendations, see live predictions of how real people would respond based on their interview data, and explore detailed participant perspectives through audio clips and narrative summaries.
 
+https://github.com/user-attachments/assets/4f924441-bca4-4cb8-8f56-2d9146816e9a
+
 ## Core Features
 
 - **Interactive Policy Editor**: Edit policy recommendations in real-time with a 500-character limit
