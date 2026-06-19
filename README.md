@@ -8,10 +8,10 @@ https://github.com/user-attachments/assets/26398693-0928-4ffc-be77-d36a7c0fa401
 
 - **Interactive Policy Editor**: Edit policy recommendations in real-time with a 500-character limit
 - **Live AI Predictions**: Streaming predictions using GPT-4 to estimate participant support (0-100% agreement)
-- **Support Visualization**: Interactive scatter plot showing participant avatars positioned by predicted agreement
+- **Support Visualization**: Interactive plot showing participant avatars positioned by predicted agreement
 - **Participant Profiles**: Detailed views with support scores, AI-generated reasoning, audio clips, and narrative summaries
 - **Meta-Medleys**: Group audio summaries combining perspectives from participants who are "Against", "On the fence", or "For" the policy
-- **Leaderboard System**: Gamified tracking of user performance in maximizing consensus
+- **Leaderboard System**: Tracking of user performance in maximizing consensus
 
 ## Prerequisites
 
